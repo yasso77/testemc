@@ -1,0 +1,177 @@
+from datetime import datetime
+
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+import pandas as pd
+
+from manager.forms.UploadForm import ExcelUploadForm
+from manager.models import Doctor, Patient, PatientVisits
+
+# Create your views here.
+
+def index(request):
+    return render(request,'index.html',{'name':'Yasser'})
+
+def uploadpatientData(request):
+    if request.method == 'POST':
+            form = ExcelUploadForm(request.POST, request.FILES)      
+            excel_file = request.FILES['my_file']
+            df = pd.read_excel(excel_file)
+
+            for index, row in df.iterrows():
+                Patient.objects.create(
+                    fullname=row['Name'],
+                    mobile=row['Mobile'],
+                    age=row['Age'],
+                    sufferedcase=row['Case'],
+                    city=row['City'],
+                    reservedBy=row['Reserved By'],
+                    arrivedOn=row['Arrived On'],
+                    remarks=row['Remarks'],
+                    expectedDate=row['Arrival Date']
+
+                    # Map other columns accordingly
+                )
+           
+            return render(request,"ConfirmMsg.html",{'message': 'Patient data uploaded Successfully','returnUrl':'pushpatientData'}, status=200)
+   
+    return render(request, 'uploadPatientData.html', {'form': 'form'})
+
+
+def showPatientData(request):  
+    return render(request,'SearchOnPatients.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
+
+
+
+
+def doctorPatientvisit(request):        
+
+        if request.method=='POST':
+            txtpatientid=request.POST.get('hdfpatientid')
+            doctorid=1 #request.POST.get('doctorid')
+            txtdiagnosis=request.POST.get('Diagnosis')
+            EvaulDegree=request.POST.get('gridRadios')
+            #chkFollowup=request.POST.get('chkFollow')
+            EvaulDegree=request.POST.get('gridRadios')
+            txtRemarks=request.POST.get('txtRemarks')
+            # followup = True if chkFollowup == 'on' else False
+            patient = Patient.objects.get(pk=txtpatientid)
+            doctor = Doctor.objects.get(pk=doctorid)
+            data=PatientVisits(patientid=patient,diagnosis=txtdiagnosis,evaluationeegree=EvaulDegree,visitdate=datetime.now(),doctorid=doctor,reasonforvisit=txtRemarks,createdate='2024-04-30')#datetime.now()
+            data.save()
+            return render(request,"ConfirmMsg.html",{'message': 'Patient`s Visit is added successfully','returnUrl':'DoctorEvaluation'}, status=200)
+           
+
+        return render(request,'PatientVisit.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
+
+#This is a block of code
+#This is a block of code
+#This is a block of code
+
+def addPatientVisit(request):
+    txtpatientid=request.POST.get('hdfpatientid')
+    doctorid=1 #request.POST.get('doctorid')
+    txtdiagnosis=request.POST.get('Diagnosis')
+    EvaulDegree=request.POST.get('gridRadios')
+    #chkFollowup=request.POST.get('chkFollow')
+    EvaulDegree=request.POST.get('gridRadios')
+    txtRemarks=request.POST.get('txtRemarks')
+
+    if request.method=='POST':
+       # followup = True if chkFollowup == 'on' else False
+        patient = Patient.objects.get(pk=txtpatientid)
+        doctor = Doctor.objects.get(pk=doctorid)
+        data=PatientVisits(patientid=patient,diagnosis=txtdiagnosis,evaluationeegree=EvaulDegree,visitdate=datetime.now(),doctorid=doctor,reasonforvisit=txtRemarks,createdate='2024-04-30')#datetime.now()
+        data.save()
+        return HttpResponseRedirect("Message")
+
+
+
+
+def LiveDegreeReport(request):
+    current_time = datetime.now().time()
+    return render(request,'LiveDegreeReport.html',context={'current_time': current_time})
+
+
+def ajaxReportChartEvlDegree(request):
+    if request.method == 'POST' and 'inputDate' in request.POST:
+            visitdate = request.POST.get('inputDate', None)
+            queryset = PatientVisits.objects.filter(createdate='2024-04-30').values('evaluationeegree')  
+
+        # Convert QuerySet to list of dictionaries
+            data = list(queryset.values())
+
+        # Return JsonResponse with the converted data
+            return JsonResponse(data, safe=False)
+            
+    else:
+            return JsonResponse({'success': False, 'error': 'Invalid request'})  
+
+
+#This is a block of code
+#This is a block of code
+#This is a block of code
+
+
+def ConfirmMsg(request):
+     return render(request,'ConfirmMsg.html',{'Msg':request.POST.get('msg')})
+
+
+def get_patientData(request):
+
+    if request.method == 'POST' and 'myData' in request.POST:
+        patientID = request.POST.get('myData', None)
+        queryset = Patient.objects.filter(patientid=patientID)    
+
+    # Convert QuerySet to list of dictionaries
+        data = list(queryset.values())
+
+    # Return JsonResponse with the converted data
+        return JsonResponse(data, safe=False)
+        
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request'})  
+    
+
+def UpdatePatientData(request):
+    if request.method == 'POST':
+       
+        patient_id = request.POST.get('hdfpatientid')
+        
+
+        patientFileNum=request.POST.get('txtFileSerial')
+        patientName=request.POST.get('txtName')
+        patientMobile=request.POST.get('txtMobile')
+        patientGender= bool(request.POST.get('gridRadios'))
+        patientAge=request.POST.get('txtAge')
+        patientCase=request.POST.get('txtCase')
+        patientRemarks=request.POST.get('txtRemarks')
+       
+
+         # Retrieve the patient object
+        try:
+            patient = Patient.objects.get(patientid=patient_id)
+        except Patient.DoesNotExist:
+            return JsonResponse({'error': 'Patient not found'}, status=404)
+
+        # Update patient attributes
+        patient.fileserial=patientFileNum
+        patient.fullname=patientName
+        patient.mobile=patientMobile
+        patient.sufferedcase=patientCase
+        patient.remarks=patientRemarks
+        patient.gender=patientGender
+        patient.age = patientAge
+
+        # Save the updated patient object
+        patient.save()
+
+        return render(request,"ConfirmMsg.html",{'message': 'Patient data updated','returnUrl':'showPatientData'}, status=200)
+   # return render(request,"/patient/templates/SearchOnPatients.html",{'message': 'Error','returnUrl':'/patient/search'}, status=404)
+
+
+
+
+
+    
+

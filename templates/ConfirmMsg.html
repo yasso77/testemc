@@ -1,0 +1,41 @@
+{%extends 'master.html'%}
+<html>
+    <head>
+
+    </head>
+    <body>
+        {% block content %}
+        <div class="pagetitle">
+            <h1>Blank Page</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item">Pages</li>
+                <li class="breadcrumb-item active">Blank</li>
+              </ol>
+            </nav>
+          </div>
+
+
+          <section class="section">
+           <div class="card">
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">{{message}} </h4>
+                <p>Et suscipit deserunt earum itaque dignissimos recusandae dolorem qui. Molestiae rerum perferendis laborum. Occaecati illo at laboriosam rem molestiae sint.</p>
+                <hr>
+                <p class="mb-0">Temporibus quis et qui aspernatur laboriosam sit eveniet qui sunt.</p>
+            
+              </div>
+
+                <div class="d-grid gap-2 mt-3">
+                  <a href="{% url returnUrl %}" class="btn btn-success">Take New Patient</a>
+
+
+              </div>
+              </div>
+        
+          </section>
+    {% endblock %}
+       
+    </body>
+</html>

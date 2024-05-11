@@ -1,0 +1,111 @@
+{%extends 'master.html'%}
+<html>
+    <head>
+
+    </head>
+    <body>
+        {% block content %}
+        <div class="pagetitle">
+            <h1>Upload Patients File</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item">Pages</li>
+                <li class="breadcrumb-item active">Upload</li>
+              </ol>
+            </nav>
+          </div>
+
+
+          <section class="section">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-1"></i>
+                {{status}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <div class="row">
+                <div class="col-lg-8">
+        
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Upload Excel File</h5>
+        
+                      <!-- General Form Elements -->
+                      <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm();"> 
+                        {%csrf_token%}
+                        <div class="col-sm-10">
+                            <input class="form-control" required name="my_file" type="file" id="formFile" accept=".xls,.xlsx">
+                            <span id="fileError" style="color: red; display: none;">Only Excel files (XLSX or XLS format) are allowed.</span>
+                          </div>
+                       
+                        <br>
+                        <button type="submit" class="btn btn-primary">Upload File</button>
+            
+            
+                    </form>
+                    <script>
+                        function validateForm() {
+                            var fileInput = document.getElementById('formFile');
+                            var fileError = document.getElementById('fileError');
+                
+                            // Get the selected file
+                            var file = fileInput.files[0];
+                
+                            // Check if a file is selected
+                            if (!file) {
+                                fileError.style.display = 'block';
+                                return false; // No file selected, prevent form submission
+                            }
+                
+                            // Check if the selected file is of XLSX or XLS format
+                            var allowedExtensions = ['.xlsx', '.xls'];
+                            var validExtension = false;
+                            for (var i = 0; i < allowedExtensions.length; i++) {
+                                if (file.name.toLowerCase().endsWith(allowedExtensions[i])) {
+                                    validExtension = true;
+                                    break;
+                                }
+                            }
+                
+                            if (!validExtension) {
+                                fileError.style.display = 'block';
+                                return false; // File format is not valid, prevent form submission
+                            }
+                
+                            // If everything is valid, hide error message and allow form submission
+                            fileError.style.display = 'none';
+                            return true;
+                        }
+                    </script>
+                    </div>
+                  </div>
+        
+                </div>
+        
+                <div class="col-lg-4">
+        
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title"></h5>
+        
+                      <!-- Advanced Form Elements -->
+                 
+        
+                    </div>
+                  </div>
+        
+                </div>
+              </div>
+
+       
+        
+       
+        </section>
+
+    
+    {% endblock %}
+       
+
+   
+    </body>
+</html>

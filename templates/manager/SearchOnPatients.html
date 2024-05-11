@@ -1,0 +1,500 @@
+{%extends 'master.html'%}
+{% load static%}
+<html>
+
+<head>
+  {% block header %}
+  <style>
+    .highlight {
+      background-color: yellow;
+      font-weight:bold;
+    }
+
+    #myInput {
+      background-image: url("{% static 'assets/img/searchicon.png' %}");
+      /* Add a search icon to input */
+      background-position: 10px 12px;
+      /* Position the search icon */
+      background-repeat: no-repeat;
+      /* Do not repeat the icon image */
+      width: 100%;
+      /* Full-width */
+      font-size: 18px;
+      /* Increase font-size */
+      padding: 12px 20px 12px 40px;
+      /* Add some padding */
+      border: 1px solid #ddd;
+      /* Add a grey border */
+      margin-bottom: 12px;
+      /* Add some space below the input */
+    }
+
+    #myTable {
+      border-collapse: collapse;
+      /* Collapse borders */
+      width: 100%;
+      /* Full-width */
+      border: 1px solid #ddd;
+      /* Add a grey border */
+      font-size: 12px;
+      /* Increase font-size */
+    }
+
+    #myTable th,
+    #myTable td {
+      text-align: left;
+      /* Left-align text */
+      padding: 8px;
+      /* Add padding */
+    }
+
+    #myTable tr {
+      /* Add a bottom border to all table rows */
+      border-bottom: 1px solid #ddd;
+    }
+
+    #myTable tr.header,
+    #myTable tr:hover {
+      /* Add a grey background color to the table header and on hover */
+      background-color: #f1f1f1;
+    }
+
+
+
+    .form-container {
+      display: none;
+
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .form-container.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .form-container.show form {
+      animation: slideIn 0.5s ease-in-out forwards;
+    }
+  </style>
+  {% endblock %}
+
+</head>
+
+<body>
+  {% block content %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <div class="pagetitle">
+    <h1>Patient Visit</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">Doctors</li>
+        <li class="breadcrumb-item active">Patient Visit Card</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card">
+            <div  class="btn btn-success mb-2">
+              Total Patients today <span id="spnTotalPatients" class="badge bg-white text-success" style="font-size:16px !important">{{Total}}</span>
+            </div>
+            <div class="card-body">
+                          <!-- Horizontal Form -->
+              <input type="text" id="myInput" oninput="showtable()" placeholder="Search for names..">
+
+              <table id="myTable" style="display: none;">
+                <tr class="header">
+                  <th style="width:25%;">File #</th>
+                  <th style="width:40%;">Patient Name</th>
+                  <th style="width:40%;">Patient Mobile</th>
+                  <th></th>
+                </tr>
+                {%for patient in patients%}
+                <tr>
+
+                  <td>{{patient.fileserial}}</td>
+                  <td>{{patient.fullname}} </td>
+                  <td>{{patient.mobile}}</td>
+
+                  <td><button type="button" title="Select" class="btn btn-outline-primary"
+                      onclick="return bindPatientData('{{ patient.patientid }}')">Select</button> </td>
+                </tr>
+                {%endfor%}
+
+              </table>
+
+              <p></p>
+
+
+              <div class="form-container">
+                <form action="{% url 'update_patient_data' %}"  method="post" name="vsitForm" validate>
+                  {% csrf_token %}
+                 
+                   
+                      <input type="hidden" name="hdfpatientid">
+                   
+                  <div class="row mb-3">
+                    <label for="txtName" class="col-sm-2 col-form-label">Patient Name</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="txtName" class="form-control" required>
+                      <div class="invalid-feedback">Please enter Patient Name.</div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtName" class="col-sm-2 col-form-label">Mobile</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="txtMobile" class="form-control" >
+                     
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtName" class="col-sm-2 col-form-label">Gender</label>
+                    <div class="col-sm-10" >
+                     
+                      <div class="form-check" style="margin-bottom: 10px;">
+                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="true">
+                        <label class="form-check-label" for="gridRadios2">
+                         Male
+                        </label>
+                      </div>
+
+                      <div style="margin-bottom: 10px;" class="form-check">
+                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="false">
+                        <label class="form-check-label" for="gridRadios1">
+                         Female
+                        </label>
+                      </div>
+                    
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtAge" class="col-sm-2 col-form-label">Age</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="txtAge" class="form-control" required>
+                      <div class="invalid-feedback">Please enter Patient Age.</div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtCase" class="col-sm-2 col-form-label">Patient Case</label>
+                    <div class="col-sm-10">
+                      <input type="text" name="txtCase" class="form-control" required>
+                      <div class="invalid-feedback">Please enter patient`s` case.</div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtRemarks" class="col-sm-2 col-form-label">Remarks</label>
+                    <div class="col-sm-10">
+                      <textarea type="text" name="txtRemarks" class="form-control" ></textarea>
+                     
+                    </div>
+                  </div>
+                
+                
+
+                                     
+                    
+                 <div class="row mb-3 alert alert-warning alert-dismissible fade show">
+                    <div class="input-group has-validation">
+                      <span class="input-group-text"  id="inputGroupPrepend">Attendance</span>
+                      <div class="form-check" style="margin-left: 10px;margin-top: 5px;">
+                        <input class="form-check-input" type="checkbox" checked id="gridCheck1" name="chkFollow">
+                        <label class="form-check-label" for="gridCheck1">
+                         Patient has attended 
+                        </label>
+                      </div>
+                     
+                    </div>
+                  </div> 
+
+
+
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Save Patient Data</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                  </div>
+                </form><!-- End Horizontal Form -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+
+        <div class="card">
+          <div class="card-body">
+
+            <h5 class="card-title">Patient History</h5>
+
+            <!-- Vertical Form -->
+
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+
+                  <img id="patientImage" alt="Profile" src='/static/assets/img/no-photo-icon-22.png' width="135" height="135" class="rounded-circle">
+                  <h2 id="patientdataDiv"></h2>
+                  <span>Patient Tags</span>
+                  <div class="social-links mt-2">
+                    <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+                  </div>
+                </div>
+                <section class="section dashboard">
+
+                  <!-- Recent Activity -->
+                  <div class="card">
+
+
+                    <div class="card-body">
+                      <h5 class="card-title">Recent Activity </h5>
+
+                      <div class="activity">
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">32 min</div>
+                          <i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
+                          <div class="activity-content">
+                            Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
+                          </div>
+                        </div><!-- End activity item-->
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">56 min</div>
+                          <i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
+                          <div class="activity-content">
+                            Voluptatem blanditiis blanditiis eveniet
+                          </div>
+                        </div><!-- End activity item-->
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">2 hrs</div>
+                          <i class="bi bi-circle-fill activity-badge text-primary align-self-start"></i>
+                          <div class="activity-content">
+                            Voluptates corrupti molestias voluptatem
+                          </div>
+                        </div><!-- End activity item-->
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">1 day</div>
+                          <i class="bi bi-circle-fill activity-badge text-info align-self-start"></i>
+                          <div class="activity-content">
+                            Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
+                          </div>
+                        </div><!-- End activity item-->
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">2 days</div>
+                          <i class="bi bi-circle-fill activity-badge text-warning align-self-start"></i>
+                          <div class="activity-content">
+                            Est sit eum reiciendis exercitationem
+                          </div>
+                        </div><!-- End activity item-->
+
+                        <div class="activity-item d-flex">
+                          <div class="activite-label">4 weeks</div>
+                          <i class="bi bi-circle-fill activity-badge text-muted align-self-start"></i>
+                          <div class="activity-content">
+                            Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
+                          </div>
+                        </div><!-- End activity item-->
+
+                      </div>
+
+                    </div>
+                  </div><!-- End Recent Activity -->
+
+                </section>
+              </div>
+
+
+            </div>
+
+
+
+
+
+          </div>
+
+
+        </div>
+
+
+      </div>
+    </div>
+
+    </div>
+  </section>
+
+
+  <script>
+
+    function setRadioValue(selectedValue) {
+      $('input[name="gridRadios"]').each(function() {
+          console.log("Inside each loop");
+          console.log("Value of this:", $(this).val());
+  
+          // Check if the current radio input's value matches the selected value
+          if (($(this).val() === "true" && selectedValue === true) ||
+              ($(this).val() === "false" && selectedValue === false)) {
+              alert($(this).val());
+              // If it matches, set it as checked
+              $(this).prop('checked', true);
+          }
+      });
+  }
+  
+
+
+    function showtable() {
+
+      var x = document.getElementById("myTable");
+      x.style.display = "block";
+
+      myFunction();
+    }
+
+
+
+    function myFunction() {
+      var input, filter, table, tr, td, i, txtValue, found;
+      input = document.getElementById("myInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("myTable");
+      tr = table.getElementsByTagName("tr");
+     
+      
+      // Loop through all table rows, starting from index 1 to skip the header row
+      for (i = 1; i < tr.length; i++) {
+        // Hide the row initially
+        tr[i].style.display = "none";
+        // Get all cells in the current row
+        td = tr[i].getElementsByTagName("td");
+        found = false;
+        // Loop through all cells in the current row
+        for (var j = 0; j < td.length; j++) {
+          // Skip if the cell contains a button
+          if (td[j].querySelector('button')) {
+            continue;
+          }
+          txtValue = td[j].textContent || td[j].innerText;
+          // Check if the cell contains the search query
+          if (filter && txtValue.toUpperCase().indexOf(filter) > -1) {
+            found = true;
+            // If any cell contains the search query, show the row
+            tr[i].style.display = "";
+            // Highlight the matching text in the cell
+            td[j].innerHTML = txtValue.replace(new RegExp(filter, 'gi'), function (match) {
+              return '<span class="highlight">' + match + '</span>'; // Wrap matching characters with <span> tag
+            });
+            // Break the inner loop as we found a match in this row
+            break;
+          } else {
+            // If no search query or no match, reset the cell's content
+            td[j].innerHTML = txtValue;
+          }
+        }
+        // If no search query or no cell in this row matched the search query, keep the row hidden
+        if (!filter || !found) {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+
+   
+    function bindPatientData(element) {
+      // Access the ID of the clicked element and print it
+      //console.log("Clicked link ID:", element.id);
+     
+      var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
+            if (hiddenInput) {
+                hiddenInput.value = element;
+            } else {
+                console.error('Hidden input with name "' + hiddenInputName + '" not found.');
+            }
+      var csrftoken = getCookie('csrftoken');
+      //alert(element)
+      $.ajax({
+        url: '/common/searchPatient',
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        data: {
+          'myData': element
+        },
+        success: function (response) {
+         
+          $('#patientdataDiv').text(response[0].fullname);
+          if(response[0].image!=null){
+          $('#patientImage').attr('src', '/media/' + response[0].image);
+        }
+         // $('#txtName').text(response[0].fullname);
+          $("input[name=txtName]").val(response[0].fullname);
+          $("input[name=txtmobile]").val(response[0].mobile);         
+          $("input[name=txtAge]").val(response[0].age);
+          $("input[name=txtCase]").val(response[0].sufferedcase);        
+          $('textarea[name="txtRemarks"]').val(response[0].remarks);
+          setRadioValue(response[0].gender);
+
+        
+
+          showForm();
+        },
+        error: function (xhr, errmsg, err) {
+          console.log(xhr.status + ": " + xhr.responseText);
+        }
+      });
+    }
+
+    function showForm() {
+      const formContainer = document.querySelector(".form-container");
+      formContainer.classList.add("show");
+    }
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+  </script>
+
+
+  {% endblock %}
+</body>
+
+</html>
