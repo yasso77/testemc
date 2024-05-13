@@ -45,6 +45,7 @@ class Patient(models.Model):
     sufferedcase = models.CharField(db_column='SufferedCase', max_length=255, blank=True, null=True)   # Field name made lowercase.
     age=models.IntegerField(db_column='Age', blank=True, null=True)  # Field name made lowercase.
     expectedDate = models.DateField(db_column='ExpectedDate', blank=True, null=True)  # Field name made lowercase.
+    attendanceDate = models.DateField(db_column='AttendanceDate', blank=True, null=True)  # Field name made lowercase.
     createdby = models.CharField(db_column='CreatedBy',max_length=100, blank=True, null=True)  # Field name made lowercase.
     latestupdate = models.DateField(db_column='LatestUpdate', blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField(db_column='UpdatedBy', blank=True, null=True)  # Field name made lowercase.

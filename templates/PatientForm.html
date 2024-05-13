@@ -1,0 +1,352 @@
+{% load static%}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                width: 100%;
+                /* No specific margin rule for container, it will retain its default center alignment */
+            }
+
+            #tblPaitenData {
+                margin: 0;
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Ensure the body fills the entire viewport height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1; /* This allows the container to expand to fill the remaining space */
+        }
+
+        .no-spacing {
+            border-collapse: collapse; /* This collapses the border spacing */
+        }
+
+        .header {
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%; /* Set the width of the container */
+            margin: 0 auto; /* Center the container horizontally */
+            /* Add other styles for the container if needed */
+        }
+
+        .footer {
+            position: fixed; /* Fixed position */
+            left: 0;
+            bottom: 0;
+            width: 100%;           
+            color: white; /* Text color */          
+            
+        }
+
+
+        table {
+            width: 100%;
+        }
+
+
+        .bottom-align {
+            vertical-align: bottom;
+        }
+
+        .top-align {
+            vertical-align: top;
+        }
+
+        .footer-image {
+            background-image: url('/static/assets/img/bgBack.png'); /* Specify the path to your image */
+            background-size: cover; /* Adjusts the size of the background image */
+            background-position: center; /* Centers the background image */
+            background-repeat: repeat; /* Prevents the background image from repeating */
+            padding: 20px; /* Add padding as needed */
+            text-align: center; /* Align text content in the cell */
+            color: white; /* Text color */
+        }
+
+        .footer-imagex {
+            background-image: url('/static/assets/img/bg.png'); /* Specify the path to your image */
+        }
+
+        #tblQuestions {
+            border-collapse: separate; /* Separate border model */
+            border-spacing: 5px; /* Adjust cell spacing */
+        }
+
+            #tblQuestions td {
+                padding: 5px; /* Adjust cell padding */
+            }
+
+        #tblPaitenData {
+            border-collapse: separate; /* Separate border model */
+            border-spacing: 10px; /* Adjust cell spacing */
+        }
+
+            #tblPaitenData td {
+                padding: 5px; /* Adjust cell padding */
+            }
+
+        #tableSpecs {
+            height: 150px;
+            border: 1px solid #928469;
+            width: 100%;
+            margin: 0 auto; /* Center the container horizontally */
+        }
+
+            #tableSpecs th {
+                border-top: 1px solid #928469;
+                border-bottom: 1px solid #928469;
+                height: 5px;
+                background-image: url('/static/assets/img/bgBack.png'); /* Specify the path to your image */
+                color: #fff;
+            }
+
+            #tableSpecs td {
+                border: 1px solid #928469;
+                padding: 4px;
+                text-align: center;
+            }
+    </style>
+</head>
+<body onload="window.print();">
+    <div class="header">
+        <table>
+            <tr>
+                <td colspan="3">form</td>
+            </tr>
+            <tr>
+                <td class="top-align" style="text-align:left">
+                    <img width="245" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
+                </td>
+                <td class="bottom-align" style="height: 200px;">
+
+
+                    <img width="208" src="/static/assets/img/form.png" alt="EMC Logo">
+
+
+                </td>
+                <td class="bottom-align">
+                </td>
+                <td class="bottom-align" style="margin-right:5px;"><img width="215" src="/static/assets/img/circleImage.png" alt="EMC Logo"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="container">
+
+      
+     
+        <table id="tblPaitenData" style="text-align:left;">
+
+            <tr>
+                <td style="text-align:right" colspan="6">  Date : {{patientData.attendanceDate}}</td>
+            </tr>
+            <tr>
+                <th style="width:35%"><div>Name :<span style="font-weight:bold;font-size:larger">{{patientData.fullname}}</span></div></th>
+
+                <th style="vertical-align: middle;width:30%">
+                    Gender : <img src="/static/assets/img/mfChoices.png" alt="EMC Logo" style="vertical-align: middle;">
+                </th>
+
+
+
+                <th style="width:35%; ">Age : {{patientData.age}}</th>
+
+
+
+            </tr>
+            <tr>
+                <th>Address :</th>
+               
+                <th>
+                    City :{{patientData.city}}
+                </th>
+                
+
+                <th>Mobile No. :{{patientData.mobile}}</th>
+                
+
+
+            </tr>
+
+            <tr>
+                <th>Occupation :</th>
+               
+                <th>
+
+                </th>
+               
+
+                <th>Referred by :</th>
+               
+
+
+            </tr>
+        </table>
+      
+
+        <div style="text-align:center;">
+            <h2>MEDICAL OCULAR HISTORY</h2>
+        </div>
+      
+        <table id="tblQuestions" style="text-align:left;">
+
+            <tr>
+                <td>
+                    WHAT IS THE REASON FOR TODAYS EXAM ?
+                </td>
+                <td style="font-weight:lighter">
+                    ........................................................................
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ARE YOU WILLING TO GET RID OF YOUR GLASS ?
+                </td>
+                <td style="font-weight:lighter">
+                    ........................................................................
+                </td>
+
+            </tr>
+
+            <tr>
+                <td>
+                    ARE YOU WEARING CONTUCT LENS FOR THE LAST TWO WEEKS ?
+                </td>
+                <td style="font-weight:lighter">
+                    ........................................................................
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+                    WHAT IS THE REASON FOR TODAYS EXAM ?
+                </td>
+                <td style="font-weight:lighter">
+                    ........................................................................
+                </td>
+
+            </tr>
+        </table>
+      
+       
+
+        <div >
+            <h4>HAVE ANY OF THESE CONDITIONS BELLOW:</h4>
+        </div>
+       
+        <table id="tableSpecs" style="border-collapse: collapse;">
+            <tr>
+                <th class="footer-image"></th>
+                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                <th></th>
+                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                <th></th>
+                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                <th></th>
+                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
+            </tr>
+
+            <tr>
+                <td>DIABETES</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>HEART DISEASE</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>GALUCOMA</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>EYE SURGERY</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-left: 2px solid #928469;"></td>
+            </tr>
+
+            <tr>
+                <td>HTN</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>ASTHMA ALLERGY</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>CATARACT</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>EYE INJURY</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-left: 2px solid #928469;"></td>
+            </tr>
+
+            <tr>
+                <td>THYROID</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>CANCER</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td>RETINAL D.</td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-right: 2px solid #928469;"></td>
+                <td style="border-left: 2px solid #928469;"></td>
+                <td style="border-left: 2px solid #928469;border-right: 2px solid #928469;"></td>
+            </tr>
+        </table>
+       
+        <br />
+        <table>
+            <tr>
+                <td>NOTE :</td>
+                <td style="font-weight:lighter">
+                    ...............................................................................
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div class="footer">
+
+        <table class="no-spacing">
+            <tr>
+                <td style="height:30px" colspan="2">yasser nasr </td>
+            </tr>
+            <tr>
+                <td style="height:8px" colspan="2" class="footer-imagex"> </td>
+            </tr>
+            <tr>
+                <td class="footer-image top-align" style="text-align:left"> <img src="/static/assets/img/footer_left.png" alt="EMC Logo"></td>
+
+                <td class="footer-image top-align" style="text-align:right"> <img src="/static/assets/img/footer_right.png" alt="EMC Logo"></td>
+            </tr>
+        </table>
+
+
+    </div>
+</body>
+</html>

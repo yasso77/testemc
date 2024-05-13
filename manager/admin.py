@@ -14,7 +14,7 @@ admin.site.register(Specialties)
 
 class PatientAdmin(admin.ModelAdmin):
     list_display=['fileserial','fullname','birthdate','gender','mobile','city']
-    list_display_links=['fileserial']
+    list_display_links=['fullname']
     list_editable=['mobile']
     search_fields=['fileserial','fullname','mobile']
    # list_filter=['mobile']

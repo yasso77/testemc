@@ -154,7 +154,7 @@
                       
 
                       <div class="row mb-3">
-                        <label for="txtName" class="col-sm-2 col-form-label">[File Number</label>
+                        <label for="txtName" class="col-sm-2 col-form-label">File Number</label>
                         <div class="col-sm-10">
                           <input type="text" name="txtFileSerial" class="form-control" required>
                           <div class="invalid-feedback">File Number is required.</div>
@@ -225,7 +225,7 @@
 
                                      
                     
-                 <div class="row mb-3 alert alert-warning alert-dismissible fade show">
+                 {% comment %} <div class="row mb-3 alert alert-warning alert-dismissible fade show">
                     <div class="input-group has-validation">
                       <span class="input-group-text"  id="inputGroupPrepend">Attendance</span>
                       <div class="form-check" style="margin-left: 10px;margin-top: 5px;">
@@ -236,7 +236,7 @@
                       </div>
                      
                     </div>
-                  </div> 
+                  </div>  {% endcomment %}
 
 
 
@@ -459,7 +459,7 @@
           if(response[0].image!=null){
           $('#patientImage').attr('src', '/media/' + response[0].image);
         }
-          $('#txtFileSerial').text(response[0].fileserial);
+          $("input[name=txtFileSerial]").val(response[0].fileserial);
           $("input[name=txtName]").val(response[0].fullname);
           $("input[name=txtMobile]").val(response[0].mobile);         
           $("input[name=txtAge]").val(response[0].age);
