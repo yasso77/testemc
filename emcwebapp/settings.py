@@ -94,6 +94,18 @@ DATABASES = {
         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
     },
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": "dbEMC",
+#         "USER": "postgres",
+#         "PASSWORD": "Cocacola!1977",
+#         "HOST": "localhost",
+#         "PORT": "5432"
+#         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
+#     },
+# }
 # DATABASES = {
 #     "default": {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -154,17 +166,17 @@ MEDIA_URL = '/media/'
 #STATIC_URL = '/static/'
 #STATICFILEES_DIRS=os.path.join(BASE_DIR,'WbClinicVision/static')
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-# STATIC_ROOT=os.path.join(BASE_DIR,'static')
-# STATIC_URL = '/static/'
-# STATICFILEES_DIRS=os.path.join(BASE_DIR,'emcwebapp/static')
-# django_heroku.settings(locals())
+STATIC_ROOT=os.path.join(BASE_DIR,'static')
+STATIC_URL = '/static/'
+STATICFILEES_DIRS=os.path.join(BASE_DIR,'emcwebapp/static')
+django_heroku.settings(locals())
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
