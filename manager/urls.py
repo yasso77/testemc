@@ -17,7 +17,7 @@ urlpatterns=[
     #path('AddVisit',views.addPatientVisit,name='SubmitVisit'),
     path('Message',views.ConfirmMsg,name='MessageAlert'),
 
-    path('report',views.LiveDegreeReport,name='report'),   
+    path('reportview',views.LiveDegreeReport,name='reportview'),   
 
     path('patientForm/<int:patientid>/',views.patientForm,name='patientForm'),
 
