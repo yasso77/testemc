@@ -1,21 +1,6 @@
-
+<!DOCTYPE html>
 {%extends 'master.html'%}
-<html>
-<head>
-    <style>
 
-        .chart-container {
-            width: 600px;
-            margin: 20px;
-          }
-          
-          .data-container {
-            margin: 20px;
-          }
-    </style>
-</head>
-
-<body>
   {% block content %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -32,13 +17,11 @@
   </nav>
 </div><!-- End Page Title -->
 <section class="section dashboard">
-  <div class="row">
-
     {% csrf_token %}
    <div class="row mb-3" >
    
  
-<div >
+
       <div class="row">
 
         <!-- Sales Card -->
@@ -138,14 +121,12 @@
     </div>
 
     
+</div>
+
 </section>
 
-
-
-
-
 <script>
-  arrydata=['A', 'B', 'C', 'D', 'E'];
+  var arrydata=['A', 'B', 'C', 'D', 'E'];
   var csrftoken = getCookie('csrftoken');
         //alert(element)
         function fetchData() {
@@ -162,20 +143,20 @@
            const degrees=response.map(function(index){
             return index.evaluationeegree
            })
-           console.log(degrees)
+           //console.log(degrees)
 
            arrydata=degrees;          
 
           },
           error: function (xhr, errmsg, err) {
-            console.log(xhr.status + ": " + xhr.responseText);
+            //console.log(xhr.status + ": " + xhr.responseText);
           }
         });
       }
 // Function to generate the chart
 
-  const months = ['A', 'B', 'C', 'D', 'E'];
-  const datas_array =[count(arrydata,'A'), count(arrydata,'B'), count(arrydata,'C'), count(arrydata,'D'), count(arrydata,'E')];;
+  var months = ['A', 'B', 'C', 'D', 'E'];
+  var datas_array =[count(arrydata,'A'), count(arrydata,'B'), count(arrydata,'C'), count(arrydata,'D'), count(arrydata,'E')];;
   
   /* create our chart */
   const myChart = new Chart('myChart', {
@@ -214,22 +195,10 @@
 });
   
 
-updateChartData = () => {
-  
-  console.log(myChart); // check the console to see different properities of the current Chart object.. which of course we can set to new values and then update with the .update() function
-  
-  /* get String value of inputs */
-
-  
-  
-    console.log(count(arrydata,'A'));
-    
+updateChartData = () => {    
     myChart.config.data.datasets[0].data = [count(arrydata,'A'), count(arrydata,'B'), count(arrydata,'C'), count(arrydata,'D'), count(arrydata,'E')];
     
- 
-  
-  /* update chart */
-  myChart.update();
+    myChart.update();
   
 }
 
@@ -258,10 +227,10 @@ function getCookie(name) {
 
 function IntervalData() { 
   fetchData();
-  let dateTime= new Date();
+  var dateTime= new Date();
 
   // return the time
-  let time = dateTime.toLocaleTimeString();
+  var time = dateTime.toLocaleTimeString();
 
   document.getElementById("hTime").innerHTML = time;
 
@@ -271,11 +240,8 @@ function IntervalData() {
 
  }
 
-let display = setInterval(IntervalData, 2000);
+var display = setInterval(IntervalData, 2000);
 </script>
 
+
 {% endblock %}
-</body>
-
-
-</html>
