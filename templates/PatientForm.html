@@ -129,6 +129,44 @@
                 text-align: center;
             }
     </style>
+
+    <script>
+        function setGenderValue(selectedValue) {
+            $('input[name="gridRadios"]').each(function() {         
+        
+                // Check if the current radio input's value matches the selected value
+                if (($(this).val() === "M" && selectedValue === "M") ||
+                    ($(this).val() === "F" && selectedValue === "F")) {             
+                    // If it matches, set it as checked
+                    $(this).prop('checked', true);
+                }
+            });
+        }  
+
+        function setGlassValue(selectedValue) {
+            $('input[name="gridRadios"]').each(function() {         
+        
+                // Check if the current radio input's value matches the selected value
+                if (($(this).val() === "Y" && selectedValue === "Y") ||
+                    ($(this).val() === "N" && selectedValue === "N")) {                     
+                    // If it matches, set it as checked
+                    $(this).prop('checked', true);
+                }
+            });
+        }  
+
+        function setConductValue(selectedValue) {
+            $('input[name="gridRadios"]').each(function() {         
+        
+                // Check if the current radio input's value matches the selected value
+                if (($(this).val() === "Y" && selectedValue === "Y") ||
+                    ($(this).val() === "N" && selectedValue === "N")) {             
+                    // If it matches, set it as checked
+                    $(this).prop('checked', true);
+                }
+            });
+        }  
+    </script>
 </head>
 <body onload="window.print();">
     <div class="header">
@@ -165,8 +203,8 @@
             <tr>
                 <th style="width:35%"><div>Name :<span style="font-weight:bold;font-size:larger">{{patientData.fullname}}</span></div></th>
 
-                <th style="vertical-align: middle;width:30%">
-                    Gender : <img src="/static/assets/img/mfChoices.png" alt="EMC Logo" style="vertical-align: middle;">
+                <th>
+                  Gender :  {{patientData.gender}}
                 </th>
 
 
@@ -217,7 +255,7 @@
                     WHAT IS THE REASON FOR TODAYS EXAM ?
                 </td>
                 <td style="font-weight:lighter">
-                    ........................................................................
+                   {{patientData.sufferedcase}}
                 </td>
             </tr>
             <tr>
@@ -225,7 +263,7 @@
                     ARE YOU WILLING TO GET RID OF YOUR GLASS ?
                 </td>
                 <td style="font-weight:lighter">
-                    ........................................................................
+                    {{patientData.rideglass}}
                 </td>
 
             </tr>
@@ -235,19 +273,11 @@
                     ARE YOU WEARING CONTUCT LENS FOR THE LAST TWO WEEKS ?
                 </td>
                 <td style="font-weight:lighter">
-                    ........................................................................
-                </td>
+                    {{patientData.wearingconduct}}
+                                  </td>
 
             </tr>
-            <tr>
-                <td>
-                    WHAT IS THE REASON FOR TODAYS EXAM ?
-                </td>
-                <td style="font-weight:lighter">
-                    ........................................................................
-                </td>
-
-            </tr>
+          
         </table>
       
        
@@ -322,7 +352,7 @@
             <tr>
                 <td>NOTE :</td>
                 <td style="font-weight:lighter">
-                    ...............................................................................
+                    {{patientData.remarks}}
                 </td>
             </tr>
 
@@ -334,7 +364,7 @@
 
         <table class="no-spacing">
             <tr>
-                <td style="height:30px" colspan="2">yasser nasr </td>
+                <td style="height:30px" colspan="2"> </td>
             </tr>
             <tr>
                 <td style="height:8px" colspan="2" class="footer-imagex"> </td>

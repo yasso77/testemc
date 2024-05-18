@@ -170,6 +170,8 @@ def UpdatePatientData(request):
         patientGender= request.POST.get('gridRadios')
         patientAge=request.POST.get('txtAge')
         patientCase=request.POST.get('txtCase')
+        RideGlass= request.POST.get('glassRadios')
+        wearingConduct= request.POST.get('contuctRadios')
         patientRemarks=request.POST.get('txtRemarks')       
 
          # Retrieve the patient object
@@ -186,6 +188,8 @@ def UpdatePatientData(request):
         patient.remarks=patientRemarks
         patient.gender=patientGender
         patient.age = patientAge
+        patient.rideglass=RideGlass
+        patient.wearingconduct=wearingConduct
         patient.attendanceDate='2024-04-30'#datetime.now().date
 
         # Save the updated patient object

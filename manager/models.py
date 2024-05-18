@@ -32,6 +32,11 @@ class Patient(models.Model):
         ('M', 'Male'),
         ('F', 'Female'),
     ]
+    YesNo_CHOICES=[
+        ('Y', 'Yes'),
+        ('N', 'No'),
+        
+    ]
 
     patientid = models.AutoField(db_column='PatientID', primary_key=True)  # Field name made lowercase.
     fileserial = models.CharField(db_column='FileSerial', max_length=150, blank=False, null=True,verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
@@ -51,6 +56,8 @@ class Patient(models.Model):
     age=models.IntegerField(db_column='Age', validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=0)  # Field name made lowercase.
     expectedDate = models.DateField(db_column='ExpectedDate', blank=True, null=True)  # Field name made lowercase.
     attendanceDate = models.DateField(db_column='AttendanceDate', blank=True, null=True)  # Field name made lowercase.
+    rideglass = models.CharField(db_column='RideGlass',max_length=1, choices=YesNo_CHOICES, null=True, blank=True)
+    wearingconduct = models.CharField(db_column='WearingConduct',max_length=1, choices=YesNo_CHOICES, null=True, blank=True)
     createdby = models.CharField(db_column='CreatedBy',max_length=100, blank=True, null=True)  # Field name made lowercase.
     latestupdate = models.DateField(db_column='LatestUpdate', blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField(db_column='UpdatedBy', blank=True, null=True)  # Field name made lowercase.

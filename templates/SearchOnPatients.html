@@ -150,31 +150,31 @@
                       
 
                       <div class="row mb-3">
-                        <label for="txtName" class="col-sm-2 col-form-label">File Number</label>
-                        <div class="col-sm-10">
+                        <label for="txtName" class="col-sm-4 col-form-label">File Number</label>
+                        <div class="col-sm-8">
                           <input type="text" name="txtFileSerial" class="form-control" required>
                           <div class="invalid-feedback">File Number is required.</div>
                         </div>
                       </div>
                   <div class="row mb-3">
-                    <label for="txtName" class="col-sm-2 col-form-label">Patient Name</label>
-                    <div class="col-sm-10">
+                    <label for="txtName" class="col-sm-4 col-form-label">Patient Name</label>
+                    <div class="col-sm-8">
                       <input type="text" name="txtName" class="form-control" required>
                       <div class="invalid-feedback">Please enter Patient Name.</div>
                     </div>
                   </div>
 
                   <div class="row mb-3">
-                    <label for="txtName" class="col-sm-2 col-form-label">Mobile</label>
-                    <div class="col-sm-10">
+                    <label for="txtName" class="col-sm-4 col-form-label">Mobile</label>
+                    <div class="col-sm-8">
                       <input type="text" name="txtMobile" class="form-control" >
                      
                     </div>
                   </div>
 
                   <div class="row mb-3">
-                    <label for="txtName" class="col-sm-2 col-form-label">Gender</label>
-                    <div class="col-sm-10" >
+                    <label for="txtName" class="col-sm-4 col-form-label">Gender</label>
+                    <div class="col-sm-8" >
                      
                       <div class="form-check" style="margin-bottom: 10px;">
                         <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="M">
@@ -194,30 +194,72 @@
                   </div>
 
                   <div class="row mb-3">
-                    <label for="txtAge" class="col-sm-2 col-form-label">Age</label>
-                    <div class="col-sm-10">
+                    <label for="txtAge" class="col-sm-4 col-form-label">Age</label>
+                    <div class="col-sm-8">
                       <input type="text" name="txtAge" class="form-control" required>
                       <div class="invalid-feedback">Please enter Patient Age.</div>
                     </div>
                   </div>
 
                   <div class="row mb-3">
-                    <label for="txtCase" class="col-sm-2 col-form-label">Patient Case</label>
-                    <div class="col-sm-10">
+                    <label for="txtCase" class="col-sm-4 col-form-label">Patient Case</label>
+                    <div class="col-sm-8">
                       <input type="text" name="txtCase" class="form-control" required>
                       <div class="invalid-feedback">Please enter patient`s` case.</div>
                     </div>
                   </div>
 
                   <div class="row mb-3">
-                    <label for="txtRemarks" class="col-sm-2 col-form-label">Remarks</label>
-                    <div class="col-sm-10">
+                    <label for="txtRemarks" class="col-sm-4 col-form-label">Remarks</label>
+                    <div class="col-sm-8">
                       <textarea type="text" name="txtRemarks" class="form-control" ></textarea>
                      
                     </div>
                   </div>
+
+                 
                 
-                
+                  <div class="row mb-3">
+                    <label for="txtName" class="col-sm-4 col-form-label"> willing to get rid of glass</label>
+                    <div class="col-sm-8" >
+                     
+                      <div class="form-check" style="margin-bottom: 10px;">
+                        <input class="form-check-input" type="radio" name="glassRadios" id="gridRadios2" value="Y">
+                        <label class="form-check-label" for="gridRadios2">
+                         YES
+                        </label>
+                      </div>
+
+                      <div style="margin-bottom: 10px;" class="form-check">
+                        <input class="form-check-input" type="radio" name="glassRadios" id="gridRadios1" value="N">
+                        <label class="form-check-label" for="gridRadios1">
+                         NO
+                        </label>
+                      </div>
+                    
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="txtName" class="col-sm-4 col-form-label"> wearing conduct lens for the last 2 weeks ?</label>
+                    <div class="col-sm-8" >
+                     
+                      <div class="form-check" style="margin-bottom: 10px;">
+                        <input class="form-check-input" type="radio" name="contuctRadios" id="gridRadios2" value="Y">
+                        <label class="form-check-label" for="gridRadios2">
+                         YES
+                        </label>
+                      </div>
+
+                      <div style="margin-bottom: 10px;" class="form-check">
+                        <input class="form-check-input" type="radio" name="contuctRadios" id="gridRadios1" value="N">
+                        <label class="form-check-label" for="gridRadios1">
+                         NO
+                        </label>
+                      </div>
+                    
+                    </div>
+                  </div>
 
                                      
                     
@@ -259,13 +301,37 @@
       $('input[name="gridRadios"]').each(function() {         
   
           // Check if the current radio input's value matches the selected value
-          if (($(this).val() === "M" && selectedValue === true) ||
-              ($(this).val() === "F" && selectedValue === false)) {             
+          if (($(this).val() === "M" && selectedValue === "M") ||
+              ($(this).val() === "F" && selectedValue === "F")) {             
               // If it matches, set it as checked
               $(this).prop('checked', true);
           }
       });
   }  
+
+  function setRadioYesNoGlass(selectedValue) {
+    $('input[name="glassRadios"]').each(function() {         
+
+        // Check if the current radio input's value matches the selected value
+        if (($(this).val() === "Y" && selectedValue === "Y") ||
+            ($(this).val() === "N" && selectedValue === "N")) {             
+            // If it matches, set it as checked
+            $(this).prop('checked', true);
+        }
+    });
+}  
+
+function setRadioYesNoConduct(selectedValue) {
+  $('input[name="contuctRadios"]').each(function() {         
+
+      // Check if the current radio input's value matches the selected value
+      if (($(this).val() === "Y" && selectedValue === "Y") ||
+          ($(this).val() === "N" && selectedValue === "N")) {             
+          // If it matches, set it as checked
+          $(this).prop('checked', true);
+      }
+  });
+}  
 
 
     function showtable() {
@@ -358,6 +424,8 @@
           $("input[name=txtCase]").val(response[0].sufferedcase);        
           $('textarea[name="txtRemarks"]').val(response[0].remarks);
           setRadioValue(response[0].gender);
+          setRadioYesNoGlass(response[0].rideglass);
+          setRadioYesNoConduct(response[0].wearingconduct);
 
         
 
