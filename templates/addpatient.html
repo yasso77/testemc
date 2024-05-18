@@ -1,0 +1,142 @@
+{% extends 'master.html'%}
+
+
+{% block content %}
+<style>
+  .form-group {
+      margin-bottom: 20px; /* Adjust this value as needed */
+  }
+  .text-danger {
+    color: red;
+}
+</style>
+<div class="pagetitle">
+    <h1>Add New Patient</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">Manager</li>
+        <li class="breadcrumb-item active">Add New Patient</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+    <div class="row">
+      <div class="col-lg-10">
+     
+
+<div class="form-container">
+  <form method="post" class="form-horizontal">
+    {% csrf_token %}
+    <div class="form-group row">
+        <label for="{{ form.fileserial.id_for_label }}" class="col-sm-2 col-form-label">File Serial</label>
+        <div class="col-sm-10">
+            {{ form.fileserial }}
+            {% if form.fileserial.errors %}
+                <div class="text-danger">
+                    {{ form.fileserial.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.fullname.id_for_label }}" class="col-sm-2 col-form-label">Full Name</label>
+        <div class="col-sm-10">
+            {{ form.fullname }}
+            {% if form.fullname.errors %}
+                <div class="text-danger">
+                    {{ form.fullname.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.mobile.id_for_label }}" class="col-sm-2 col-form-label">Mobile</label>
+        <div class="col-sm-10">
+            {{ form.mobile }}
+            {% if form.mobile.errors %}
+                <div class="text-danger">
+                    {{ form.mobile.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.city.id_for_label }}" class="col-sm-2 col-form-label">City</label>
+        <div class="col-sm-10">
+            {{ form.city }}
+            {% if form.city.errors %}
+                <div class="text-danger">
+                    {{ form.city.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.age.id_for_label }}" class="col-sm-2 col-form-label">Age</label>
+        <div class="col-sm-10">
+            {{ form.age }}
+            {% if form.age.errors %}
+                <div class="text-danger">
+                    {{ form.age.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Gender</label>
+        <div class="col-sm-10">
+            <div>
+                {% for radio in form.gender %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label">{{ radio.choice_label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.gender.errors %}
+                <div class="text-danger">
+                    {{ form.gender.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-2 col-form-label">Suffered Case</label>
+        <div class="col-sm-10">
+            {{ form.sufferedcase }}
+            {% if form.sufferedcase.errors %}
+                <div class="text-danger">
+                    {{ form.sufferedcase.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.reservedBy.id_for_label }}" class="col-sm-2 col-form-label">Reserved By</label>
+        <div class="col-sm-10">
+            {{ form.reservedBy }}
+            
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.remarks.id_for_label }}" class="col-sm-2 col-form-label">Remarks</label>
+        <div class="col-sm-10">
+            {{ form.remarks }}
+            
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-10 offset-sm-2">
+          
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+       
+        </div>
+    </div>
+</form>
+          
+    </div>
+  </section>
+{%endblock%}

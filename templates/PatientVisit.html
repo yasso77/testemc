@@ -1,9 +1,8 @@
 {%extends 'master.html'%}
 {% load static%}
-<html>
 
-<head>
   {% block header %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <style>
     .highlight {
       background-color: yellow;
@@ -90,13 +89,7 @@
     }
   </style>
   {% endblock %}
-
-</head>
-
-<body>
   {% block content %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
   <div class="pagetitle">
     <h1>Patient Visit</h1>
     <nav>
@@ -113,7 +106,7 @@
       <div class="col-lg-8">
         <div class="card">
           <div class="card">
-            <div  class="btn btn-success mb-2">
+            <div  class="btn btn-primary mb-2">
               Total Patients today <span id="spnTotalPatients" class="badge bg-white text-success" style="font-size:16px !important">{{Total}}</span>
             </div>
             <div class="card-body">
@@ -142,96 +135,59 @@
               </table>
 
               <p></p>
-
-
+<hr>
               <div class="form-container">
-                <form  method="post" name="vsitForm" validate>
-                  {% csrf_token %}
-                 
-                   
-                      <input type="hidden" name="hdfpatientid">
-                   
-                  <div class="row mb-3">
-                    <label for="inputNumber" class="col-sm-2 col-form-label">Diagnosis</label>
-                    <div class="col-sm-10">
-                      <textarea type="text" name="Diagnosis" class="form-control" required></textarea>
-                      <div class="invalid-feedback">Please enter your Diagnosis.</div>
+                <form method="post" name="vsitForm" validate>
+                    {% csrf_token %}
+            
+                    <input type="hidden" name="hdfpatientid">
+            
+                    <div class="mb-3">
+                        <label for="inputNumber" class="form-label">Diagnosis</label>
+                        <textarea type="text" name="Diagnosis" class="form-control" required></textarea>
+                        <div class="invalid-feedback">Please enter your Diagnosis.</div>
                     </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="inputNumber" class="col-sm-2 col-form-label">Remarks</label>
-                    <div class="col-sm-10">
-                      <textarea type="text" name="txtRemarks" class="form-control" required></textarea>
-                      <div class="invalid-feedback">Please enter your Remarks.</div>
+            
+                    <div class="mb-3">
+                        <label for="inputNumber" class="form-label">Remarks</label>
+                        <textarea type="text" name="txtRemarks" class="form-control" required></textarea>
+                        <div class="invalid-feedback">Please enter your Remarks.</div>
                     </div>
-                  </div>
-                
-
-                  <div class="row mb-4">
-                    
-                      <label for="inputNumber" class="col-sm-2 col-form-label"> Degree</label>
-                      <div class="col-sm-10" >
-                        <div style="margin-bottom: 10px;" class="form-check">
-                          <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="A"
-                            >
-                          <label class="form-check-label" for="gridRadios1">
-                            A -  Qualifed 
-                          </label>
+            
+                    <div class="mb-4">
+                        <label class="form-label">Degree</label>
+                        <div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="A">
+                                <label class="form-check-label" for="gridRadios1">A - Qualifed</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="B">
+                                <label class="form-check-label" for="gridRadios2">B - Not Qualifed cvxd</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="C">
+                                <label class="form-check-label" for="gridRadios3">C - Follow Up &lt; 2 weeks</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios4" value="D">
+                                <label class="form-check-label" for="gridRadios4">D - Follow Up &gt; 2 weeks</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios5" value="E">
+                                <label class="form-check-label" for="gridRadios5">E - Not Qualifed</label>
+                            </div>
                         </div>
-                        <div class="form-check" style="margin-bottom: 10px;">
-                          <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="B">
-                          <label class="form-check-label" for="gridRadios2">
-                            B - Not Qualifed cvxd
-                          </label>
-                        </div>
-                        <div class="form-check" style="margin-bottom: 10px;">
-                          <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="C">
-                          <label class="form-check-label" for="gridRadios3">
-                            C - Follow Up < 2 weeks
-                          </label>
-                        </div>
-
-                        <div class="form-check" style="margin-bottom: 10px;">
-                          <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios4" value="D">
-                          <label class="form-check-label" for="gridRadios4">
-                            D - Follow Up > 2 weeks
-                          </label>
-                        </div>
-
-                        <div class="form-check" style="margin-bottom: 10px;">
-                          <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios5" value="E">
-                          <label class="form-check-label" for="gridRadios5">
-                            E - Not Qualifed
-                          </label>
-                        </div>
-                      </div>
-                   
-
-
                     </div>
-
-                  {% comment %} <div class="row mb-3">
-                    <div class="input-group has-validation">
-                      <span class="input-group-text" style="width: 15%;" id="inputGroupPrepend">Follow-up</span>
-                      <div class="form-check" style="margin-left: 10px;margin-top: 5px;">
-                        <input class="form-check-input" type="checkbox" id="gridCheck1" name="chkFollow">
-                        <label class="form-check-label" for="gridCheck1">
-                         Should Follow with patient
-                        </label>
-                      </div>
-                      <div class="invalid-feedback">Please enter your Remarks.</div>
+            
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </div>
-                  </div> {% endcomment %}
-
-
-
-                  <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-secondary">Reset</button>
-                  </div>
-                </form><!-- End Horizontal Form -->
-              </div>
+                </form>
+            </div>
+            
+            
             </div>
           </div>
         </div>
@@ -249,15 +205,10 @@
               <div class="card">
                 <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
-                  <img id="patientImage" alt="Profile" src='/static/assets/img/no-photo-icon-22.png' width="135" height="135" class="rounded-circle">
+                  {% comment %} <img id="patientImage" src="/static/assets/img/no-photo-icon-22.png" width="135" height="135" class="rounded-circle"> {% endcomment %}
                   <h2 id="patientdataDiv"></h2>
-                  <span>Patient Tags</span>
-                  <div class="social-links mt-2">
-                    <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-                    <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-                  </div>
+                  
+                 
                 </div>
                 <section class="section dashboard">
 
@@ -328,11 +279,6 @@
 
 
             </div>
-
-
-
-
-
           </div>
 
 
@@ -341,11 +287,8 @@
 
       </div>
     </div>
-
-    </div>
+   
   </section>
-
-
   <script>
     function showtable() {
 
@@ -403,7 +346,8 @@
     function bindPatientData(element) {
       // Access the ID of the clicked element and print it
       //console.log("Clicked link ID:", element.id);
-     
+      table = document.getElementById("myTable");
+      table.style.display = "none";
       var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
     if (hiddenInput) {
         hiddenInput.value = element;
@@ -424,7 +368,7 @@
         success: function (response) {
          
           $('#patientdataDiv').text(response[0].fullname);
-          $('#patientImage').attr('src', '/media/' + response[0].image);         
+          //$('#patientImage').attr('src', '/media/' + response[0].image);         
         
 
           showForm();
@@ -455,9 +399,4 @@
     }
 
   </script>
-
-
   {% endblock %}
-</body>
-
-</html>

@@ -1,9 +1,8 @@
-{%extends 'master.html'%}
+{% extends 'master.html'%}
 {% load static%}
-<html>
 
-<head>
   {% block header %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <style>
     .highlight {
       background-color: yellow;
@@ -92,11 +91,8 @@
   </style>
   {% endblock %}
 
-</head>
-
-<body>
   {% block content %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  
 
   <div class="pagetitle">
     <h1>Patient Visit</h1>
@@ -111,11 +107,11 @@
   <section class="section">
 
     <div class="row">
-      <div class="col-lg-8">
+      <div class="col-lg-12">
         <div class="card">
           <div class="card">
-            <div  class="btn btn-success mb-2">
-              Total Patients today <span id="spnTotalPatients" class="badge bg-white text-success" style="font-size:16px !important">{{Total}}</span>
+            <div  class="btn btn-primary mb-2">
+              Total Patients today <span id="spnTotalPatients" class="badge bg-white text-primary" style="font-size:16px !important">{{Total}}</span>
             </div>
             <div class="card-body">
                           <!-- Horizontal Form -->
@@ -181,14 +177,14 @@
                     <div class="col-sm-10" >
                      
                       <div class="form-check" style="margin-bottom: 10px;">
-                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="True">
+                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="M">
                         <label class="form-check-label" for="gridRadios2">
                          Male
                         </label>
                       </div>
 
                       <div style="margin-bottom: 10px;" class="form-check">
-                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="False">
+                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="F">
                         <label class="form-check-label" for="gridRadios1">
                          Female
                         </label>
@@ -241,8 +237,8 @@
 
 
                   <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Save Patient Data</button>
-                    <button type="reset" class="btn btn-secondary">Reset</button>
+                    <button type="submit" class="btn btn-primary">Save Patient & Print Form</button>
+                    
                   </div>
                 </form><!-- End Horizontal Form -->
               </div>
@@ -250,113 +246,10 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4">
-
-        <div class="card">
-          <div class="card-body">
-
-            <h5 class="card-title">Patient History</h5>
-
-            <!-- Vertical Form -->
-
-            <div class="col-12">
-              <div class="card">
-                <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-
-                  <img id="patientImage" alt="Profile" src='/static/assets/img/no-photo-icon-22.png' width="135" height="135" class="rounded-circle">
-                  <h2 id="patientdataDiv"></h2>
-                  <span>Patient Tags</span>
-                  <div class="social-links mt-2">
-                    <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-                    <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <section class="section dashboard">
-
-                  <!-- Recent Activity -->
-                  <div class="card">
-
-
-                    <div class="card-body">
-                      <h5 class="card-title">Recent Activity </h5>
-
-                      <div class="activity">
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">32 min</div>
-                          <i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
-                          <div class="activity-content">
-                            Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
-                          </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">56 min</div>
-                          <i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
-                          <div class="activity-content">
-                            Voluptatem blanditiis blanditiis eveniet
-                          </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">2 hrs</div>
-                          <i class="bi bi-circle-fill activity-badge text-primary align-self-start"></i>
-                          <div class="activity-content">
-                            Voluptates corrupti molestias voluptatem
-                          </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">1 day</div>
-                          <i class="bi bi-circle-fill activity-badge text-info align-self-start"></i>
-                          <div class="activity-content">
-                            Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
-                          </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">2 days</div>
-                          <i class="bi bi-circle-fill activity-badge text-warning align-self-start"></i>
-                          <div class="activity-content">
-                            Est sit eum reiciendis exercitationem
-                          </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                          <div class="activite-label">4 weeks</div>
-                          <i class="bi bi-circle-fill activity-badge text-muted align-self-start"></i>
-                          <div class="activity-content">
-                            Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
-                          </div>
-                        </div><!-- End activity item-->
-
-                      </div>
-
-                    </div>
-                  </div><!-- End Recent Activity -->
-
-                </section>
-              </div>
-
-
-            </div>
-
-
-
-
-
-          </div>
-
-
-        </div>
-
-
-      </div>
+     
     </div>
 
-    </div>
+    
   </section>
 
 
@@ -366,14 +259,13 @@
       $('input[name="gridRadios"]').each(function() {         
   
           // Check if the current radio input's value matches the selected value
-          if (($(this).val() === "True" && selectedValue === true) ||
-              ($(this).val() === "False" && selectedValue === false)) {             
+          if (($(this).val() === "M" && selectedValue === true) ||
+              ($(this).val() === "F" && selectedValue === false)) {             
               // If it matches, set it as checked
               $(this).prop('checked', true);
           }
       });
-  }
-  
+  }  
 
 
     function showtable() {
@@ -496,10 +388,10 @@
       return cookieValue;
     }
 
+
+    
+
   </script>
 
 
   {% endblock %}
-</body>
-
-</html>

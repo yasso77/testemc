@@ -1,10 +1,12 @@
 from datetime import datetime
 
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
 import pandas as pd
 
 from manager.forms.UploadForm import ExcelUploadForm
+from manager.forms.addpatient import MyModelForm
 from manager.models import Doctor, Patient, PatientVisits
 
 # Create your views here.
@@ -161,17 +163,14 @@ def get_patientData(request):
 def UpdatePatientData(request):
     if request.method == 'POST':
        
-        patient_id = request.POST.get('hdfpatientid')       
-
+        patient_id = request.POST.get('hdfpatientid')     
         patientFileNum=request.POST.get('txtFileSerial')
         patientName=request.POST.get('txtName')
         patientMobile=request.POST.get('txtMobile')
-        patientGender= bool(request.POST.get('gridRadios'))
+        patientGender= request.POST.get('gridRadios')
         patientAge=request.POST.get('txtAge')
         patientCase=request.POST.get('txtCase')
-        patientRemarks=request.POST.get('txtRemarks')
-        
-       
+        patientRemarks=request.POST.get('txtRemarks')       
 
          # Retrieve the patient object
         try:
@@ -190,10 +189,30 @@ def UpdatePatientData(request):
         patient.attendanceDate='2024-04-30'#datetime.now().date
 
         # Save the updated patient object
-        patient.save()
+        patient.save()      
+        # Construct the URL with the patient ID    
+         # Construct the URL for the patient form with the patient ID
+        try:
+            patient_form_url = reverse('patientForm', kwargs={'patientid': patient_id})
+        except Exception as e:
+            print(f"Error in URL reversing: {e}")
+            patient_form_url = "#"
 
-        return render(request,"ConfirmMsg.html",{'message': 'Patient data updated','returnUrl':'showPatientData','btnText':'Return back to Patients List'}, status=200)
-   # return render(request,"/patient/templates/SearchOnPatients.html",{'message': 'Error','returnUrl':'/patient/search'}, status=404)
+        return render(request,"ConfirmMsg.html",{'message': 'Patient updated Successfully..','returnUrl':patient_form_url,'btnText':'Print Patient Form','target':'_blank'}, status=200)
+    
+
+
+
+def my_model_form_view(request):
+    if request.method == 'POST':
+        form = MyModelForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return render(request,"ConfirmMsg.html",{'message': 'Patient Added Successfully..','returnUrl':'addnewpatient','btnText':'Add New Patient'}, status=200)
+    else:
+        form = MyModelForm()    
+    
+    return render(request, 'addpatient.html', {'form': form})
 
 
 

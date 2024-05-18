@@ -19,6 +19,8 @@ urlpatterns=[
 
     path('reportview',views.LiveDegreeReport,name='reportview'),   
 
-    path('patientForm/<int:patientid>/',views.patientForm,name='patientForm'),
+    path('patientForm/<int:patientid>/',views.patientForm,name='patientForm'),    
+
+    path('addnewpatient', views.my_model_form_view, name='addnewpatient'),
 
 ]

@@ -76,47 +76,31 @@ WSGI_APPLICATION = 'emcwebapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": "d99lulv5k3lo8n",
+#         "USER": "u4dvsg3gsk55fq",
+#         "PASSWORD": "p85dd57baac2dd618b2931db16e8e6454ebcd77fb9484a99111c78a8967d3cc9a",
+#         "HOST": "c6sfjnr30ch74e.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com",
+#         "PORT": "5432"
+#         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
+#     },
 # }
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "d99lulv5k3lo8n",
-        "USER": "u4dvsg3gsk55fq",
-        "PASSWORD": "p85dd57baac2dd618b2931db16e8e6454ebcd77fb9484a99111c78a8967d3cc9a",
-        "HOST": "c6sfjnr30ch74e.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com",
+        "NAME": "dbEMC",
+        "USER": "postgres",
+        "PASSWORD": "Cocacola!1977",
+        "HOST": "localhost",
         "PORT": "5432"
         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
     },
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": "dbEMC",
-#         "USER": "postgres",
-#         "PASSWORD": "Cocacola!1977",
-#         "HOST": "localhost",
-#         "PORT": "5432"
-#         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
-#     },
-# }
-# DATABASES = {
-#     "default": {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         "NAME": "dbemc",
-#         "USER": "postgres",
-#         "PASSWORD": "Cocacola!1977",
-#         "HOST": "localhost",
-#         "PORT": "5432"
-#         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
-#     },
-# }
 
 
 # Password validation
@@ -155,28 +139,23 @@ USE_TZ = True
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-#STATIC_URL = 'static/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-#STATIC_ROOT=os.path.join(BASE_DIR,'static')
-#STATIC_URL = '/static/'
-#STATICFILEES_DIRS=os.path.join(BASE_DIR,'WbClinicVision/static')
 
-# STATIC_URL = '/static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),
-# ]
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-STATIC_ROOT=os.path.join(BASE_DIR,'static')
 STATIC_URL = '/static/'
-STATICFILEES_DIRS=os.path.join(BASE_DIR,'emcwebapp/static')
-django_heroku.settings(locals())
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+
+# STATIC_ROOT=os.path.join(BASE_DIR,'static')
+# STATIC_URL = '/static/'
+# STATICFILEES_DIRS=os.path.join(BASE_DIR,'emcwebapp/static')
+# django_heroku.settings(locals())
+
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
