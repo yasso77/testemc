@@ -1,19 +1,31 @@
 from datetime import datetime
-
+from django.contrib.auth import logout
+from django.contrib.auth import login
+from django.contrib.auth import authenticate
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 import pandas as pd
 
+from manager import models
+
+from manager.decorators import permission_required_with_redirect
 from manager.forms.UploadForm import ExcelUploadForm
 from manager.forms.addpatient import MyModelForm
+from manager.forms.forms import LoginForm
 from manager.models import Doctor, Patient, PatientVisits
+from django.contrib.auth.decorators import login_required,permission_required
 
 # Create your views here.
-
+@login_required
 def index(request):
-    return render(request,'index.html',{'name':'Yasser'})
+    return render(request,'index.html',{'name':'index'})
 
+def no_permission_view(request):
+    return render(request, 'no_permission.html')
+
+@login_required
+@permission_required_with_redirect('manager.UploadPatientFile',login_url='/no-permission/')
 def uploadpatientData(request):
     if request.method == 'POST':
             form = ExcelUploadForm(request.POST, request.FILES)      
@@ -60,16 +72,17 @@ def uploadpatientData(request):
 def showPatientData(request):  
     return render(request,'SearchOnPatients.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
 
+
 def uploadedPatientDataList(request):  
     return render(request,'UploadedPatientsList.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
 
-
+@permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
 def showPatientDataAttendedToday(request):  
     return render(request,'SearchOnPatientsPrintForm.html',{'patients':Patient.objects.filter(attendanceDate='2024-04-30'),'Total':Patient.objects.filter(attendanceDate='2024-04-30').count()})
 
 
 
-
+@permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
 def doctorPatientvisit(request):        
 
         if request.method=='POST':
@@ -94,29 +107,13 @@ def doctorPatientvisit(request):
 #This is a block of code
 #This is a block of code
 
-def addPatientVisit(request):
-    txtpatientid=request.POST.get('hdfpatientid')
-    doctorid=1 #request.POST.get('doctorid')
-    txtdiagnosis=request.POST.get('Diagnosis')
-    EvaulDegree=request.POST.get('gridRadios')
-    #chkFollowup=request.POST.get('chkFollow')
-    EvaulDegree=request.POST.get('gridRadios')
-    txtRemarks=request.POST.get('txtRemarks')
 
-    if request.method=='POST':
-       # followup = True if chkFollowup == 'on' else False
-        patient = Patient.objects.get(pk=txtpatientid)
-        doctor = Doctor.objects.get(pk=doctorid)
-        data=PatientVisits(patientid=patient,diagnosis=txtdiagnosis,evaluationeegree=EvaulDegree,visitdate=datetime.now(),doctorid=doctor,reasonforvisit=txtRemarks,createdate='2024-04-30')#datetime.now()
-        data.save()
-        return HttpResponseRedirect("Message")
-
-
+@permission_required_with_redirect('manager.LiveReport', login_url='/no-permission/')
 def LiveDegreeReport(request):
     current_time = datetime.now().time()
     return render(request,'LiveDegreeReport.html',context={'current_time': current_time})
 
-
+@permission_required_with_redirect('manager.LiveReport', login_url='/no-permission/')
 def ajaxReportChartEvlDegree(request):
     if request.method == 'POST' and 'inputDate' in request.POST:
             visitdate = request.POST.get('inputDate', None)
@@ -159,7 +156,7 @@ def get_patientData(request):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request'})  
     
-
+@permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
 def UpdatePatientData(request):
     if request.method == 'POST':
        
@@ -205,9 +202,9 @@ def UpdatePatientData(request):
         return render(request,"ConfirmMsg.html",{'message': 'Patient updated Successfully..','returnUrl':patient_form_url,'btnText':'Print Patient Form','target':'_blank'}, status=200)
     
 
-
-
-def my_model_form_view(request):
+@login_required
+@permission_required_with_redirect('manager.AddNewPatient', login_url='/no-permission/')
+def addNewPatient(request):
     if request.method == 'POST':
         form = MyModelForm(request.POST)
         if form.is_valid():
@@ -219,8 +216,27 @@ def my_model_form_view(request):
     return render(request, 'addpatient.html', {'form': form})
 
 
-
-
+def custom_logout_view(request):
+    logout(request)
+    return redirect('/custom-logout-page/')
+    
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            # Process the form data (authentication logic here)
+            # For example, authenticate user and log in
+             username = form.cleaned_data['username']
+             password = form.cleaned_data['password']
+             user = authenticate(request, username=username, password=password)
+             if user is not None:
+                login(request, user)
+                return redirect('some_view')
+            
+    else:
+        form = LoginForm()
+    
+    return render(request, 'registration/login.html', {'form': form})
 
     
 

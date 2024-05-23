@@ -79,6 +79,4 @@ class PatientVisits(models.Model):
     treatment = models.TextField(db_column='Treatment', blank=True, null=True)  # Field name made lowercase.
     followup = models.BooleanField( db_column='FollowUp', blank=True, null=True)  # Field name made lowercase.
     evaluationeegree = models.CharField(db_column='EvaluationDegree',max_length=1, blank=True, null=True)  # Field name made lowercase.
-    createdate = models.DateField(db_column='CreateDate', blank=True, null=True)  # Field name made lowercase.
-
-   # visit=models.ManyToOneRel(Patient,on_delete=models.CASCADE)
+    createdate = models.DateField(db_column='CreateDate', blank=True, null=True)  # Field name made 
