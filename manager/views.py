@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.db.models import Q
 from django.contrib.auth import logout
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
@@ -15,6 +16,8 @@ from manager.forms.addpatient import MyModelForm
 from manager.forms.forms import LoginForm
 from manager.models import Doctor, Patient, PatientVisits
 from django.contrib.auth.decorators import login_required,permission_required
+
+from manager.orm import ORMPatientsHandling
 
 # Create your views here.
 @login_required
@@ -69,16 +72,35 @@ def uploadpatientData(request):
     return render(request, 'uploadPatientData.html', {'form': 'form'})
 
 
-def showPatientData(request):  
-    return render(request,'SearchOnPatients.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
+def showPatientData(request):
+    today = datetime.now().date()
+    
+    patients_today = Patient.objects.filter(attendanceDate=today)
+    total_patients_today = patients_today.count() 
+   
+    return render(request, 'SearchOnPatients.html', {
+        'patients': patients_today,
+        'Total': total_patients_today
+    })
 
 
 def uploadedPatientDataList(request):  
-    return render(request,'UploadedPatientsList.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
+    today = datetime.now().date()
+    return render(request,'UploadedPatientsList.html',{'patients':Patient.objects.filter(createdate=today),'Total':Patient.objects.count()})
 
 @permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
-def showPatientDataAttendedToday(request):  
-    return render(request,'SearchOnPatientsPrintForm.html',{'patients':Patient.objects.filter(attendanceDate='2024-04-30'),'Total':Patient.objects.filter(attendanceDate='2024-04-30').count()})
+def showPatientDataAttendedToday(request): 
+     
+    ormObj=ORMPatientsHandling()
+    patientList=ormObj.getPatientsTodayWithVisitStatus()
+    patientcount=patientList.count()   
+
+    return render(request, 'SearchOnPatientsPrintForm.html', {
+            'patients': patientList,
+            'Total': patientcount
+        })
+        
+    
 
 
 
@@ -89,19 +111,28 @@ def doctorPatientvisit(request):
             txtpatientid=request.POST.get('hdfpatientid')
             doctorid=1 #request.POST.get('doctorid')
             txtdiagnosis=request.POST.get('Diagnosis')
-            EvaulDegree=request.POST.get('gridRadios')
-            #chkFollowup=request.POST.get('chkFollow')
+            EvaulDegree=request.POST.get('gridRadios')            
             EvaulDegree=request.POST.get('gridRadios')
             txtRemarks=request.POST.get('txtRemarks')
-            # followup = True if chkFollowup == 'on' else False
             patient = Patient.objects.get(pk=txtpatientid)
             doctor = Doctor.objects.get(pk=doctorid)
-            data=PatientVisits(patientid=patient,diagnosis=txtdiagnosis,evaluationeegree=EvaulDegree,visitdate=datetime.now(),doctorid=doctor,reasonforvisit=txtRemarks,createdate='2024-04-30')#datetime.now()
+            data=PatientVisits(patientid=patient,diagnosis=txtdiagnosis,evaluationeegree=EvaulDegree,
+            visitdate=datetime.now().date().isoformat(),
+            doctorid=doctor,
+            reasonforvisit=txtRemarks,
+            createdate=datetime.now().date().isoformat())
             data.save()
             return render(request,"ConfirmMsg.html",{'message': 'Patient`s Visit is added successfully','returnUrl':'DoctorEvaluation','btnText':'New Patient'}, status=200)
-           
+        
+        
+        ormObj=ORMPatientsHandling()
+        patientList=ormObj.getPatientsTodayWithNoVisitYet()
+        patientcount=patientList.count()   
 
-        return render(request,'PatientVisit.html',{'patients':Patient.objects.all(),'Total':Patient.objects.count()})
+        return render(request, 'PatientVisit.html', {
+            'patients': patientList,
+            'Total': patientcount
+        })
 
 #This is a block of code
 #This is a block of code
@@ -117,7 +148,7 @@ def LiveDegreeReport(request):
 def ajaxReportChartEvlDegree(request):
     if request.method == 'POST' and 'inputDate' in request.POST:
             visitdate = request.POST.get('inputDate', None)
-            queryset = PatientVisits.objects.filter(createdate='2024-04-30').values('evaluationeegree')  
+            queryset = PatientVisits.objects.filter(visitdate__date=datetime.now().date()).values('evaluationeegree')  
 
         # Convert QuerySet to list of dictionaries
             data = list(queryset.values())
@@ -187,7 +218,8 @@ def UpdatePatientData(request):
         patient.age = patientAge
         patient.rideglass=RideGlass
         patient.wearingconduct=wearingConduct
-        patient.attendanceDate='2024-04-30'#datetime.now().date
+        patient.attendanceDate=datetime.now().date()
+        patient.arrivedOn=datetime.now().time().isoformat()
 
         # Save the updated patient object
         patient.save()      
