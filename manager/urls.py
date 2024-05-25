@@ -9,7 +9,7 @@ urlpatterns=[
     path('searchPatient', views.get_patientData,name='searchP') ,     
     path('getattendedpatient', views.showPatientDataAttendedToday,name='getattendedpatient') , 
     path('no-permission/', views.no_permission_view, name='no_permission'),
-    path('UploadedList', views.uploadedPatientDataList,name='UploadedList') , 
+    path('PatientsList', views.uploadedPatientDataList,name='PatientsList') , 
     path('UpdatePatientData', views.UpdatePatientData, name='update_patient_data'),
 
     path('DoctorEvaluation', views.doctorPatientvisit,name='DoctorEvaluation'),   

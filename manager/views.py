@@ -8,16 +8,16 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 import pandas as pd
 
-from manager import models
-
 from manager.decorators import permission_required_with_redirect
 from manager.forms.UploadForm import ExcelUploadForm
 from manager.forms.addpatient import MyModelForm
 from manager.forms.forms import LoginForm
 from manager.models import Doctor, Patient, PatientVisits
 from django.contrib.auth.decorators import login_required,permission_required
-
 from manager.orm import ORMPatientsHandling
+
+
+ormObj=ORMPatientsHandling()
 
 # Create your views here.
 @login_required
@@ -73,25 +73,36 @@ def uploadpatientData(request):
 
 
 def showPatientData(request):
-    today = datetime.now().date()
     
-    patients_today = Patient.objects.filter(attendanceDate=today)
-    total_patients_today = patients_today.count() 
+        patientList=ormObj.getPatientsTodayWithNoVisitYet()
+        patientcount=patientList.count()  
    
-    return render(request, 'SearchOnPatients.html', {
-        'patients': patients_today,
-        'Total': total_patients_today
-    })
+        return render(request, 'SearchOnPatients.html', {
+        'patients': patientList,
+        'Total': patientcount
+        })
 
+@permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
+def uploadedPatientDataList(request): 
+    
+      if request.method == 'POST':
+        fromDate = request.POST.get('txtFromDate')
+        toDate = request.POST.get('txtToDate')
+        # Fetch patients with their related visits
+        queryset = ormObj.get_all_Patients_Between_Period(fromDate, toDate)
+        context = {
+            'patients': queryset,
+        }
+      else:
+        context = {}  # Define an empty context if request method is not POST
 
-def uploadedPatientDataList(request):  
-    today = datetime.now().date()
-    return render(request,'UploadedPatientsList.html',{'patients':Patient.objects.filter(createdate=today),'Total':Patient.objects.count()})
+      return render(request, 'UploadedPatientsList.html', context)
+   
 
 @permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
 def showPatientDataAttendedToday(request): 
      
-    ormObj=ORMPatientsHandling()
+    
     patientList=ormObj.getPatientsTodayWithVisitStatus()
     patientcount=patientList.count()   
 
@@ -122,11 +133,10 @@ def doctorPatientvisit(request):
             reasonforvisit=txtRemarks,
             createdate=datetime.now().date().isoformat())
             data.save()
-            return render(request,"ConfirmMsg.html",{'message': 'Patient`s Visit is added successfully','returnUrl':'DoctorEvaluation','btnText':'New Patient'}, status=200)
+            return render(request,"ConfirmMsg.html",{'message': 'Patient`s Visit is added successfully','returnUrl':'DoctorEvaluation','btnText':'New Patient'}, status=200)       
         
         
-        ormObj=ORMPatientsHandling()
-        patientList=ormObj.getPatientsTodayWithNoVisitYet()
+        patientList=ormObj.getPatientsAttendedToday()
         patientcount=patientList.count()   
 
         return render(request, 'PatientVisit.html', {

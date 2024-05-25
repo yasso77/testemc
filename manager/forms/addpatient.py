@@ -2,8 +2,7 @@
 from django import forms
 from manager.models import Patient
 
-class MyModelForm(forms.ModelForm):
-    
+class MyModelForm(forms.ModelForm):   
     
     
     class Meta:

@@ -71,8 +71,8 @@
 
               <table id="myTable" class="table table-striped" >
                 <tr class="header">
-                  <th style="width:10%;">File #</th>
-                  <th style="width:40%;">Patient Name</th>
+                  <th style="width:15%;">File #</th>
+                  <th style="width:30%;">Patient Name</th>
                   <th style="width:15%;"> Mobile</th>
                   <th style="width:15%;"> City</th>
                   
@@ -90,10 +90,19 @@
 
                   <td style="text-align:right;">
                     
+                {% if patient.evaluation_degree %}
+                    <button class="btn btn-warning" onclick="openPopup({{ patient.patientid }})">                    
+                        <i class="bi bi-star me-1"></i>
+                       Evaluated AS <span style="font-weight:bold ;"> [{{ patient.evaluation_degree }}]</span>
+                    </button> 
+                {% else %}
                     <button class="btn btn-success" onclick="openPopup({{ patient.patientid }})">                    
-                     <i class="bi bi-star me-1"></i>
-                     {{patient.evaluation_degree}}
-                    </button> </td>
+                        <i class="bi bi-star me-1"></i>
+                        Print Form
+                    </button> 
+                {% endif %}
+                
+                  </td>
                 </tr>
                 {%endfor%}
 

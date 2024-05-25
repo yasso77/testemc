@@ -1,115 +1,120 @@
 {%extends 'master.html'%}
-{% load static%}
-<html>
 
-<head>
-  {% block header %}
-  <style>
-    .highlight {
-      background-color: yellow;
-      font-weight:bold;
-    }
+{% block content %}
 
-    #myInput {
-      background-image: url("{% static 'assets/img/searchicon.png' %}");
-      /* Add a search icon to input */
-      background-position: 10px 12px;
-      /* Position the search icon */
-      background-repeat: no-repeat;
-      /* Do not repeat the icon image */
-      width: 100%;
-      /* Full-width */
-      font-size: 18px;
-      /* Increase font-size */
-      padding: 12px 20px 12px 40px;
-      /* Add some padding */
-      border: 1px solid #ddd;
-      /* Add a grey border */
-      margin-bottom: 12px;
-      /* Add some space below the input */
-    }
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- Include Bootstrap JS and its dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-   
-
-
-    
-
-  
-  </style>
-  {% endblock %}
-
-</head>
-
-<body>
-  {% block content %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
   <div class="pagetitle">
-    <h1>Attended Patients</h1>
+  <h1> Patients Report View</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
         <li class="breadcrumb-item">Manager</li>
-        <li class="breadcrumb-item active">Attended Patients</li>
+        <li class="breadcrumb-item active">Show All Patients between period</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
   <section class="section">
 
     <div class="row">
-      <div class="col-lg-12">
+      
+        <div class="col-lg-8">
         <div class="card">
-          <div class="card">
-           <br>
-           <br>
-            {% comment %} <div  class="btn btn-success mb-2">
-              Total Patients today <span id="spnTotalPatients" class="badge bg-white text-success" style="font-size:16px !important">{{Total}}</span>
-            </div> {% endcomment %}
-            <div class="card-body">
-                          <!-- Horizontal Form -->
-              <input type="text" id="myInput" oninput="myFunction()" placeholder="Search for patients..">
+          <div class="card-body">
+            <h5 class="card-title">General Form Elements</h5>
 
-              <table id="myTable" class="table table-striped" >
-                <tr class="header">
-                  <th>File #</th>
-                  <th>Patient Name</th>
-                  <th> Mobile</th>
-                  <th> City</th>
-                  <th> Remarks</th>
-                  <th>Booked Date</th>
-                  <th>Reserved By</th>
-                 
-                </tr>
-                {%for patient in patients%}
-                <tr>
-
-                  <td>{{patient.fileserial}}</td>
-                  <td>{{patient.fullname}} </td>
-                  <td>{{patient.mobile}}</td>
-                  <td>{{patient.city}}</td>
-                  
-                  <td>{{patient.remarks}}</td>
-                  <td> {{patient.expectedDate}}</td>
-
-                    <td> {{patient.reservedBy}}</td>
-
-                    
-
-                  
-                </tr>
-                {%endfor%}
-
-              </table>
-
-              <p></p>
-
-
-              <div class="form-container">
-             
+            <!-- General Form Elements -->
+            <form method="post" validate>
+              {% csrf_token %}
+              <div class="row mb-4">
+                <label for="inputDate" class="col-sm-3 col-form-label">From Date</label>
+                <div class="col-sm-8">
+                  <input type="date" required name="txtFromDate" class="form-control">
+                </div>
               </div>
-            </div>
+              <div class="row mb-4"> 
+                <label for="inputDate" class="col-sm-3 col-form-label">To Date</label>
+                <div class="col-sm-8">
+                  <input type="date" required name="txtToDate" class="form-control">
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <label class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-8">
+                  <button type="submit" class="btn btn-primary">Show Report</button>
+                </div>
+              </div>
+
+            </form><!-- End General Form Elements -->
+
           </div>
         </div>
+        </div>
+        <br>
+        <div class="col-lg-12">
+        <div class="accordion" id="patientsAccordion">
+          {% for patient in patients %}
+              <div class="card">
+                  <div class="card-header" id="heading{{ patient.patientid }}">
+                    <h2 class="mb-0">
+                      <button class="btn btn-outline-primary" style="width: 99%; text-align: left;" type="button" data-toggle="collapse" data-target="#collapse{{ patient.patientid }}" aria-expanded="true" aria-controls="collapse{{ patient.patientid }}">
+                          File ID: {{ patient.fileserial }} - {{ patient.fullname }} - Age: {{ patient.age }} 
+                          <span class="ml-auto badge bg-primary rounded-pill">{{ patient.patientvisits.count }} visits</span>
+                      </button>
+                  </h2>
+                  </div>
+
+                  <div id="collapse{{ patient.patientid }}" class="collapse" aria-labelledby="heading{{ patient.patientid }}" data-parent="#patientsAccordion">
+                      <div class="card-body">
+                          <h4>Visits:</h4>
+                          {% if patient.patientvisits.all %}
+                              <ul>
+                                 
+                                      <li>
+                                          <table class="table table-bordered">
+                                              <thead>
+                                                  <tr>
+                                                      <th>Visit Date</th>
+                                                      <th>Doctor Name</th>
+                                                      <th>Diagnosis</th>
+                                                      <th>Remarks</th>
+                                                      <th></th>
+                                                  </tr>
+                                              </thead>
+                                              <tbody>
+                                                {% for visit in patient.patientvisits.all %}
+                                                  <tr>
+                                                      <td>{{ visit.visitdate }}</td>
+                                                      <td>{{ visit.doctorid }}</td>
+                                                      <td>{{ visit.diagnosis }}</td>
+                                                      <td>{{ visit.reasonforvisit }}</td>
+                                                      <td style="text-align: right;">
+                                                          <button class="btn btn-warning">
+                                                              <i class="bi bi-star me-1"></i>
+                                                              Evaluated as <span style="font-weight:bold;">[{{ visit.evaluationeegree }}]</span>
+                                                          </button>
+                                                      </td>
+                                                  </tr>
+                                                  {% endfor %}
+                                              </tbody>
+                                          </table>
+                                      </li>
+                                  
+                              </ul>
+                          {% else %}
+                              <p>No visits found.</p>
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+      </div>
       </div>
       
     </div>
@@ -117,95 +122,6 @@
     </div>
   </section>
 
-
-  <script>
-
-    function openPopup(patientid) {
-      // URL of the page you want to open in the popup window
-      var url = "{% url 'patientForm' 0 %}".replace('0', patientid);
-  
-      // Options for the popup window
-      var options = {
-          width: 600, // Width of the popup window
-          height: 400, // Height of the popup window
-          top: 100, // Position from the top of the screen
-          left: 100, // Position from the left of the screen
-          toolbar: "no", // Show or hide the browser toolbar
-          menubar: "no", // Show or hide the browser menubar
-          location: "no", // Show or hide the browser location bar
-          resizable: "yes", // Allow resizing of the popup window
-          scrollbars: "yes" // Show or hide scrollbars in the popup window
-      };
-  
-      // Open the popup window
-      window.open(url, "PopupWindow", getOptionsString(options));
-  }
-
-  function getOptionsString(options) {
-    var optionString = "";
-    for (var key in options) {
-        optionString += key + "=" + options[key] + ",";
-    }
-    // Remove the trailing comma
-    optionString = optionString.slice(0, -1);
-    return optionString;
-}
-  
-
-    function myFunction() {
-      var input, filter, table, tr, td, i, txtValue, found;
-      input = document.getElementById("myInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable");
-      tr = table.getElementsByTagName("tr");
-     
-      
-      // Loop through all table rows, starting from index 1 to skip the header row
-      for (i = 1; i < tr.length; i++) {
-        // Hide the row initially
-        tr[i].style.display = "none";
-        // Get all cells in the current row
-        td = tr[i].getElementsByTagName("td");
-        found = false;
-        // Loop through all cells in the current row
-        for (var j = 0; j < td.length; j++) {
-          // Skip if the cell contains a button
-          if (td[j].querySelector('button')) {
-            continue;
-          }
-          txtValue = td[j].textContent || td[j].innerText;
-          // Check if the cell contains the search query
-          if (filter && txtValue.toUpperCase().indexOf(filter) > -1) {
-            found = true;
-            // If any cell contains the search query, show the row
-            tr[i].style.display = "";
-            // Highlight the matching text in the cell
-            td[j].innerHTML = txtValue.replace(new RegExp(filter, 'gi'), function (match) {
-              return '<span class="highlight">' + match + '</span>'; // Wrap matching characters with <span> tag
-            });
-            // Break the inner loop as we found a match in this row
-            break;
-          } else {
-            // If no search query or no match, reset the cell's content
-            td[j].innerHTML = txtValue;
-          }
-        }
-        // If no search query or no cell in this row matched the search query, keep the row hidden
-        if (!filter || !found) {
-          tr[i].style.display = "none";
-        }
-      }
-    }
-
-   
- 
-
-   
-
-  </script>
-
-
   {% endblock %}
-</body>
 
-</html>
+

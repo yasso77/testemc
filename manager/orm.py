@@ -1,20 +1,28 @@
-
-
-from multiprocessing import Value
-
-from django.forms import CharField, IntegerField
-
 from manager import models
 from datetime import datetime
-from django.db.models import Q, F,Case, When, Value, BooleanField,Exists, OuterRef,Subquery
+from django.db.models import Q,OuterRef,Subquery,F
 
 
-class ORMPatientsHandling():
-    
+class ORMPatientsHandling():    
 
     # TODO: Define fields here
     
     def getPatientsTodayWithNoVisitYet(self):
+        # Get today's date
+        today = datetime.now().date()
+
+                # Step 1: Get patients who attended today
+        patients_attended_today = models.Patient.objects.filter(expectedDate=today)
+
+        # Step 2: Get patients who do not have a visit date today
+        patients_no_visit_today = patients_attended_today.exclude(
+            Q(patientvisits__visitdate=today)
+        ) 
+        
+        return patients_no_visit_today
+           
+    
+    def getPatientsAttendedToday(self):
         # Get today's date
         today = datetime.now().date()
 
@@ -26,21 +34,11 @@ class ORMPatientsHandling():
             Q(patientvisits__visitdate=today)
         ) 
         
-        return patients_no_visit_today
-           
-           
+        return patients_no_visit_today      
     
     def getPatientsTodayWithVisitStatus(self):
         # Get today's date
         today = datetime.now().date()
-
-       # Query to get patients who attended today
-        patients_today = models.Patient.objects.filter(attendanceDate=today)
-        patient_visit=models.PatientVisits.objects.filter(visitdate__date=today,patientid=4)
-        for it in patient_visit:
-            print (it.evaluationeegree)
-
-        from django.db.models import Subquery, OuterRef
 
         # Subquery to get evaluation degree for each patient if available
         evaluation_degree_subquery = models.PatientVisits.objects.filter(
@@ -57,17 +55,24 @@ class ORMPatientsHandling():
 
         return patients_today_with_evaluation_degree
 
-
+    def expectedPatientToday(self):
         
+          today = datetime.now().date()    
+          patients_today = models.Patient.objects.filter(expectedDate=today)          
+          return patients_today  
+      
+    def get_all_Patients_Between_Period(self,fromdate,todate):         
 
 
+        queryset = models.Patient.objects.filter(
+            expectedDate__gte=fromdate,
+            expectedDate__lte=todate
+        ).prefetch_related('patientvisits').filter(
+            Q(patientvisits__isnull=True) | Q(patientvisits__patientid=F('patientid'))
+        ).distinct()
 
-
-
-
-
-
-
+        return queryset
+    
 
 
     def __str__(self):
