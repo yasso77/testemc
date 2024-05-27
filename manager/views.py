@@ -72,6 +72,8 @@ def uploadpatientData(request):
     return render(request, 'uploadPatientData.html', {'form': 'form'})
 
 
+@login_required
+@permission_required_with_redirect('manager.ShowPatientReport',login_url='/no-permission/')
 def showPatientData(request):
     
         patientList=ormObj.getPatientsTodayWithNoVisitYet()

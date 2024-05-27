@@ -7,6 +7,7 @@ class PublichManagerPerm(models.Model):
         permissions = (
             ("UploadPatientFile", "Can upload patient files"),
             ("LiveReport", "Can view live report"),
+            ("ShowPatientReport","Show Patient Report")
         )
 
     def __str__(self):
