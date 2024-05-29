@@ -34,6 +34,8 @@ def uploadpatientData(request):
             form = ExcelUploadForm(request.POST, request.FILES)      
             excel_file = request.FILES['my_file']
             df = pd.read_excel(excel_file)
+            added_count = 0
+            updated_count = 0
 
             
             for index, row in df.iterrows():
@@ -52,6 +54,7 @@ def uploadpatientData(request):
                     existing_patient.remarks = row['Remarks']
                     existing_patient.expectedDate = row['ArrivalDate']
                     existing_patient.save()
+                    updated_count += 1
                 else:
                     # If no patient with the same mobile number exists, create a new record
                     Patient.objects.create(
@@ -65,9 +68,12 @@ def uploadpatientData(request):
                         remarks=row['Remarks'],
                         expectedDate=row['ArrivalDate']
                         # Map other columns accordingly
-                    )                
-           
-            return render(request,"ConfirmMsg.html",{'message': 'Patient data uploaded Successfully','returnUrl':'pushpatientData','btnText':'Upload New File'}, status=200)
+                    ) 
+                    added_count += 1               
+            message = f'Patient data uploaded successfully.<br>{added_count} patients were added.<br>{updated_count} patients were updated.'
+            
+            
+            return render(request,"ConfirmMsg.html",{'message': message,'returnUrl':'upload','btnText':'Upload New File'}, status=200)
    
     return render(request, 'uploadPatientData.html', {'form': 'form'})
 
@@ -198,52 +204,76 @@ def get_patientData(request):
         
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request'})  
+
+def check_fileserial(request):
+    if request.method == 'GET':
+        fileserial = request.GET.get('fileserial')
+        patient_id = request.GET.get('patient_id')
+
+        if fileserial:
+            exists = Patient.objects.filter(fileserial=fileserial).exclude(patientid=patient_id).exists()
+            if exists:
+                return JsonResponse({'exists': True, 'message': 'Another patient with this file serial already exists.'}, status=200)
+            else:
+                return JsonResponse({'exists': False, 'message': 'File serial is available.'}, status=200)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
     
 @permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
 def UpdatePatientData(request):
     if request.method == 'POST':
-       
-        patient_id = request.POST.get('hdfpatientid')     
-        patientFileNum=request.POST.get('txtFileSerial')
-        patientName=request.POST.get('txtName')
-        patientMobile=request.POST.get('txtMobile')
-        patientGender= request.POST.get('gridRadios')
-        patientAge=request.POST.get('txtAge')
-        patientCase=request.POST.get('txtCase')
-        RideGlass= request.POST.get('glassRadios')
-        wearingConduct= request.POST.get('contuctRadios')
-        patientRemarks=request.POST.get('txtRemarks')       
+        patient_id = request.POST.get('hdfpatientid')
+        patientFileNum = request.POST.get('txtFileSerial')
+        patientName = request.POST.get('txtName')
+        patientMobile = request.POST.get('txtMobile')
+        patientGender = request.POST.get('gridRadios')
+        patientAge = request.POST.get('txtAge')
+        patientCase = request.POST.get('txtCase')
+        RideGlass = request.POST.get('glassRadios')
+        wearingConduct = request.POST.get('contuctRadios')
+        patientRemarks = request.POST.get('txtRemarks')
 
-         # Retrieve the patient object
+        # Retrieve the patient object
         try:
             patient = Patient.objects.get(patientid=patient_id)
         except Patient.DoesNotExist:
             return JsonResponse({'error': 'Patient not found'}, status=404)
 
+         # Check if the fileserial exists for another patient
+        
+
         # Update patient attributes
-        patient.fileserial=patientFileNum
-        patient.fullname=patientName
-        patient.mobile=patientMobile
-        patient.sufferedcase=patientCase
-        patient.remarks=patientRemarks
-        patient.gender=patientGender
+        patient.fileserial = patientFileNum
+        patient.fullname = patientName
+        patient.mobile = patientMobile
+        patient.sufferedcase = patientCase
+        patient.remarks = patientRemarks
+        patient.gender = patientGender
         patient.age = patientAge
-        patient.rideglass=RideGlass
-        patient.wearingconduct=wearingConduct
-        patient.attendanceDate=datetime.now().date()
-        patient.arrivedOn=datetime.now().time().isoformat()
+        patient.rideglass = RideGlass
+        patient.wearingconduct = wearingConduct
+        patient.attendanceDate = datetime.now().date()
+        patient.arrivedOn = datetime.now().time().isoformat()
 
         # Save the updated patient object
-        patient.save()      
-        # Construct the URL with the patient ID    
-         # Construct the URL for the patient form with the patient ID
+        patient.save()
+
+        # Construct the URL for the patient form with the patient ID
         try:
             patient_form_url = reverse('patientForm', kwargs={'patientid': patient_id})
         except Exception as e:
             print(f"Error in URL reversing: {e}")
             patient_form_url = "#"
 
-        return render(request,"ConfirmMsg.html",{'message': 'Patient updated Successfully..','returnUrl':patient_form_url,'btnText':'Print Patient Form','target':'_blank'}, status=200)
+        return render(request, "ConfirmMsg.html", {
+            'message': 'Patient updated successfully.',
+            'returnUrl': patient_form_url,
+            'btnText': 'Print Patient Form',
+            'target': '_blank'
+        }, status=200)
+    
+    # Handle non-POST requests or other logic if needed
+    return render(request, 'update_patient_form.html')
     
 
 @login_required

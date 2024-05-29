@@ -28,5 +28,6 @@ urlpatterns=[
     path('custom-logout-page/', TemplateView.as_view(template_name='logout.html'), name='custom-logout-page'),
     path('login/', views.login_view, name='loginView'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('check_fileserial/', views.check_fileserial, name='check_fileserial'),
 
 ]

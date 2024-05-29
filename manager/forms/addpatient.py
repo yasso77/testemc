@@ -1,4 +1,5 @@
 # forms.py
+from datetime import date, datetime
 from django import forms
 from manager.models import Patient
 
@@ -7,7 +8,8 @@ class MyModelForm(forms.ModelForm):
     
     class Meta:
         model = Patient
-        fields = ['fileserial','fullname', 'mobile', 'city','age','gender','sufferedcase','reservedBy','remarks']
+        fields = ['fileserial','fullname', 'mobile', 'city','age','gender','sufferedcase','reservedBy','remarks','expectedDate']
+        
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
@@ -18,6 +20,9 @@ class MyModelForm(forms.ModelForm):
             'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
+            'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+             
+    
         }
         error_messages = {
             'fileserial': {
@@ -42,4 +47,25 @@ class MyModelForm(forms.ModelForm):
                 'required': 'Suffered case is required.',
             }
           }
-   
+        
+    def __init__(self, *args, **kwargs):
+        super(MyModelForm, self).__init__(*args, **kwargs)
+        self.fields['expectedDate'].initial = date.today()
+        # Set choices for gender field explicitly to avoid null value
+        self.fields['gender'].choices = [
+            ('M', 'Male'),
+            ('F', 'Female')
+        ]
+        
+        
+    def clean_fileserial(self):
+        fileserial = self.cleaned_data.get('fileserial')
+        if Patient.objects.filter(fileserial=fileserial).exists():
+            raise forms.ValidationError('A patient with this file serial already exists.')
+        return fileserial
+    
+    def clean_mobile(self):
+        mobile = self.cleaned_data.get('mobile')
+        if Patient.objects.filter(mobile=mobile).exists():
+            raise forms.ValidationError('A patient with this mobile number already exists.')
+        return mobile

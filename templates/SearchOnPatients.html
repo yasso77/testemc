@@ -149,13 +149,16 @@
                       <input type="hidden" name="hdfpatientid">
                       
 
-                      <div class="row mb-3">
-                        <label for="txtName" class="col-sm-4 col-form-label">File Number</label>
-                        <div class="col-sm-8">
-                          <input type="text" name="txtFileSerial" class="form-control" required>
-                          <div class="invalid-feedback">File Number is required.</div>
-                        </div>
-                      </div>
+                               
+            <div class="row mb-3">
+              <label for="txtFileSerial" class="col-sm-4 col-form-label">File Number</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="txtFileSerial" required name="txtFileSerial" value="{{ request.POST.txtFileSerial }}">
+                <div id="fileserial-feedback" class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <!-- Other form fields go here -->
                   <div class="row mb-3">
                     <label for="txtName" class="col-sm-4 col-form-label">Patient Name</label>
                     <div class="col-sm-8">
@@ -279,7 +282,7 @@
 
 
                   <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Save Patient & Print Form</button>
+                    <button type="submit" id='btnSubmit' class="btn btn-primary">Save Patient & Print Form</button>
                     
                   </div>
                 </form><!-- End Horizontal Form -->
@@ -397,6 +400,7 @@ function setRadioYesNoConduct(selectedValue) {
       var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
             if (hiddenInput) {
                 hiddenInput.value = element;
+                //alert(element)
             } else {
                 console.error('Hidden input with name "' + hiddenInputName + '" not found.');
             }
@@ -458,6 +462,52 @@ function setRadioYesNoConduct(selectedValue) {
     
 
   </script>
-
+  <script>
+    $(document).ready(function() {
+      var txtFileSerial = $('#txtFileSerial');
+      var submitButton = $('#btnSubmit'); // Update with your submit button's actual ID or selector
+  
+      function toggleSubmitButton() {
+          if (txtFileSerial.hasClass('is-invalid')) {
+              submitButton.prop('disabled', true);
+          } else {
+              submitButton.prop('disabled', false);
+          }
+      }
+  
+      txtFileSerial.on('blur', function() {
+          var fileserial = $(this).val();
+          var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
+          var patient_id = hiddenInput.value;
+         
+          var feedbackElement = $('#fileserial-feedback');
+  
+          if (fileserial) {
+              $.ajax({
+                  url: '{% url "check_fileserial" %}',
+                  data: {
+                      'fileserial': fileserial,
+                      'patient_id': patient_id
+                  },
+                  dataType: 'json',
+                  success: function(data) {
+                      if (data.exists) {
+                          txtFileSerial.addClass('is-invalid');
+                          feedbackElement.text(data.message);
+                      } else {
+                          txtFileSerial.removeClass('is-invalid').addClass('is-valid');
+                          feedbackElement.text('');
+                      }
+                      toggleSubmitButton(); // Check submit button state after validation
+                  }
+              });
+          } else {
+              txtFileSerial.removeClass('is-invalid is-valid');
+              feedbackElement.text('');
+              toggleSubmitButton(); // Check submit button state after clearing validation
+          }
+      });
+  });
+</script>
 
   {% endblock %}
