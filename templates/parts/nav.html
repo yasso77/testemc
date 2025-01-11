@@ -4,7 +4,7 @@
       {% if user.is_authenticated %}
 
       <li class="nav-item">
-        <a class="nav-link " href="index.html">
+        <a class="nav-link " href="{%url 'index'%}>
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
@@ -13,33 +13,47 @@
 
       <li class="nav-item">
         <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Link Sections</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-menu-button-wide"></i><span>Operations</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="components-nav" class="nav-content  " data-bs-parent="#sidebar-nav">
           <li>
             <a href="{%url 'pushpatientData'%}">
-              <i class="bi bi-circle"></i><span>Upload Patients - Manager</span>
+              <i class="bi bi-circle"></i><span>Upload Patients File</span>
             </a>
           </li>
 
           <li>
             <a href="{%url 'addnewpatient'%}">
-              <i class="bi bi-circle"></i><span>Add New Patient</span>
+              <i class="bi bi-circle"></i><span>1-Add New Patient</span>
             </a>
           </li>
 
          
           <li>
             <a href="{%url 'showPatientData'%}">
-              <i class="bi bi-circle"></i><span>Attended Patient - Recipt(1)</span>
+              <i class="bi bi-circle"></i><span>2-Attended Patient</span>
             </a>
           </li>
         
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
-              <i class="bi bi-circle"></i><span>Doctor Evaluation</span>
+              <i class="bi bi-circle"></i><span>3-Doctor Evaluation</span>
             </a>
           </li>
+
+               
+         
+        
+        </ul>
+      </li><!-- End Components Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="components-nav" class="nav-content  " data-bs-parent="#sidebar-nav">
+          
+        
           <li>
             <a href="{%url 'reportview'%}">
               <i class="bi bi-circle"></i><span>Live Report</span>
@@ -62,6 +76,15 @@
         
         </ul>
       </li><!-- End Components Nav -->
+
+      {%if request.user.is_staff%}
+      <li class="nav-item">
+        <a class="nav-link " href="{%url 'admin:index'%}">
+          <i class="bi bi-grid"></i>
+          <span>Administration</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+      {%endif%}
 
       {% else %}
      <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>

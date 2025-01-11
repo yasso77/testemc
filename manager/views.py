@@ -16,6 +16,7 @@ from manager.forms.forms import LoginForm
 from manager.models import Doctor, Patient, PatientVisits,ClassficationsOptions
 from django.contrib.auth.decorators import login_required,permission_required
 from manager.orm import ORMPatientsHandling
+from django.shortcuts import get_object_or_404
 
 
 ormObj=ORMPatientsHandling()
@@ -139,16 +140,21 @@ def doctorPatientvisit(request):
         txtdiagnosis = request.POST.get('Diagnosis')
         EvaulDegree = request.POST.get('gridRadios')
         txtRemarks = request.POST.get('txtRemarks')
+        hdfclassifiedID = request.POST.get('selectedOption')
+       
 
         patient = Patient.objects.get(pk=txtpatientid)
         doctor = Doctor.objects.get(pk=doctorid)
         visit_date = datetime.now().date()
+        objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
+        
 
         # Save the patient visit
         data = PatientVisits(
             patientid=patient,
             diagnosis=txtdiagnosis,
             evaluationeegree=EvaulDegree,
+            classifiedID=objclassifiedID,
             visitdate=visit_date,
             doctorid=doctor,
             reasonforvisit=txtRemarks,

@@ -14,6 +14,10 @@
                 padding: 0;
             }
 
+            .footer {
+                position: static; /* Ensure footer is at the end of the page */
+            }
+
             .container {
                 width: 100%;
                 /* No specific margin rule for container, it will retain its default center alignment */
@@ -25,16 +29,17 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh; /* Ensure the body fills the entire viewport height */
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
         }
-
+        
         .container {
-            flex: 1; /* This allows the container to expand to fill the remaining space */
+            flex: 1;
         }
+        
 
         .no-spacing {
             border-collapse: collapse; /* This collapses the border spacing */
@@ -48,18 +53,14 @@
         }
 
         .container {
-            width: 100%; /* Set the width of the container */
-            margin: 0 auto; /* Center the container horizontally */
-            /* Add other styles for the container if needed */
+            padding-bottom: 60px; /* Add space for footer */
         }
+        
 
         .footer {
-            position: fixed; /* Fixed position */
-            left: 0;
-            bottom: 0;
-            width: 100%;           
-            color: white; /* Text color */          
-            
+            position: relative; /* Change from fixed to relative */
+            margin-top: auto; /* Push the footer down if content is short */
+            width: 100%;
         }
 
 
@@ -75,9 +76,9 @@
         .top-align {
             vertical-align: top;
         }
-
+        
         .footer-image {
-            background-image: url('/static/assets/img/bgBack.png'); /* Specify the path to your image */
+            background-image: url("{% static 'assets/img/bgBack.png' %}"); /* Specify the path to your image */
             background-size: cover; /* Adjusts the size of the background image */
             background-position: center; /* Centers the background image */
             background-repeat: repeat; /* Prevents the background image from repeating */
@@ -87,7 +88,7 @@
         }
 
         .footer-imagex {
-            background-image: url('/static/assets/img/bg.png'); /* Specify the path to your image */
+            background-image: url("{% static 'assets/assets/img/bg.png' %}"); /* Specify the path to your image */
         }
 
         #tblQuestions {
@@ -119,7 +120,7 @@
                 border-top: 1px solid #928469;
                 border-bottom: 1px solid #928469;
                 height: 5px;
-                background-image: url('/static/assets/img/bgBack.png'); /* Specify the path to your image */
+                background-image: url("{% static 'assets/img/bgBack.png' %}"); /* Specify the path to your image */
                 color: #fff;
             }
 
@@ -181,13 +182,13 @@
                 <td class="bottom-align" style="height: 200px;">
 
 
-                    <img width="208" src="/static/assets/img/form.png" alt="EMC Logo">
+                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo">
 
 
                 </td>
                 <td class="bottom-align">
                 </td>
-                <td class="bottom-align" style="margin-right:5px;"><img width="215" src="/static/assets/img/circleImage.png" alt="EMC Logo"></td>
+                <td class="bottom-align" style="margin-right:5px;"><img width="215" src="{% static 'assets/img/circleImage.png' %}" alt="EMC Logo"></td>
             </tr>
         </table>
     </div>
@@ -198,7 +199,7 @@
         <table id="tblPaitenData" style="text-align:left;">
 
             <tr>
-                <td style="text-align:right" colspan="6">  Date : {{patientData.attendanceDate}}</td>
+                <td style="text-align:right" colspan="6">  Date/Time : {% now "d-M-y : H:i" %}</td>
             </tr>
             <tr>
                 <th style="width:35%"><div>Name :<span style="font-weight:bold;font-size:larger">{{patientData.fullname}}</span></div></th>
@@ -370,9 +371,9 @@
                 <td style="height:8px" colspan="2" class="footer-imagex"> </td>
             </tr>
             <tr>
-                <td class="footer-image top-align" style="text-align:left"> <img src="/static/assets/img/footer_left.png" alt="EMC Logo"></td>
+                <td class="footer-image top-align" style="text-align:left"> <img src="{% static 'assets/img/footer_left.png' %}" alt="EMC Logo"></td>
 
-                <td class="footer-image top-align" style="text-align:right"> <img src="/static/assets/img/footer_right.png" alt="EMC Logo"></td>
+                <td class="footer-image top-align" style="text-align:right"> <img src="{% static 'assets/img/footer_right.png' %}" alt="EMC Logo"></td>
             </tr>
         </table>
 

@@ -146,13 +146,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
 
+TIME_ZONE = 'Asia/Baghdad'
 USE_TZ = True
-
 
 #MEDIA
 

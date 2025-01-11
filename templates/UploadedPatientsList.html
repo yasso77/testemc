@@ -97,8 +97,9 @@
                                                       <td style="text-align: right;">
                                                           <button class="btn btn-warning">
                                                               <i class="bi bi-star me-1"></i>
-                                                              Evaluated as <span style="font-weight:bold;">[{{ visit.evaluationeegree }}]</span>
+                                                              Evaluated as <span style="font-weight:bold;">[{{ visit.evaluationeegree }}] - {{visit.classifiedID.optionClassified}}</span>
                                                           </button>
+                                                          
                                                       </td>
                                                   </tr>
                                                   {% endfor %}
