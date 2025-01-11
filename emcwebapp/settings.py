@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-import django_heroku
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #'debuggy',
-    'debug_toolbar',
+    #'debug_toolbar',
     'manager',
    
 ]
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
     # 'debuggy.middleware.DebuggyMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'emcwebapp.urls'
@@ -83,29 +83,28 @@ WSGI_APPLICATION = 'emcwebapp.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
+DATABASES = {
+	'default': {
+		'ENGINE': 'django.db.backends.mysql',
+		'NAME': 'emcdb',
+		'USER': 'admin',
+		'PASSWORD': 'Cocacola!1977',
+		'HOST':'localhost',
+		'PORT':'3306',
+	}
+}
+
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": "d99lulv5k3lo8n",
-#         "USER": "u4dvsg3gsk55fq",
-#         "PASSWORD": "p85dd57baac2dd618b2931db16e8e6454ebcd77fb9484a99111c78a8967d3cc9a",
-#         "HOST": "c6sfjnr30ch74e.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com",
+#         "NAME": "dbEMC",
+#         "USER": "postgres",
+#         "PASSWORD": "Cocacola!1977",
+#         "HOST": "localhost",
 #         "PORT": "5432"
 #         #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
 #     },
 # }
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "dbEMC",
-        "USER": "postgres",
-        "PASSWORD": "Cocacola!1977",
-        "HOST": "localhost",
-        "PORT": "5432"
-        #"OPTIONS": {'driver': 'ODBC Driver 17 for SQL Server', 'Trusted_Connection':'Yes'},
-    },
-}
 
 #AUTH_USER_MODEL = "user.CustomUser"
 

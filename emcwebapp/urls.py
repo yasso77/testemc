@@ -21,7 +21,7 @@ from emcwebapp import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls), 
-    path('__debug__/', include('debug_toolbar.urls')),    
+    #path('__debug__/', include('debug_toolbar.urls')),    
     path('',include('manager.urls')),   
     # path('patient/',include('patients.urls')),
     # path('doctor/',include('doctors.urls')),

@@ -1,4 +1,5 @@
 from django import forms
+from manager.models import ClassficationsOptions
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -7,3 +8,5 @@ class LoginForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'yourPassword', 'placeholder': 'Password'})
     )
+ 
+
