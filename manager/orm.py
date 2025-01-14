@@ -2,6 +2,8 @@ from manager import models
 from datetime import datetime
 from django.db.models import Q,OuterRef,Subquery,F
 
+from manager.model.patient import Patient
+
 
 class ORMPatientsHandling():    
 
@@ -12,7 +14,7 @@ class ORMPatientsHandling():
         today = datetime.now().date()
 
                 # Step 1: Get patients who attended today
-        patients_attended_today = models.Patient.objects.filter(expectedDate=today)
+        patients_attended_today = Patient.objects.filter(expectedDate=today)
 
         # Step 2: Get patients who do not have a visit date today
         patients_no_visit_today = patients_attended_today.exclude(
@@ -27,7 +29,7 @@ class ORMPatientsHandling():
         today = datetime.now().date()
 
                 # Step 1: Get patients who attended today
-        patients_attended_today = models.Patient.objects.filter(attendanceDate=today)
+        patients_attended_today = Patient.objects.filter(attendanceDate=today)
 
         # Step 2: Get patients who do not have a visit date today
         patients_no_visit_today = patients_attended_today.exclude(
@@ -64,7 +66,7 @@ class ORMPatientsHandling():
     def get_all_Patients_Between_Period(self,fromdate,todate):         
 
 
-        queryset = models.Patient.objects.filter(
+        queryset = Patient.objects.filter(
             expectedDate__gte=fromdate,
             expectedDate__lte=todate
         ).prefetch_related('patientvisits').filter(

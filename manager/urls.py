@@ -1,33 +1,36 @@
 from django.urls import include, path
-from .import views
+from manager.views.doctor import DoctorView
+from manager.views.paitent import PatientView
+from manager.views.main import MainView
+from manager.views.report import ReportView
 from django.views.generic import TemplateView
 
 urlpatterns=[
-    path('', views.index,name='index'), 
-    path('upload', views.uploadpatientData,name='pushpatientData'),
-    path('showPatientData', views.showPatientData,name='showPatientData'),
-    path('searchPatient', views.get_patientData,name='searchP') ,     
-    path('getattendedpatient', views.showPatientDataAttendedToday,name='getattendedpatient') , 
-    path('no-permission/', views.no_permission_view, name='no_permission'),
-    path('PatientsList', views.uploadedPatientDataList,name='PatientsList') , 
-    path('UpdatePatientData', views.UpdatePatientData, name='update_patient_data'),
+    path('', MainView.index,name='index'), 
+    path('upload', MainView.uploadpatientData,name='pushpatientData'),
+    path('showPatientData', ReportView.showPatientData,name='showPatientData'),
+    path('searchPatient', PatientView.get_patientData,name='searchP') ,     
+    path('getattendedpatient', ReportView.showPatientDataAttendedToday,name='getattendedpatient') , 
+    path('no-permission/', MainView.no_permission_view, name='no_permission'),
+    path('PatientsList', ReportView.uploadedPatientDataList,name='PatientsList') , 
+    path('UpdatePatientData', PatientView.UpdatePatientData, name='update_patient_data'),
 
-    path('DoctorEvaluation', views.doctorPatientvisit,name='DoctorEvaluation'),   
-    path('report',views.ajaxReportChartEvlDegree,name='LiveEvulationReport'),
+    path('DoctorEvaluation', DoctorView.doctorPatientvisit,name='DoctorEvaluation'),   
+    path('report',ReportView.ajaxReportChartEvlDegree,name='LiveEvulationReport'),
 
     #path('AddVisit',views.addPatientVisit,name='SubmitVisit'),
-    path('Message',views.ConfirmMsg,name='MessageAlert'),
+    path('Message',MainView.ConfirmMsg,name='MessageAlert'),
 
-    path('reportview',views.LiveDegreeReport,name='reportview'),   
+    path('reportview',ReportView.LiveDegreeReport,name='reportview'),   
 
-    path('patientForm/<int:patientid>/',views.patientForm,name='patientForm'),    
+    path('patientForm/<int:patientid>/',PatientView.patientForm,name='patientForm'),    
 
-    path('addnewpatient', views.addNewPatient, name='addnewpatient'),
+    path('addnewpatient', PatientView.addNewPatient, name='addnewpatient'),
     
-    path('logout/', views.custom_logout_view, name='logoutx'),
+    path('logout/', MainView.custom_logout_view, name='logoutx'),
     path('custom-logout-page/', TemplateView.as_view(template_name='logout.html'), name='custom-logout-page'),
-    path('login/', views.login_view, name='loginView'),
+    path('login/', MainView.login_view, name='loginView'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('check_fileserial/', views.check_fileserial, name='check_fileserial'),
+    path('check_fileserial/', PatientView.check_fileserial, name='check_fileserial'),
 
 ]

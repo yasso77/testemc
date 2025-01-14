@@ -1,7 +1,9 @@
 # forms.py
 from datetime import date, datetime
 from django import forms
-from manager.models import Patient
+
+from manager.model.patient import Patient
+
 
 class MyModelForm(forms.ModelForm):   
     

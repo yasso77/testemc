@@ -1,6 +1,7 @@
 from django.contrib import admin
-
-from manager.models import Doctor, Patient, Specialties,ClassficationsOptions
+from manager.model.doctor import Doctor, Specialties
+from manager.model.patient import Patient
+from manager.models import ClassficationsOptions
 
 # Register your models here.
 

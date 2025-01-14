@@ -19,6 +19,8 @@ from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
 
 
+
+
 ormObj=ORMPatientsHandling()
 
 # Create your views here.
@@ -127,65 +129,6 @@ def showPatientDataAttendedToday(request):
 
 @permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
 
-def doctorPatientvisit(request): 
-    classifiedOptions = ClassficationsOptions.objects.filter(isActive=True).values(
-        'classifiedID', 'classifiedCategory', 'optionClassified', 'isActive'
-    )
-    
-    classifiedOptionsJSON = json.dumps(list(classifiedOptions), cls=DjangoJSONEncoder)
-
-    if request.method == 'POST':
-        txtpatientid = request.POST.get('hdfpatientid')
-        doctorid = 1  # Static doctor ID for now; replace with actual data.
-        txtdiagnosis = request.POST.get('Diagnosis')
-        EvaulDegree = request.POST.get('gridRadios')
-        txtRemarks = request.POST.get('txtRemarks')
-        hdfclassifiedID = request.POST.get('selectedOption')
-       
-
-        patient = Patient.objects.get(pk=txtpatientid)
-        doctor = Doctor.objects.get(pk=doctorid)
-        visit_date = datetime.now().date()
-        objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
-        
-
-        # Save the patient visit
-        data = PatientVisits(
-            patientid=patient,
-            diagnosis=txtdiagnosis,
-            evaluationeegree=EvaulDegree,
-            classifiedID=objclassifiedID,
-            visitdate=visit_date,
-            doctorid=doctor,
-            reasonforvisit=txtRemarks,
-            createdate=visit_date,
-        )
-        data.save()
-
-        return render(
-            request,
-            "ConfirmMsg.html",
-            {
-                'message': "Patient's Visit is added successfully",
-                'returnUrl': 'DoctorEvaluation',
-                'btnText': 'New Patient'
-            },
-            status=200,
-        )
-
-    
-    patientList = ormObj.getPatientsAttendedToday()
-    patientcount = patientList.count()
-
-    return render(
-        request,
-        'PatientVisit.html',
-        {
-            'patients': patientList,
-            'Total': patientcount,
-            'classifiedOptionsJSON': classifiedOptionsJSON,
-        }
-    )
 
 
 #This is a block of code
@@ -223,107 +166,6 @@ def ConfirmMsg(request):
      return render(request,'ConfirmMsg.html',{'Msg':request.POST.get('msg')})
 
 
-def patientForm(request,patientid):
-     return render(request,'PatientForm.html',{'patientData':Patient.objects.get(patientid=patientid)})
-
-def get_patientData(request):
-
-    if request.method == 'POST' and 'myData' in request.POST:
-        patientID = request.POST.get('myData', None)
-        queryset = Patient.objects.filter(patientid=patientID)    
-
-    # Convert QuerySet to list of dictionaries
-        data = list(queryset.values())
-
-    # Return JsonResponse with the converted data
-        return JsonResponse(data, safe=False)
-        
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request'})  
-
-def check_fileserial(request):
-    if request.method == 'GET':
-        fileserial = request.GET.get('fileserial')
-        patient_id = request.GET.get('patient_id')
-
-        if fileserial:
-            exists = Patient.objects.filter(fileserial=fileserial).exclude(patientid=patient_id).exists()
-            if exists:
-                return JsonResponse({'exists': True, 'message': 'Another patient with this file serial already exists.'}, status=200)
-            else:
-                return JsonResponse({'exists': False, 'message': 'File serial is available.'}, status=200)
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-    
-@permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
-def UpdatePatientData(request):
-    if request.method == 'POST':
-        patient_id = request.POST.get('hdfpatientid')
-        patientFileNum = request.POST.get('txtFileSerial')
-        patientName = request.POST.get('txtName')
-        patientMobile = request.POST.get('txtMobile')
-        patientGender = request.POST.get('gridRadios')
-        patientAge = request.POST.get('txtAge')
-        patientCase = request.POST.get('txtCase')
-        RideGlass = request.POST.get('glassRadios')
-        wearingConduct = request.POST.get('contuctRadios')
-        patientRemarks = request.POST.get('txtRemarks')
-
-        # Retrieve the patient object
-        try:
-            patient = Patient.objects.get(patientid=patient_id)
-        except Patient.DoesNotExist:
-            return JsonResponse({'error': 'Patient not found'}, status=404)
-
-         # Check if the fileserial exists for another patient
-        
-
-        # Update patient attributes
-        patient.fileserial = patientFileNum
-        patient.fullname = patientName
-        patient.mobile = patientMobile
-        patient.sufferedcase = patientCase
-        patient.remarks = patientRemarks
-        patient.gender = patientGender
-        patient.age = patientAge
-        patient.rideglass = RideGlass
-        patient.wearingconduct = wearingConduct
-        patient.attendanceDate = datetime.now().date()
-        patient.arrivedOn = datetime.now().time().isoformat()
-
-        # Save the updated patient object
-        patient.save()
-
-        # Construct the URL for the patient form with the patient ID
-        try:
-            patient_form_url = reverse('patientForm', kwargs={'patientid': patient_id})
-        except Exception as e:
-            print(f"Error in URL reversing: {e}")
-            patient_form_url = "#"
-
-        return render(request, "ConfirmMsg.html", {
-            'message': 'Patient updated successfully.',
-            'returnUrl': patient_form_url,
-            'btnText': 'Print Patient Form',
-            'target': '_blank'
-        }, status=200)
-    
-    # Handle non-POST requests or other logic if needed
-    return render(request, 'update_patient_form.html')
-    
-
-@login_required
-@permission_required_with_redirect('manager.AddNewPatient', login_url='/no-permission/')
-def addNewPatient(request):
-    if request.method == 'POST':
-        form = MyModelForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return render(request,"ConfirmMsg.html",{'message': 'Patient Added Successfully..','returnUrl':'addnewpatient','btnText':'Add New Patient'}, status=200)
-    else:
-        form = MyModelForm()    
-    
-    return render(request, 'addpatient.html', {'form': form})
 
 
 def custom_logout_view(request):
