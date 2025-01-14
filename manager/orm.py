@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db.models import Q,OuterRef,Subquery,F
 
 from manager.model.patient import Patient
+from manager.model.visit import PatientVisits
 
 
 class ORMPatientsHandling():    
@@ -43,13 +44,13 @@ class ORMPatientsHandling():
         today = datetime.now().date()
 
         # Subquery to get evaluation degree for each patient if available
-        evaluation_degree_subquery = models.PatientVisits.objects.filter(
+        evaluation_degree_subquery = PatientVisits.objects.filter(
             visitdate__date=today,
             patientid=OuterRef('pk')  # Correlate with the patient ID
         ).order_by('-visitdate').values('evaluationeegree')[:1]  # Fetch the latest evaluation degree
 
         # Query to get patients who attended today with evaluation degree if available
-        patients_today_with_evaluation_degree = models.Patient.objects.filter(
+        patients_today_with_evaluation_degree = Patient.objects.filter(
             attendanceDate=today
         ).annotate(
             evaluation_degree=Subquery(evaluation_degree_subquery)
@@ -60,7 +61,7 @@ class ORMPatientsHandling():
     def expectedPatientToday(self):
         
           today = datetime.now().date()    
-          patients_today = models.Patient.objects.filter(expectedDate=today)          
+          patients_today = Patient.objects.filter(expectedDate=today)          
           return patients_today  
       
     def get_all_Patients_Between_Period(self,fromdate,todate):         

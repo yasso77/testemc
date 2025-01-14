@@ -1,6 +1,6 @@
 from django.contrib import admin
 from manager.model.doctor import Doctor, Specialties
-from manager.model.patient import Patient
+from manager.model.patient import Patient,City
 from manager.models import ClassficationsOptions
 
 # Register your models here.
@@ -8,9 +8,9 @@ from manager.models import ClassficationsOptions
 admin.site.site_header='EMC-Administration'
 admin.site.site_title='EMC'
 class DoctorAdmin(admin.ModelAdmin):
-    list_display=['DoctorID','FullName','Mobile','SpecialtyID','active']
-    list_display_links=['FullName']   
-    search_fields=['FullName','Mobile']
+    list_display=['doctorID','fullName','mobile','specialtyID','active']
+    list_display_links=['fullName']   
+    search_fields=['fullName','mobile']
 # Register your models here.
 
 admin.site.register(Doctor,DoctorAdmin)
@@ -45,3 +45,4 @@ class ClassficationsOptionsAdmin(admin.ModelAdmin):
         obj.save()   
     
 admin.site.register(ClassficationsOptions,ClassficationsOptionsAdmin)
+admin.site.register(City)

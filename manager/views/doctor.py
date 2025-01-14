@@ -4,6 +4,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from datetime import datetime
   # Import from the package, not the specific file
 from manager.decorators import permission_required_with_redirect
+from manager.model.doctor import Doctor
 from manager.model.patient import Patient
 from manager.model.visit import PatientVisits
 from manager.models import ClassficationsOptions

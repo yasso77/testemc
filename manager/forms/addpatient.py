@@ -15,7 +15,7 @@ class MyModelForm(forms.ModelForm):
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'city': forms.Select(attrs={'class': 'form-control'}),
             'age': forms.TextInput(attrs={'class': 'form-control'}),
             'sufferedcase': forms.TextInput(attrs={'class': 'form-control'}),
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
