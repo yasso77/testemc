@@ -10,16 +10,18 @@ class MyModelForm(forms.ModelForm):
     
     class Meta:
         model = Patient
-        fields = ['fileserial','fullname', 'mobile', 'city','age','gender','sufferedcase','reservedBy','remarks','expectedDate']
+        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','leadSource','remarks','expectedDate']
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            'city': forms.Select(attrs={'class': 'form-control'}),
+            'city': forms.Select(attrs={'class': 'form-select'}),
             'age': forms.TextInput(attrs={'class': 'form-control'}),
             'sufferedcase': forms.TextInput(attrs={'class': 'form-control'}),
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
+            'reservationCode': forms.TextInput(attrs={'class': 'form-control'}),
+            'leadSource': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
             'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute

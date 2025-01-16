@@ -25,7 +25,7 @@ urlpatterns=[
 
     path('patientForm/<int:patientid>/',PatientView.patientForm,name='patientForm'),    
 
-    path('addnewpatient', PatientView.addNewPatient, name='addnewpatient'),
+    path('newreservation', PatientView.addNewPatient, name='newreservation'),
     
     path('logout/', MainView.custom_logout_view, name='logoutx'),
     path('custom-logout-page/', TemplateView.as_view(template_name='logout.html'), name='custom-logout-page'),

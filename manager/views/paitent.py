@@ -111,8 +111,8 @@ class PatientView(ListView):
             form = MyModelForm(request.POST)
             if form.is_valid():
                 form.save()
-                return render(request,"ConfirmMsg.html",{'message': 'Patient Added Successfully..','returnUrl':'addnewpatient','btnText':'Add New Patient'}, status=200)
+                return render(request,"ConfirmMsg.html",{'message': 'The Reservation is Added Successfully..','returnUrl':'newreservation','btnText':'Add New Reservation'}, status=200)
         else:
             form = MyModelForm()    
         
-        return render(request, 'addpatient.html', {'form': form})
+        return render(request, 'callcenter/newReservation.html', {'form': form})
