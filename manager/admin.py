@@ -45,4 +45,22 @@ class ClassficationsOptionsAdmin(admin.ModelAdmin):
         obj.save()   
     
 admin.site.register(ClassficationsOptions,ClassficationsOptionsAdmin)
-admin.site.register(City)
+
+class CityAdmin(admin.ModelAdmin):
+    list_display=['cityID','cityName','isVisible','createdDate']
+    list_display_links=['cityName']   
+    search_fields=['cityName','isVisible']
+   # list_filter=['mobile']
+    #list_per_page=2
+    #fields=['fileserial','fullname','birthdate']
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'isVisible':
+            # Replace the BooleanField widget with a RadioSelect showing Yes/No
+            kwargs['widget'] = admin.widgets.AdminRadioSelect(
+                choices=[(True, 'Yes'), (False, 'No')]
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+# Register your models here.
+
+admin.site.register(City,CityAdmin)

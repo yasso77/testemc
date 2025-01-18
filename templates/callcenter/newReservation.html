@@ -14,7 +14,7 @@
     <h1>New Reservation</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
         <li class="breadcrumb-item">Call Center</li>
         <li class="breadcrumb-item active">Add New Reservation</li>
       </ol>
@@ -30,7 +30,7 @@
   <form method="post" class="form-horizontal">
     {% csrf_token %}
     <div class="form-group row">
-        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code</label>
+        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.reservationCode }}
             {% if form.reservationCode.errors %}
@@ -41,7 +41,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name</label>
+        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.fullname }}
             {% if form.fullname.errors %}
@@ -52,7 +52,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.mobile.id_for_label }}" class="col-sm-3 col-form-label">Mobile</label>
+        <label for="{{ form.mobile.id_for_label }}" aria-placeholder="7776556565" class="col-sm-3 col-form-label">Mobile <span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.mobile }}
             {% if form.mobile.errors %}
@@ -63,7 +63,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City</label>
+        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.city }}
             {% if form.city.errors %}
@@ -74,7 +74,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age</label>
+        <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.age }}
             {% if form.age.errors %}
@@ -85,7 +85,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label class="col-sm-3 col-form-label">Gender</label>
+        <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             <div>
                 {% for radio in form.gender %}
@@ -104,7 +104,7 @@
     </div>
 
     <div class="form-group row">
-        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Comming Source</label>
+        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Comming Source<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.leadSource }}
             {% if form.leadSource.errors %}
@@ -115,7 +115,7 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case</label>
+        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.sufferedcase }}
             {% if form.sufferedcase.errors %}
@@ -135,20 +135,19 @@
     </div>
 
     <div class="form-group row">
-        <label for="{{ form.expectedDate.id_for_label }}" class="col-sm-3 col-form-label">Expeceted Date</label>
+        <label for="{{ form.expectedDate.id_for_label }}" class="col-sm-3 col-form-label">Expeceted Date <span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.expectedDate  }}
             
         </div>
     </div>
     <div class="form-group row">
-        <div class="col-sm-10 offset-sm-2">
-          
-            <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
+            <button type="submit" class="btn btn-primary">Create Reservation</button>
             <button type="reset" class="btn btn-secondary">Reset</button>
-       
         </div>
     </div>
+    
 </form>
           
     </div>

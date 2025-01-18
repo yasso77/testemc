@@ -20,10 +20,20 @@ from django.views.generic.list import ListView
 # Create your views here.
 
 class MainView(ListView):
+    
     @login_required
-    def index(request):
-        return render(request,'index.html',{'name':'index'})
-
+    def dashboard(request):
+        if request.user.groups.filter(name="Recepition").exists():
+             return render(request,'center/dashboard.html',{'name':'index'})
+         
+        elif request.user.groups.filter(name="Call center").exists():            
+             return render(request,'callcenter/dashboard.html',{'name':'index'})
+         
+        else:
+            return render(request,'index.html',{'name':'index'})
+        
+        
+ 
     def no_permission_view(request):
         return render(request, 'no_permission.html')
 

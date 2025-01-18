@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav">
@@ -16,36 +17,54 @@
           <i class="bi bi-menu-button-wide"></i><span>Operations</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="components-nav" class="nav-content  " data-bs-parent="#sidebar-nav">
-          <li>
+          {% comment %} <li>
             <a href="{%url 'pushpatientData'%}">
               <i class="bi bi-circle"></i><span>Upload Patients File</span>
             </a>
-          </li>
-
+          </li> {% endcomment %}
+          {% if request.user|in_group:"Call Center" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'newreservation'%}">
               <i class="bi bi-circle"></i><span>New Reservation</span>
             </a>
           </li>
 
-         
+          <li>
+            <a href="{%url 'reservationList'%}">
+              <i class="bi bi-circle"></i><span>Reservations List</span>
+            </a>
+          </li>
+
+          {%endif%}
+
+          {% if request.user|in_group:"Recepition" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'showPatientData'%}">
               <i class="bi bi-circle"></i><span>2-Attended Patient</span>
             </a>
           </li>
-        
+          <li>
+            <a href="{%url 'centerPatients'%}">
+              <i class="bi bi-circle"></i><span>Patients List</span>
+            </a>
+          </li>
+          {%endif%}
+
+          {% if request.user|in_group:"Doctor" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
               <i class="bi bi-circle"></i><span>3-Doctor Evaluation</span>
             </a>
           </li>
+          {%endif%}
 
+          {% if request.user|in_group:"Audit" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
               <i class="bi bi-circle"></i><span>Discussion</span>
             </a>
           </li>
+          {%endif%}
 
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
@@ -58,7 +77,7 @@
         
         </ul>
       </li><!-- End Components Nav -->
-
+      {%if request.user.is_staff%}
       <li class="nav-item">
         <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -88,7 +107,7 @@
         
         </ul>
       </li><!-- End Components Nav -->
-
+      {%endif%}
       {%if request.user.is_staff%}
       <li class="nav-item">
         <a class="nav-link " href="{%url 'admin:index'%}">

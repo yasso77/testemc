@@ -1,0 +1,152 @@
+{%extends 'master.html'%}
+
+        {% block content %}
+                  
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      
+          <div class="pagetitle">
+            <h1>Call Center Dashboard</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active">Call Center Dash Board</li>
+              </ol>
+            </nav>
+          </div><!-- End Page Title -->
+      
+              <div class="container-fluid">
+                  <!-- Page Header -->
+                  <div class="row bg-primary text-white p-3 mb-4">
+                      <div class="col">
+                          <h1>Call Center Dashboard</h1>
+                          <p>Analyze reservations and follow-up leads at a glance</p>
+                      </div>
+                  </div>
+          
+                  <!-- Dashboard Summary Cards -->
+                  <div class="row text-center mb-4">
+                      <div class="col-md-3">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Total Reservations</h5>
+                                  <p class="card-text display-6">150</p>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Confirmed Visits</h5>
+                                  <p class="card-text display-6">100</p>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Pending Follow-ups</h5>
+                                  <p class="card-text display-6">25</p>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Missed Appointments</h5>
+                                  <p class="card-text display-6">10</p>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+          
+                  <!-- Charts Section -->
+                  <div class="row">
+                      <!-- Pie Chart: Reservations Status -->
+                      <div class="col-md-6 mb-4">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Reservation Status Breakdown</h5>
+                                  <canvas id="reservationPieChart"></canvas>
+                              </div>
+                          </div>
+                      </div>
+          
+                      <!-- Line Chart: Daily Reservations -->
+                      <div class="col-md-6 mb-4">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Daily Reservations</h5>
+                                  <canvas id="dailyReservationsLineChart"></canvas>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+          
+                  <!-- Bar Chart: Missed Appointments -->
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Missed Appointments by Month</h5>
+                                  <canvas id="missedAppointmentsBarChart"></canvas>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          
+              <!-- Chart.js Scripts -->
+              <script>
+                  // Pie Chart: Reservation Status Breakdown
+                  const reservationPieCtx = document.getElementById('reservationPieChart').getContext('2d');
+                  new Chart(reservationPieCtx, {
+                      type: 'pie',
+                      data: {
+                          labels: ['Confirmed', 'Pending', 'Missed'],
+                          datasets: [{
+                              label: 'Reservations',
+                              data: [100, 25, 10], // Replace with dynamic data
+                              backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                          }]
+                      },
+                  });
+          
+                  // Line Chart: Daily Reservations
+                  const dailyReservationsCtx = document.getElementById('dailyReservationsLineChart').getContext('2d');
+                  new Chart(dailyReservationsCtx, {
+                      type: 'line',
+                      data: {
+                          labels: ['Jan 1', 'Jan 2', 'Jan 3', 'Jan 4', 'Jan 5'], // Replace with dynamic data
+                          datasets: [{
+                              label: 'Reservations',
+                              data: [20, 35, 25, 40, 30], // Replace with dynamic data
+                              borderColor: '#007bff',
+                              fill: false
+                          }]
+                      },
+                  });
+          
+                  // Bar Chart: Missed Appointments by Month
+                  const missedAppointmentsCtx = document.getElementById('missedAppointmentsBarChart').getContext('2d');
+                  new Chart(missedAppointmentsCtx, {
+                      type: 'bar',
+                      data: {
+                          labels: ['January', 'February', 'March'], // Replace with dynamic data
+                          datasets: [{
+                              label: 'Missed Appointments',
+                              data: [10, 15, 8], // Replace with dynamic data
+                              backgroundColor: '#dc3545'
+                          }]
+                      },
+                  });
+              </script>
+          
+              <!-- Bootstrap JS -->
+              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          
+       
+    {% endblock %}
+       
+    

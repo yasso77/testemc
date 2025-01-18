@@ -1,0 +1,115 @@
+{% extends 'master.html'%}
+{% load custom_filters %}
+
+{% block content %}
+ <!-- Include DataTables CSS -->
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<div class="pagetitle">
+    <h1>Patients List - 20 Days Ago </h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Center</li>
+        <li class="breadcrumb-item active">Patients List</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+ 
+        <table id="patientsTable" class="display">
+            <thead>
+                <tr>
+                    <th>File #</th>
+                    {% comment %} <th>Reservation Code</th> {% endcomment %}
+                    <th>Full Name</th> 
+                  
+                    <th>Age</th>  
+                    <th>Gender</th>  
+                               
+                   
+                    <th>Case</th>        
+                  
+                    <th>Expected Date</th>
+                    <th>Confirmed Date</th>
+                    <th>Attendance Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td>
+                          
+                        
+
+                            {{patient.fileserial}}
+                         
+                        
+                        </td>
+                        {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
+                        <td>{{ patient.fullname }}</td>
+                       
+                        <td>{{ patient.age }}</td>
+                        <td>{{ patient.gender }}</td>                      
+                        
+                       
+                        <td>{{ patient.sufferedcase }}</td>
+                        
+                        <td>{% if patient.expectedDate|is_today %}
+                            <span class="btn btn-sm btn-info">Today: {{ patient.expectedDate }}</span>
+                        {% else %}
+                            {{ patient.expectedDate }}
+                        {% endif %}</td>
+                        <td>
+                            {% if patient.confirmationDate|is_today %}
+                            <span class="btn btn-sm btn-info">Today: {{ patient.confirmationDate }}</span>
+                        {% else %}
+                            {{ patient.confirmationDate }}
+                        {% endif %}
+                            
+                          </td>
+                          <td>
+                            {{ patient.attendanceDate }}
+
+                          </td>
+                        <td>
+                            
+                          
+                            <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-primary">Prepear Form</a>
+                    
+                            <!-- Delete Button -->
+                           
+                       
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No patients found created within the last 10 days.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+</section>
+
+<!-- Include jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<!-- Initialize DataTables -->
+<script>
+    $(document).ready(function() {
+        $('#patientsTable').DataTable({
+            "order": [[3, 'desc']],  // Sort by 'createdDate' column (index 3) in descending order by default
+            "searching": true,      // Enable search
+            "paging": true,         // Enable pagination
+            "lengthChange": false,  // Disable length change dropdown
+            "info": false           // Disable info display
+        });
+    });
+</script>
+{%endblock%}

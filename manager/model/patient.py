@@ -2,18 +2,26 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 
-class City(models.Model):
-    
+
+class CityManager(models.Manager):
+        def active(self):
+            return self.filter(isVisible=True)
+class City(models.Model):    
     cityID=models.AutoField(primary_key=True)
     cityName=models.CharField(max_length=100, blank=True, null=True,verbose_name='City Name')
     isVisible=models.BooleanField(blank=True,null=True)
-    createdDate=models.DateField(blank=True,null=True)
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     
+    objects = CityManager()
     def __str__(self):
         return self.cityName
     class Meta:
-        verbose_name='Cities'
+        verbose_name='City'
+        verbose_name_plural = "Cities"
         
+class PatientManager(models.Manager):
+        def active(self):
+            return self.filter(isDeleted=False)
 class Patient(models.Model):
 
    
@@ -51,13 +59,19 @@ class Patient(models.Model):
     rideglass = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='Ride Of Glass')
     wearingconduct = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='WEaring Conduct')
     createdby = models.CharField(max_length=100, blank=True, null=True)  # Field name made lowercase.
+    createdDate = models.DateField( blank=True, null=True,verbose_name='created Date')  # 
     latestupdate = models.DateField( blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField( blank=True, null=True)  # Field name made lowercase.
+    isDeleted = models.BooleanField(default=False)
+    
+    objects = PatientManager()
 
     def __str__(self):
         return self.fullname
     class Meta:
         verbose_name='Patients'
         ordering=['-fullname']
+        
+    
         
         
