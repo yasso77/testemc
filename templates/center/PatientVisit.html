@@ -75,7 +75,14 @@
       }
     }
     
-    
+    /* Custom font style for the alert div */
+    div.alert.alert-warning[name="divPatientName"] {
+      font-family: 'Arial', sans-serif; /* Change the font family */
+      font-size: 18px;                  /* Set the font size */
+      font-weight: bold;                /* Make the font bold */
+      
+      color: darkred;                   /* Change the text color */
+  }
 
   
   /* Restyled Close Button */
@@ -203,12 +210,12 @@
   {% endblock %}
   {% block content %}
   <div class="pagetitle">
-    <h1>Patient Visit</h1>
+    <h1>Doctor Examination</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
         <li class="breadcrumb-item">Doctors</li>
-        <li class="breadcrumb-item active">Doctor Evaluation</li>
+        <li class="breadcrumb-item active">Doctor Examination</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -224,7 +231,7 @@
                           <!-- Horizontal Form -->
               <input type="text" id="myInput" oninput="showtable()" placeholder="Search for names..">
 
-              <table id="myTable" style="display: none;">
+              <table id="myTable" >
                 <tr class="header">
                   <th style="width:25%;">File #</th>
                   <th style="width:40%;">Patient Name</th>
@@ -232,14 +239,14 @@
                   <th></th>
                 </tr>
                 {%for patient in patients%}
-                <tr>
+                <tr onclick="highlightRow(this)">
 
                   <td>{{patient.fileserial}}</td>
                   <td>{{patient.fullname}} </td>
                   <td>{{patient.mobile}}</td>
 
                   <td><button type="button" title="Select" class="btn btn-outline-primary"
-                      onclick="return bindPatientData('{{ patient.patientid }}')">Select</button> </td>
+                      onclick="return bindPatientData('{{ patient.patientid }}', '{{ patient.fullname }}')">Select</button> </td>
                 </tr>
                 {%endfor%}
 
@@ -251,8 +258,9 @@
                 <form method="post" name="vsitForm" action="DoctorEvaluation" validate>
                     {% csrf_token %}
             
-                    <input type="hidden" name="hdfpatientid">
-            
+                    <input type="hidden"  name="hdfpatientid">
+
+            <div class="alert alert-warning" name="divPatientName">Selected Patient:</div>
                     <div class="mb-3">
                         <label for="inputNumber" class="form-label">Diagnosis</label>
                         <textarea type="text" name="Diagnosis" class="form-control" required></textarea>
@@ -265,31 +273,6 @@
                         <div class="invalid-feedback">Please enter your Remarks.</div>
                     </div>
             
-                    {% comment %} <div class="mb-4">
-                        <label class="form-label">Degree</label>
-                        <div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="A">
-                                <label class="form-check-label" for="gridRadios1">A - Qualifed</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="B">
-                                <label class="form-check-label" for="gridRadios2">B - Not Qualifed cvxd</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="C">
-                                <label class="form-check-label" for="gridRadios3">C - Follow Up &lt; 2 weeks</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios4" value="D">
-                                <label class="form-check-label" for="gridRadios4">D - Follow Up &gt; 2 weeks</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios5" value="E">
-                                <label class="form-check-label" for="gridRadios5">E - Not Qualifed</label>
-                            </div>
-                        </div>
-                    </div> {% endcomment %}
                    
                   
                     <div class="mb-4">
@@ -374,7 +357,25 @@
         </div>
     </div>
   </div>
-  
+  <script>
+    function highlightRow(row) {
+        // Remove the highlight class from all rows
+        const rows = document.querySelectorAll("#myTable tr");
+        rows.forEach(tr => tr.classList.remove("highlight"));
+
+        // Add the highlight class to the clicked row
+        row.classList.add("highlight");
+    }
+</script>
+
+<style>
+    /* Highlight class styling */
+    .highlight {
+        background-color: #47FCBDFF; /* Light blue background */
+        font-weight: bold;     /* Bold font */
+        color: black;   
+    }
+</style>
 
   <script>
     const classifiedOptions = {{ classifiedOptionsJSON|safe }};
@@ -491,12 +492,14 @@ modalElement.addEventListener('hidden.bs.modal', () => {
     }
 
 
-    function bindPatientData(element) {
+    function bindPatientData(element,namepatient) {
       // Access the ID of the clicked element and print it
       //console.log("Clicked link ID:", element.id);
-      table = document.getElementById("myTable");
-      table.style.display = "none";
+     // table = document.getElementById("myTable");
+    //  table.style.display = "none";
       var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
+      
+      $('div.alert.alert-warning[name="divPatientName"]').text('Selected Patient: '+namepatient);
     if (hiddenInput) {
         hiddenInput.value = element;
     } else {

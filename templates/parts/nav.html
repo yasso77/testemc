@@ -5,7 +5,7 @@
       {% if user.is_authenticated %}
 
       <li class="nav-item">
-        <a class="nav-link " href="{%url 'index'%}>
+        <a class="nav-link " href="{%url 'index'%}">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
@@ -38,11 +38,11 @@
           {%endif%}
 
           {% if request.user|in_group:"Recepition" or request.user|in_group:"Admin" %}
-          <li>
+          {% comment %} <li>
             <a href="{%url 'showPatientData'%}">
               <i class="bi bi-circle"></i><span>2-Attended Patient</span>
             </a>
-          </li>
+          </li> {% endcomment %}
           <li>
             <a href="{%url 'centerPatients'%}">
               <i class="bi bi-circle"></i><span>Patients List</span>
@@ -53,15 +53,15 @@
           {% if request.user|in_group:"Doctor" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
-              <i class="bi bi-circle"></i><span>3-Doctor Evaluation</span>
+              <i class="bi bi-circle"></i><span>Doctor Examination</span>
             </a>
           </li>
           {%endif%}
 
           {% if request.user|in_group:"Audit" or request.user|in_group:"Admin" %}
           <li>
-            <a href="{%url 'DoctorEvaluation'%}">
-              <i class="bi bi-circle"></i><span>Discussion</span>
+            <a href="{%url 'AuditEvaluation'%}">
+              <i class="bi bi-circle"></i><span>Audit Examination </span>
             </a>
           </li>
           {%endif%}
