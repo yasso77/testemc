@@ -20,7 +20,7 @@ class editReservationForm(forms.ModelForm):
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
             #'fullname': forms.TextInput(attrs={'class': 'form-control'}),           
-            'mobile': forms.NumberInput(attrs={'class': 'form-control' }),           
+            'mobile': forms.TextInput(attrs={'class': 'form-control' }),           
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'age': forms.NumberInput(attrs={
             'class': 'form-control',
@@ -63,16 +63,22 @@ class editReservationForm(forms.ModelForm):
             
           } 
         
-    def clean_mobile(self):
-        mobileNum = self.cleaned_data.get('mobile')
-        reservCode = self.cleaned_data.get('reservationCode')
-        print(reservCode)       
+    # def clean_mobile(self):
+    #     mobileNum = self.cleaned_data.get('mobile')
+    #     reservCode = self.cleaned_data.get('reservationCode')
+    #     print(reservCode)       
 
-        # Check for duplicate mobile with a different reservation code
-        if Patient.objects.filter(mobile=mobileNum).exclude(reservationCode=reservCode).exists():
-            raise forms.ValidationError('A patient with this Mobile Number already exists.')
+    #     # Check for duplicate mobile with a different reservation code
+    #     if Patient.objects.filter(mobile=mobileNum).exclude(reservationCode=reservCode).exists():
+    #         raise forms.ValidationError('A patient with this Mobile Number already exists.')
 
-        return mobileNum
+    #     return mobileNum
+    
+    def clean_confirmationDate(self):
+        confirmation_date = self.cleaned_data.get('confirmationDate')
+        if confirmation_date and confirmation_date < date.today():
+            raise forms.ValidationError("Confirmation Date Date cannot be earlier than today.")
+        return confirmation_date
 
         
     def clean_age(self):

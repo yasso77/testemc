@@ -119,7 +119,7 @@ class PatientView(ListView):
         month_number = now().month  # Get current month number
         latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
 
-        print(latest_code)
+        #print(latest_code)
         # Extract incrementing part if available
         if latest_code and latest_code.reservationCode:
             latest_increment = int(latest_code.reservationCode.split('-')[-1])

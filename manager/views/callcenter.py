@@ -28,11 +28,13 @@ class CallCenterView(ListView):
         
         # Filter the Patient records created within the previous 10 days by a specific user (createdby)
         # assuming `request.user` is the logged-in user
+        is_admin = request.user.groups.filter(name='Admin').exists()
+        #print(is_admin)
         recent_patients = (
         Patient.objects.active()
-        .filter(
-            createdDate__gte=ten_days_ago,
-            reservedBy=request.user
+         .filter(
+        Q(createdDate__gte=ten_days_ago) &
+        (Q(reservedBy=request.user) | Q() if not is_admin else Q())
         )
         .select_related('sufferedcase')
         .values(

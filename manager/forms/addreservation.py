@@ -1,4 +1,5 @@
 # forms.py
+from datetime import date
 from django import forms
 from manager.model.patient import City, Offers, Patient, SufferedCases
 
@@ -16,7 +17,7 @@ class MyModelForm(forms.ModelForm):
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
-            'mobile': forms.NumberInput(attrs={
+            'mobile': forms.TextInput(attrs={
             'class': 'form-control',
             #'placeholder': '7xx1234567'  # Guide user to input correct format
             }),           
@@ -100,11 +101,17 @@ class MyModelForm(forms.ModelForm):
     #         raise forms.ValidationError('A patient with this file serial already exists.')
     #     return fileserial
     
-    def clean_mobile(self):
-        mobileNum = self.cleaned_data.get('mobile')
-        if Patient.objects.filter(mobile=mobileNum).exists():
-            raise forms.ValidationError('A patient with this Mobile Number already exists.')
-        return mobileNum
+    # def clean_mobile(self):
+    #     mobileNum = self.cleaned_data.get('mobile')
+    #     if Patient.objects.filter(mobile=mobileNum).exists():
+    #         raise forms.ValidationError('A patient with this Mobile Number already exists.')
+    #     return mobileNum
+    
+    def clean_expectedDate(self):
+        expected_date = self.cleaned_data.get('expectedDate')
+        if expected_date and expected_date < date.today():
+            raise forms.ValidationError("Expected Date cannot be earlier than today.")
+        return expected_date
     
     # def clean_mobile(self):
     #     mobile = self.cleaned_data.get('mobile')        
