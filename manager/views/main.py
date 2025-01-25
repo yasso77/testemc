@@ -16,6 +16,7 @@ from manager.model.patient import Patient
 from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
+from manager.views.callcenter import CallCenterView
 
 # Create your views here.
 
@@ -23,11 +24,16 @@ class MainView(ListView):
     
     @login_required
     def dashboard(request):
+        
+        userID=request.user
         if request.user.groups.filter(name="Recepition").exists():
              return render(request,'center/dashboard.html',{'name':'index'})
          
-        elif request.user.groups.filter(name="Call center").exists():            
-             return render(request,'callcenter/dashboard.html',{'name':'index'})
+        elif request.user.groups.filter(name="Call center").exists(): 
+            
+            stats = CallCenterView.get_patient_statistics_past_30_days(request.user)
+           
+            return render(request,'callcenter/dashboard.html',{'stats': stats})
          
         else:
             return render(request,'index.html',{'name':'index'})
@@ -38,7 +44,7 @@ class MainView(ListView):
         return render(request, 'no_permission.html')
 
     @login_required
-    @permission_required_with_redirect('manager.UploadPatientFile',login_url='/no-permission/')
+    
     def uploadpatientData(request):
         if request.method == 'POST':
                 form = ExcelUploadForm(request.POST, request.FILES)      

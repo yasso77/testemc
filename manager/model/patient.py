@@ -1,11 +1,21 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 
 class CityManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
+
+class OffersManager(models.Manager):
+        def active(self):
+            return self.filter(isVisible=True)
+
+    
+class SufferedCasesManager(models.Manager):
+        def active(self):
+            return self.filter(isVisible=True)      
 class City(models.Model):    
     cityID=models.AutoField(primary_key=True)
     cityName=models.CharField(max_length=100, blank=True, null=True,verbose_name='City Name')
@@ -19,6 +29,35 @@ class City(models.Model):
         verbose_name='City'
         verbose_name_plural = "Cities"
         
+class Offers(models.Model):    
+    offerID=models.AutoField(primary_key=True)
+    offerName=models.CharField(max_length=350, blank=True, null=True,verbose_name='Offer Name')
+    isVisible=models.BooleanField(blank=True,null=True)
+    validFromDate=models.DateField(verbose_name='Valid from',blank=True,null=True)
+    validToDate=models.DateField(verbose_name='Valid To',blank=True,null=True)
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+    objects = OffersManager()
+    def __str__(self):
+        return self.offerName
+    class Meta:
+        verbose_name='Offer'
+        verbose_name_plural = "Offers"
+        
+class SufferedCases(models.Model):    
+    sufferedcaseID=models.AutoField(primary_key=True)
+    caseName=models.CharField(max_length=350, blank=True, null=True,verbose_name='Case Name')
+    isVisible=models.BooleanField(blank=True,null=True)
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+    objects = SufferedCasesManager()
+    def __str__(self):
+        return self.caseName
+    class Meta:
+        verbose_name='Suffered Case'
+        verbose_name_plural = "Cases"
+
+
 class PatientManager(models.Manager):
         def active(self):
             return self.filter(isDeleted=False)
@@ -35,6 +74,12 @@ class Patient(models.Model):
         
     ]    
     leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend')]
+    
+    CallDirection_CHOICES=[
+        ('IN','INCOMING- Patient Call'),
+        ('OUT','OUTGOING - Call Center Call'),
+        
+    ]    
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.
     reservationCode = models.CharField( max_length=150, blank=False, null=True,verbose_name='Confirmation Code',error_messages='Reservation code is requiered')
@@ -48,23 +93,34 @@ class Patient(models.Model):
     address = models.CharField(max_length=1000, blank=True, null=True,verbose_name='Address')  # Field name made lowercase.
     city = models.ForeignKey(City,blank=True, null=True,on_delete=models.SET_NULL,verbose_name='City Name')  # Field name made lowercase.
     email = models.CharField(max_length=150, blank=True, null=True,verbose_name='Email')  # Field name made lowercase.   
-    reservedBy = models.ForeignKey(User, on_delete=models.DO_NOTHING)  # Field name made lowercase.
-    arrivedOn = models.CharField(max_length=150, blank=True, null=True)  # Field name made lowercase.
+    reservedBy = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='reserved_patients')  # Field name made lowercase.
+    offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
+    sufferedcase = models.ForeignKey(
+        'SufferedCases',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Suffered Case'
+    )
+    arrivedOn = models.CharField(max_length=150, blank=True, null=True,)  # Field name made lowercase.
     remarks = models.CharField(max_length=2055, blank=True, null=True,verbose_name='Remarks')
-    sufferedcase = models.CharField(max_length=255, blank=True, null=True,verbose_name='Case')   # Field name made lowercase.
+    
     age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=0,verbose_name='Age')  # Field name made lowercase.
+    callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0])
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
     confirmationDate = models.DateField(verbose_name='Confirmation Date', blank=True, null=True)  # Field name made lowercase.
     attendanceDate = models.DateField(blank=True, null=True,verbose_name='Actual Attendance  Date')  # Field name made lowercase.
     rideglass = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='Ride Of Glass')
     wearingconduct = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='WEaring Conduct')
-    createdby = models.CharField(max_length=100, blank=True, null=True)  # Field name made lowercase.
+    createdBy = models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='created_patients')  # Field name made lowercase.
     createdDate = models.DateField( blank=True, null=True,verbose_name='created Date')  # 
     latestupdate = models.DateField( blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField( blank=True, null=True)  # Field name made lowercase.
     isDeleted = models.BooleanField(default=False)
     
     objects = PatientManager()
+    
+    
 
     def __str__(self):
         return self.fullname

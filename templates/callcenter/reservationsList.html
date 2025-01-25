@@ -4,7 +4,7 @@
  <!-- Include DataTables CSS -->
  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 <div class="pagetitle">
-    <h1>Reservation List - 20 Days Ago by {{ request.user.username }}</h1>
+    <h1>Reservation List <span class="alert alert-warning">{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
@@ -19,16 +19,17 @@
         <table id="patientsTable" class="display">
             <thead>
                 <tr>
-                    <th>Reservation Code</th>
+                    <th>R.Code</th>
                     <th>Full Name</th> 
                     <th>Mobile</th>
                     <th>Age</th>  
-                    <th>Gender</th>  
+                   
                                
-                    <th>Lead Source</th>
+                    {% comment %} <th>Lead Source</th> {% endcomment %}
                     <th>Case</th>        
                     <th>Created Date</th>
                     <th>Expected Date</th>
+                    <th>Confirmation Date</th>  
                     <th></th>
                 </tr>
             </thead>
@@ -39,13 +40,14 @@
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
                         <td>{{ patient.age }}</td>
-                        <td>{{ patient.gender }}</td>                      
+                                           
                         
-                        <td>{{ patient.leadSource }}</td>
-                        <td>{{ patient.sufferedcase }}</td>
+                        {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
+                        <td>{{ patient.sufferedcase__caseName }}</td>
                         
                         <td>{{ patient.createdDate }}</td>
                         <td>{{ patient.expectedDate }}</td>
+                        <td>{{ patient.confirmationDate }}</td>  
                         <td>
                             {% if patient.attendanceDate %}
                             <!-- Attendance date is set -->
@@ -63,6 +65,7 @@
                             </form>
                         {% endif %}
                         </td>
+                         
                     </tr>
                 {% empty %}
                     <tr>
@@ -85,11 +88,12 @@
 <script>
     $(document).ready(function() {
         $('#patientsTable').DataTable({
-            "order": [[3, 'desc']],  // Sort by 'createdDate' column (index 3) in descending order by default
+            "order": [[0, 'desc']],  // Sort by 'createdDate' column (index 3) in descending order by default
             "searching": true,      // Enable search
             "paging": true,         // Enable pagination
             "lengthChange": false,  // Disable length change dropdown
-            "info": false           // Disable info display
+            "info": false,
+            "pageLength": 25           // Disable info display
         });
     });
 </script>

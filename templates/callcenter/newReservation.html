@@ -30,7 +30,7 @@
   <form method="post" class="form-horizontal">
     {% csrf_token %}
     <div class="form-group row">
-        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code<span style="color: red;">*</span></label>
+        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code</label>
         <div class="col-sm-8">
             {{ form.reservationCode }}
             {% if form.reservationCode.errors %}
@@ -125,12 +125,45 @@
             {% endif %}
         </div>
     </div>
+
+    <div class="form-group row">
+        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers </label>
+        <div class="col-sm-8">
+            {{ form.offerID }}
+            {% if form.offerID.errors %}
+                <div class="text-danger">
+                    {{ form.offerID.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
     
     <div class="form-group row">
         <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
         <div class="col-sm-8">
             {{ form.remarks }}
             
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction </label>
+      
+        <div class="col-sm-8">
+            <div>
+                {% for radio in form.callDirection %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label">{{ radio.choice_label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.callDirection.errors %}
+                <div class="text-danger">
+                    {{ form.callDirection.errors }}
+                </div>
+            {% endif %}
         </div>
     </div>
 

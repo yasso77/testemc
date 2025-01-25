@@ -12,6 +12,7 @@ from manager.forms.editPatient import editPatientForm
 from manager.model.patient import Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.timezone import now
 
 
 
@@ -111,25 +112,45 @@ class PatientView(ListView):
         
 
     @login_required
-    @permission_required_with_redirect('manager.AddNewPatient', login_url='/no-permission/')
-    def addNewPatient(request):
+   
+    def addNewPatient(request):        
+           
+        username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
+        month_number = now().month  # Get current month number
+        latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
+
+        print(latest_code)
+        # Extract incrementing part if available
+        if latest_code and latest_code.reservationCode:
+            latest_increment = int(latest_code.reservationCode.split('-')[-1])
+            increment = latest_increment + 1
+        else:
+            increment = 1
+
+        # Format increment with leading zeros
+        increment_part = f"{increment:03d}"
+        reservationCode = f"{username_prefix}-{month_number}-{increment_part}"
+        
+        
         if request.method == 'POST':
             form = MyModelForm(request.POST)
             if form.is_valid():
                 patient = form.save(commit=False)
+                patient.reservationCode=reservationCode
                 patient.reservedBy = request.user  # Set the logged-in user
-                patient.createdDate=date.now
+                patient.createdBy = request.user  # Set the logged-in user
+                patient.createdDate=datetime.now().date()
                 patient.save()
                 
                 return render(request,"ConfirmMsg.html",{'message': 'The Reservation is Added Successfully..','returnUrl':'newreservation','btnText':'Add New Reservation'}, status=200)
         else:
-            form = MyModelForm()    
+             form = MyModelForm(initial={'reservationCode': reservationCode})
         
-        return render(request, 'callcenter/newReservation.html', {'form': form})
+        return render(request, 'callcenter/newReservation.html', {'form': form,'code':reservationCode})
     
     
     @login_required
-    @permission_required_with_redirect('manager.AddNewPatient', login_url='/no-permission/')
+   
     def patientsList(request):
        # Get the current date
         today = date.today()
@@ -142,7 +163,7 @@ class PatientView(ListView):
         recent_patients = Patient.objects.active().filter(
         createdDate__gte=ten_days_ago        
         ).values(
-            'fileserial','patientid','fullname', 'reservationCode', 'createdDate','city','age','sufferedcase','expectedDate','gender','confirmationDate','attendanceDate')  # Select only the required fields
+            'fileserial','patientid','fullname', 'reservationCode', 'createdDate','city','age','sufferedcase__id','expectedDate','gender','confirmationDate','attendanceDate')  # Select only the required fields
         
         # Pass the data to the template      
         

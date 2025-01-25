@@ -1,51 +1,57 @@
 # forms.py
-from datetime import date, datetime
 from django import forms
-import re
-from django.core.exceptions import ValidationError
-
-from manager.model.patient import City, Patient
+from manager.model.patient import City, Offers, Patient, SufferedCases
 
 
 class MyModelForm(forms.ModelForm):   
     
     # Explicitly define city field outside Meta
-    city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", 
-                                  widget=forms.Select(attrs={'class': 'form-select'}))
+    city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
+    sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))
+    offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
     class Meta:
         model = Patient
        
-        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','leadSource','remarks','expectedDate','confirmationDate']
+        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection']
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile': forms.NumberInput(attrs={
             'class': 'form-control',
-            'placeholder': '7xx1234567'  # Guide user to input correct format
+            #'placeholder': '7xx1234567'  # Guide user to input correct format
             }),           
             
             'age': forms.NumberInput(attrs={
             'class': 'form-control',
             'min': 1,  # Minimum age
             'max': 99,  # Maximum age (restricts to two digits)
-            'placeholder': 'Enter age',
-                }),
-            'sufferedcase': forms.TextInput(attrs={'class': 'form-control'}),
-            'remarks': forms.TextInput(attrs={'class': 'form-control'}),
-            'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
-            'reservationCode': forms.TextInput(attrs={'class': 'form-control'}),
+               }),
+            
+            'remarks': forms.TextInput(attrs={'class': 'form-control'}),            
+            'reservationCode': forms.TextInput(attrs={
+            'readonly': 'readonly',
+            'class': 'form-control',
+            'style': 'background-color: yellow;font-weight:bold'}),
+            
+            
+            'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
+
             'leadSource': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
-            'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
-            'confirmationDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+            
+            'expectedDate': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'required': True,  # Add required attribute here
+            }),
+            
              
     
         }
         error_messages = {
-            'reservationCode': {
-                'required': 'Reservation Code is required.',
-            },
+            'callDirection': {
+                 'required': 'Call Direction is required.',
+             },
             'fullname': {
                 'required': 'Full name is required.',
             },
@@ -64,8 +70,8 @@ class MyModelForm(forms.ModelForm):
             'sufferedcase': {
                 'required': 'Suffered case is required.',
             },
-            'confirmationDate': {
-                'required': 'Confirmation Date is required.',
+            'leadSource': {
+                'required': 'Coming Source is required.',
             },
             
              'expectedDate': {
@@ -84,22 +90,30 @@ class MyModelForm(forms.ModelForm):
             ('M', 'Male'),
             ('F', 'Female')
         ]
+         # Add 'required' attribute explicitly to RadioSelect fields
+        self.fields['gender'].widget.attrs.update({'required': True})
+        self.fields['leadSource'].widget.attrs.update({'required': True})
         
-        
-    def clean_fileserial(self):
-        fileserial = self.cleaned_data.get('fileserial')
-        if Patient.objects.filter(fileserial=fileserial).exists():
-            raise forms.ValidationError('A patient with this file serial already exists.')
-        return fileserial
+    # def clean_fileserial(self):
+    #     fileserial = self.cleaned_data.get('fileserial')
+    #     if Patient.objects.filter(fileserial=fileserial).exists():
+    #         raise forms.ValidationError('A patient with this file serial already exists.')
+    #     return fileserial
     
     def clean_mobile(self):
-        mobile = self.cleaned_data.get('mobile')        
-        # Regex pattern to match 7xx1234567
-        pattern = r'^7\d{2}\d{3}\d{4}$'
-        if not re.match(pattern, mobile):
-            raise ValidationError('Mobile number must be in the format 7xx1234567.')
+        mobileNum = self.cleaned_data.get('mobile')
+        if Patient.objects.filter(mobile=mobileNum).exists():
+            raise forms.ValidationError('A patient with this Mobile Number already exists.')
+        return mobileNum
+    
+    # def clean_mobile(self):
+    #     mobile = self.cleaned_data.get('mobile')        
+    #     # Regex pattern to match 7xx1234567
+    #     pattern = r'^7\d{2}\d{3}\d{4}$'
+    #     if not re.match(pattern, mobile):
+    #         raise ValidationError('Mobile number must be in the format 7xx1234567.')
         
-        return mobile
+    #     return mobile
     
     def clean_age(self):
         age = self.cleaned_data.get('age')

@@ -24,13 +24,20 @@
 
     <div class="row">
       <div class="col-lg-10">
-     <h3>Reservation Number:-{{patient.reservationCode}}</h3>
-     <h3>For : {{ patient.fullname}}</h3>
+        <div style="border: 2px solid #4CAF50; padding: 10px 20px; border-radius: 10px; background-color: #f9f9f9; color: #333; display: inline-block; margin-bottom: 15px;">
+            <span style="font-weight: bold; color: #4CAF50;">Reservation Details:</span>
+            <span>Reservation Number: <span style="color: #000;font-weight: bold">{{ patient.reservationCode }}</span></span>,
+            <span>For: <span style="color: #000;font-weight: bold">{{ patient.fullname }}</span></span>
+        </div>
+        
+        
 
 <div class="form-container">
   <form method="post" class="form-horizontal">
     {% csrf_token %}
     
+    <input type="hidden" name="reservationCode" value="{{ form.reservationCode.value }}">
+
     {% comment %} <div class="form-group row">
         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
         <div class="col-sm-8">
@@ -116,12 +123,43 @@
             {% endif %}
         </div>
     </div>
+    <div class="form-group row">
+        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers </label>
+        <div class="col-sm-8">
+            {{ form.offerID }}
+            {% if form.offerID.errors %}
+                <div class="text-danger">
+                    {{ form.offerID.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
     
     <div class="form-group row">
         <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
         <div class="col-sm-8">
             {{ form.remarks }}
             
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction </label>
+      
+        <div class="col-sm-8">
+            <div>
+                {% for radio in form.callDirection %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label">{{ radio.choice_label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.callDirection.errors %}
+                <div class="text-danger">
+                    {{ form.callDirection.errors }}
+                </div>
+            {% endif %}
         </div>
     </div>
 

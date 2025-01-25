@@ -16,6 +16,7 @@ urlpatterns = [
     path('custom-logout-page/', TemplateView.as_view(template_name='logout.html'), name='custom-logout-page'),
     path('login/', MainView.login_view, name='loginView'),
     
+    
     # ReportView
     path('showPatientData', ReportView.showPatientData, name='showPatientData'),
     path('getattendedpatient', ReportView.showPatientDataAttendedToday, name='getattendedpatient'),
@@ -34,9 +35,11 @@ urlpatterns = [
 
     # CallCenterView
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),
+    path('reservationListScope/<str:viewScope>/', CallCenterView.reservationsListviewScope, name='reservationListScope'),
     path('edit_reservation/<int:patientid>/', CallCenterView.edit_reservation, name='edit_reservation'),
     path('delete_patient/<int:patientid>/', CallCenterView.delete_patient, name='delete_patient'),
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
+    path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
 
     # DoctorView
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
