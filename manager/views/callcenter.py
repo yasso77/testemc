@@ -41,7 +41,7 @@ class CallCenterView(ListView):
             'patientid', 'fullname', 'reservationCode', 'leadSource',
             'createdDate', 'city', 'mobile', 'age',
             'sufferedcase__caseName', 'expectedDate',
-            'gender', 'attendanceDate','confirmationDate'
+            'gender', 'attendanceDate'
         )
     )
         
@@ -73,7 +73,7 @@ class CallCenterView(ListView):
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate','confirmationDate'
+                    'gender', 'attendanceDate'
                 )
             )
         elif viewScope=='missed':
@@ -86,14 +86,14 @@ class CallCenterView(ListView):
                     isDeleted=False,                  # Exclude deleted patients
                    
                 ).filter(
-                    Q(expectedDate__lt=today) | Q(confirmationDate__lt=today)  # Correct usage of Q object with OR logic
+                    Q(expectedDate__lt=today) #| Q(confirmationDate__lt=today)  # Correct usage of Q object with OR logic
                 )
                 .select_related('sufferedcase')       # Optimize related model queries
                 .values(
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate','confirmationDate'
+                    'gender', 'attendanceDate'
                 )
             )
                 
@@ -102,7 +102,7 @@ class CallCenterView(ListView):
                 Patient.objects.active()
                 .filter(
                     reservedBy=request.user,
-                    confirmationDate__gt=today,
+                    #confirmationDate__gt=today,
                     createdDate__gte=thirty_days_ago,
                     attendanceDate__isnull=True,
                     isDeleted=False                # Exclude deleted patients
@@ -112,7 +112,7 @@ class CallCenterView(ListView):
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate','confirmationDate'
+                    'gender', 'attendanceDate'
                 )
             )
                 
@@ -124,7 +124,7 @@ class CallCenterView(ListView):
                    createdDate__gte=thirty_days_ago,
                    isDeleted=False
                 ).filter(
-                    Q(expectedDate=today) | Q(confirmationDate=today)  # Either condition can be true
+                    Q(expectedDate=today) #| Q(confirmationDate=today)  # Either condition can be true
                 ).select_related('sufferedcase')       # Optimize related model queries
                 .values(
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
@@ -199,7 +199,7 @@ class CallCenterView(ListView):
         # 2. Patients who confirmed their dates in the past 30 days & their confirmation date is greater than today
         confirmed_patients_count = Patient.objects.filter(
             reservedBy=user,
-            confirmationDate__gt=today,
+            #confirmationDate__gt=today,
             createdDate__gte=thirty_days_ago,
             attendanceDate__isnull=True,
             isDeleted=False
@@ -211,7 +211,7 @@ class CallCenterView(ListView):
             createdDate__gte=thirty_days_ago,
             isDeleted=False
                 ).filter(
-                    Q(expectedDate=today) | Q(confirmationDate=today)  # Either condition can be true
+                    Q(expectedDate=today) #| Q(confirmationDate=today)  # Either condition can be true
                 ).count()
 
         # 4. Patients who missed their expected or confirmation date in the past 30 days
@@ -221,7 +221,7 @@ class CallCenterView(ListView):
             attendanceDate__isnull=True,
             isDeleted=False
                 ).filter(
-                    Q(expectedDate__lt=today) | Q(confirmationDate__lt=today)  # Either condition can be true
+                    Q(expectedDate__lt=today) #| Q(confirmationDate__lt=today)  # Either condition can be true
                 ).count()
         
          # 5. Patients who atteneded in the past 30 days
@@ -285,4 +285,11 @@ class CallCenterView(ListView):
             })
 
         return JsonResponse({'reservationsData': data})
+    
+    def validate_mobile(request):
+        mobile = request.GET.get('mobile', None)
+        if mobile:
+            if Patient.objects.filter(mobile=mobile).exists():
+                return JsonResponse({'exists': True, 'message': 'A patient with this Mobile Number already exists.'})
+        return JsonResponse({'exists': False})
 

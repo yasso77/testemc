@@ -9,7 +9,7 @@ from manager.forms.addreservation import MyModelForm
 from django.contrib.auth.decorators import login_required,permission_required
 
 from manager.forms.editPatient import editPatientForm
-from manager.model.patient import Patient
+from manager.model.patient import CallTrack, Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
@@ -112,16 +112,15 @@ class PatientView(ListView):
         
 
     @login_required
-   
     def addNewPatient(request):        
-           
+        # Generate reservation code
         username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
-        month_number = now().month  # Get current month number
+        month_number = now().month  # Get the current month number
         latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
 
-        #print(latest_code)
-        # Extract incrementing part if available
+        # Determine incrementing part
         if latest_code and latest_code.reservationCode:
+            
             latest_increment = int(latest_code.reservationCode.split('-')[-1])
             increment = latest_increment + 1
         else:
@@ -131,22 +130,35 @@ class PatientView(ListView):
         increment_part = f"{increment:03d}"
         reservationCode = f"{username_prefix}-{month_number}-{increment_part}"
         
-        
         if request.method == 'POST':
-            form = MyModelForm(request.POST)
+            # Pass request to the form for message handling
+            form = MyModelForm(request=request, data=request.POST)
             if form.is_valid():
                 patient = form.save(commit=False)
-                patient.reservationCode=reservationCode
-                patient.reservedBy = request.user  # Set the logged-in user
-                patient.createdBy = request.user  # Set the logged-in user
-                patient.createdDate=datetime.now().date()
+                patient.reservationCode = reservationCode
+                patient.reservedBy = request.user  # Assign the logged-in user
+                patient.createdBy = request.user  # Assign the logged-in user
+                patient.createdDate = datetime.now().date()
                 patient.save()
                 
-                return render(request,"ConfirmMsg.html",{'message': 'The Reservation is Added Successfully..','returnUrl':'newreservation','btnText':'Add New Reservation'}, status=200)
+                # Return confirmation message
+                return render(
+                    request,
+                    "ConfirmMsg.html",
+                    {
+                        'message': 'The Reservation is Added Successfully.',
+                        'returnUrl': 'newreservation',
+                        'btnText': 'Add New Reservation',
+                    },
+                    status=200,
+                )
         else:
-             form = MyModelForm(initial={'reservationCode': reservationCode})
+            # Initialize the form with the generated reservation code
+            form = MyModelForm(request=request, initial={'reservationCode': reservationCode})
         
-        return render(request, 'callcenter/newReservation.html', {'form': form,'code':reservationCode})
+        # Render the new reservation form
+        return render(request, 'callcenter/newReservation.html', {'form': form, 'code': reservationCode})
+
     
     
     @login_required
@@ -173,6 +185,7 @@ class PatientView(ListView):
     def edit_patient(request, patientid):
         # Fetch the patient instance or return 404 if not found
         patient = get_object_or_404(Patient, patientid=patientid)
+        calltrack=CallTrack.objects.filter(patientid=patientid)
         
         try:
              patient_form_url = reverse('patientForm', kwargs={'patientid': patientid})
@@ -202,4 +215,4 @@ class PatientView(ListView):
             form = editPatientForm(instance=patient)
         
         # Render the edit page with the form and patient data
-        return render(request, 'center/editPatient.html', {'form': form, 'patient': patient})
+        return render(request, 'center/editPatient.html', {'form': form, 'patient': patient,'calltracks':calltrack})

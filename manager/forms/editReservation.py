@@ -15,7 +15,7 @@ class editReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby','fullName']  # Exclude non-editable fields
-        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','confirmationDate','offerID','callDirection']
+        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
@@ -36,7 +36,7 @@ class editReservationForm(forms.ModelForm):
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
             'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
-            'confirmationDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+           
              
     
         }
@@ -57,9 +57,7 @@ class editReservationForm(forms.ModelForm):
             'sufferedcase': {
                 'required': 'Suffered case is required.',
             },
-            'confirmationDate': {
-                'required': 'Confirmation Date is required.',
-            }           
+                       
             
           } 
         
@@ -74,11 +72,11 @@ class editReservationForm(forms.ModelForm):
 
     #     return mobileNum
     
-    def clean_confirmationDate(self):
-        confirmation_date = self.cleaned_data.get('confirmationDate')
-        if confirmation_date and confirmation_date < date.today():
-            raise forms.ValidationError("Confirmation Date Date cannot be earlier than today.")
-        return confirmation_date
+    # def clean_confirmationDate(self):
+    #     confirmation_date = self.cleaned_data.get('confirmationDate')
+    #     if confirmation_date and confirmation_date < date.today():
+    #         raise forms.ValidationError("Confirmation Date Date cannot be earlier than today.")
+    #     return confirmation_date
 
         
     def clean_age(self):

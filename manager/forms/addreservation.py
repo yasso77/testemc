@@ -2,7 +2,7 @@
 from datetime import date
 from django import forms
 from manager.model.patient import City, Offers, Patient, SufferedCases
-
+from django.contrib import messages
 
 class MyModelForm(forms.ModelForm):   
     
@@ -17,10 +17,10 @@ class MyModelForm(forms.ModelForm):
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
-            'mobile': forms.TextInput(attrs={
-            'class': 'form-control',
-            #'placeholder': '7xx1234567'  # Guide user to input correct format
-            }),           
+            # 'mobile': forms.TextInput(attrs={
+            # 'class': 'form-control',
+            # #'placeholder': '7xx1234567'  # Guide user to input correct format
+            # }),           
             
             'age': forms.NumberInput(attrs={
             'class': 'form-control',
@@ -81,19 +81,36 @@ class MyModelForm(forms.ModelForm):
           }
         
     def __init__(self, *args, **kwargs):
-        super(MyModelForm, self).__init__(*args, **kwargs)
-        self.fields['expectedDate'].initial = ''
-        self.fields['mobile'].initial = ''  # Ensure no default value
-        self.fields['age'].initial = ''  # Ensure no default value
+        # Extract 'request' before calling the parent constructor
+        self.request = kwargs.pop('request', None)
         
-        # Set choices for gender field explicitly to avoid null value
+        # Call the parent constructor
+        super().__init__(*args, **kwargs)
+        
+        # Initialize field values
+        self.fields['expectedDate'].initial = ''
+        self.fields['mobile'].initial = ''
+        self.fields['age'].initial = ''
+        
+        # Explicitly set choices for the gender field to avoid null values
         self.fields['gender'].choices = [
             ('M', 'Male'),
-            ('F', 'Female')
+            ('F', 'Female'),
         ]
-         # Add 'required' attribute explicitly to RadioSelect fields
+        
+        # Ensure RadioSelect fields are marked as required
         self.fields['gender'].widget.attrs.update({'required': True})
         self.fields['leadSource'].widget.attrs.update({'required': True})
+
+        
+    # def clean_mobile(self): 
+    #     mobileNum = self.cleaned_data.get('mobile') 
+    #     if Patient.objects.filter(mobile=mobileNum).exists(): 
+    #         print(mobileNum)
+    #         if self.request:  # Ensure request is available
+    #             print('hello request')
+    #             messages.warning(self.request, 'A patient with this Mobile Number already exists.')
+    #     return mobileNum
         
     # def clean_fileserial(self):
     #     fileserial = self.cleaned_data.get('fileserial')

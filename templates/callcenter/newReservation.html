@@ -52,15 +52,14 @@
         </div>
     </div>
     <div class="form-group row">
-        <label for="{{ form.mobile.id_for_label }}" aria-placeholder="7776556565" class="col-sm-3 col-form-label">Mobile <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.mobile }}
-            {% if form.mobile.errors %}
-                <div class="text-danger">
-                    {{ form.mobile.errors }}
-                </div>
-            {% endif %}
-        </div>
+        
+            <label for="id_mobile" class="col-sm-3 col-form-label">Mobile</label>
+            <div class="col-sm-8">
+            <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control">
+           
+            <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
+            </div>
+        
     </div>
     <div class="form-group row">
         <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
@@ -189,4 +188,30 @@
           
     </div>
   </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileField = document.getElementById('id_mobile');
+        const messageSpan = document.getElementById('mobile-validation-message');
+        
+        mobileField.addEventListener('blur', function () {
+            const mobile = mobileField.value;
+            if (mobile) {
+                fetch(`/validate-mobile/?mobile=${mobile}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            messageSpan.innerHTML = 'A patient with this Mobile Number already exists. <a href="/patient-detail/${mobile}" target="_blank">Click here to view</a>';
+                            messageSpan.style.display = 'block'; // Show the message
+                        } else {
+                            messageSpan.style.display = 'none'; // Hide the message if no error
+                            messageSpan.textContent = ''; // Clear message if mobile is valid
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+</script>
+
 {%endblock%}

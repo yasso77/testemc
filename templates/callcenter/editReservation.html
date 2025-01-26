@@ -162,18 +162,38 @@
             {% endif %}
         </div>
     </div>
+<hr>
 
+<ul>
+    {% for track in calltracks %}
+            <li>
+                <strong>Confirmation date:</strong> {{ track.confirmationDate }} <br>
+                <strong>Remarks:</strong> {{ track.remarks }}<br>
+                <strong>Created date:</strong> {{ track.createdDate }}
+                <strong>Created by:</strong> {{ track.createdBy }}
+            </li>
+        {% empty %}
+            <li>No call tracks available for this patient.</li>
+        {% endfor %}
+</ul>
+<div class="form-group row">
+    <label  class="col-sm-3 col-form-label">Call Remarks</label>
+    <div class="col-sm-8">
+        <textarea id="id_callDetails" name="txtCallDetails" cols="30" rows="5"></textarea>
+        
+    </div>
+</div>
     <div class="form-group row">
         <label for="{{ form.confirmationDate.id_for_label }}" class="col-sm-3 col-form-label">New Confirmation Date <span style="color: red;">*</span></label>
         <div class="col-sm-8">
-            <div class="alert alert-info">Expected Date was: {{ patient.expectedDate|default:"Not Set" }}</div>
+            {% comment %} <div class="alert alert-info">Expected Date was: {{ patient.expectedDate|default:"Not Set" }}</div>
                        {{ form.confirmationDate  }}
                        {% if form.confirmationDate.errors %}
                        <div class="text-danger">
                            {{ form.confirmationDate.errors }}
                        </div>
                    {% endif %}
-        </div>
+        </div> {% endcomment %}
     </div>
     <div class="form-group row">
         <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->

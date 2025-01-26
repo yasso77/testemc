@@ -108,7 +108,7 @@ class Patient(models.Model):
     age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=0,verbose_name='Age')  # Field name made lowercase.
     callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0])
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
-    confirmationDate = models.DateField(verbose_name='Confirmation Date', blank=True, null=True)  # Field name made lowercase.
+      # Field name made lowercase.
     attendanceDate = models.DateField(blank=True, null=True,verbose_name='Actual Attendance  Date')  # Field name made lowercase.
     rideglass = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='Ride Of Glass')
     wearingconduct = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='WEaring Conduct')
@@ -127,6 +127,22 @@ class Patient(models.Model):
     class Meta:
         verbose_name='Patients'
         ordering=['-fullname']
+        
+        
+class CallTrack(models.Model):    
+    callTrackID=models.AutoField(primary_key=True)
+    patientID=models.ForeignKey(Patient,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='call_patients')
+    remarks=models.CharField(max_length=500, blank=True, null=True,verbose_name='Call Remarks')
+    confirmationDate = models.DateField(verbose_name='Confirmation Date', blank=True, null=True)    
+    createdBy=models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='call_agent')
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+  
+    def __str__(self):
+        return self.remarks
+    class Meta:
+        verbose_name='Call Track'
+        verbose_name_plural = "Call Tracks"
         
     
         

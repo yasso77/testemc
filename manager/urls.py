@@ -17,6 +17,7 @@ urlpatterns = [
     path('login/', MainView.login_view, name='loginView'),
     
     
+    
     # ReportView
     path('showPatientData', ReportView.showPatientData, name='showPatientData'),
     path('getattendedpatient', ReportView.showPatientDataAttendedToday, name='getattendedpatient'),
@@ -40,6 +41,7 @@ urlpatterns = [
     path('delete_patient/<int:patientid>/', CallCenterView.delete_patient, name='delete_patient'),
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
+    path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
 
     # DoctorView
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
