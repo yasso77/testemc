@@ -4,7 +4,7 @@
  <!-- Include DataTables CSS -->
  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 <div class="pagetitle">
-    <h1>Reservation List <span class="alert alert-warning">{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
+    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
@@ -28,8 +28,8 @@
                     {% comment %} <th>Lead Source</th> {% endcomment %}
                     <th>Case</th>        
                     <th>Created Date</th>
-                    <th>Expected Date</th>
-                    <th>Confirmation Date</th>  
+                     <th>Expected Date</th> 
+                    {% comment %} <th>Confirmation Date</th>   {% endcomment %}
                     <th></th>
                 </tr>
             </thead>
@@ -47,7 +47,7 @@
                         
                         <td>{{ patient.createdDate }}</td>
                         <td>{{ patient.expectedDate }}</td>
-                        <td>{{ patient.confirmationDate }}</td>  
+                        {% comment %} <td>{{ patient.confirmationDate }}</td>   {% endcomment %}
                         <td>
                             {% if patient.attendanceDate %}
                             <!-- Attendance date is set -->
@@ -56,6 +56,8 @@
                         {% else %}
                             <!-- Attendance date is null -->
                             <!-- Edit Button -->
+
+                            <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning">Follow-Up</a>
                             <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary">Edit</a>
                     
                             <!-- Delete Button -->

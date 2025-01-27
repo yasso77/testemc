@@ -1,0 +1,289 @@
+{% extends 'master.html'%}
+
+
+{% block content %}
+<style>
+  .form-group {
+      margin-bottom: 20px; /* Adjust this value as needed */
+  }
+  .text-danger {
+    color: red;
+}
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-item .timeline-marker {
+    position: absolute;
+    left: 0; /* Align it to the left */
+    width: 6px; /* Set the width of the vertical bar */
+    height: 100%; /* Make the bar span the entire height */
+    background-color: #007bff; /* Change to any color you want */
+}
+
+.timeline-item .timeline-content {
+    margin-left: 20px; /* Space between bar and content */
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.timeline-item .timeline-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.timeline-item p {
+    margin-bottom: 10px;
+}
+
+.timeline-item .text-muted {
+    color: #6c757d !important;
+}
+
+
+</style>
+<div class="pagetitle">
+    <h1>Follow Up Reservation</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Call Center</li>
+        <li class="breadcrumb-item active">Follow Up Reservation</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+   
+        <div style="border: 2px solid #4CAF50; padding: 10px 20px; border-radius: 10px; background-color: #f9f9f9; color: #333; display: inline-block; margin-bottom: 15px;">
+            <span style="font-weight: bold; color: #4CAF50;">Reservation Details:</span>
+            <span>Reservation Number: <span style="color: #000;font-weight: bold">{{ patient.reservationCode }}</span></span>,
+            <span>For: <span style="color: #000;font-weight: bold">{{ patient.fullname }}</span></span>
+        </div>
+        
+        
+        <div class="container">
+            <div class="row">
+                <!-- Left Column: Form Section -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Follow-Up Form</h5>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                            <form method="post" class="form-horizontal" id="followUpForm">
+                                {% csrf_token %}
+                            
+                                <!-- Notes/Comment -->
+                                <div class="form-group row">
+                                    <label for="{{ form.remarks.id_for_label }}" class="col-sm-4 col-form-label">
+                                        Notes/Comment <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        {{ form.remarks }}
+                                        {% if form.remarks.errors %}
+                                            <div class="text-danger">
+                                                {{ form.remarks.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            
+                                <!-- Outcome -->
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">
+                                        Outcome <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <div id="outcomeGroup">
+                                            {% for radio in form.outcome %}
+                                                <div class="form-check form-check-inline">
+                                                    {{ radio.tag }}
+                                                    <label class="form-check-label">{{ radio.choice_label }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.outcome.errors %}
+                                            <div class="text-danger">
+                                                {{ form.outcome.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            
+                                <!-- Next Follow-up Date -->
+                                <div class="form-group row">
+                                    <label for="{{ form.nextFollow.id_for_label }}" class="col-sm-4 col-form-label">
+                                        Next Follow-up <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        {{ form.nextFollow }}
+                                        {% if form.nextFollow.errors %}
+                                            <div class="text-danger">
+                                                {{ form.nextFollow.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            
+                                <!-- Confirmation Date -->
+                                <div class="form-group row">
+                                    <label for="{{ form.confirmationDate.id_for_label }}" class="col-sm-4 col-form-label">
+                                        Confirmation Date <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        {{ form.confirmationDate }}
+                                        {% if form.confirmationDate.errors %}
+                                            <div class="text-danger">
+                                                {{ form.confirmationDate.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            
+                                <!-- Submit Buttons -->
+                                <div class="form-group row">
+                                    <div class="col-sm-12 text-center">
+                                        <button type="submit" class="btn btn-primary">Add Follow-up</button>
+                                        <a href="{% url 'reservationList' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Right Column: Call Tracks Section -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Follow-Up Tracks</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for track in calltracks %}
+                                    <div class="timeline-item">
+                                        <!-- Apply dynamic color class based on outcome -->
+                                        <div class="timeline-marker 
+                                            {% if track.outcome == 'Canceled' %}bg-danger
+                                            {% elif track.outcome == 'Confirmed' %}bg-success
+                                            {% elif track.outcome == 'Rescheduled' %}bg-warning
+                                            {% else %}bg-info
+                                            {% endif %}
+                                        "></div>
+                                        <div class="timeline-content">
+                                            <h5 class="timeline-title">{{ track.outcome }}</h5>
+                                        
+                                            <!-- Remarks First -->
+                                            <p>{{ track.remarks }}</p>
+                                        
+                                           <!-- Dates Section -->
+    <div class="d-flex justify-content-start align-items-center mt-2">
+        <!-- Next Follow-Up -->
+        <div class="me-3" style="font-size: 0.9rem;"> <!-- Smaller Font -->
+            <i class="bi bi-calendar-check text-warning me-1"></i> <!-- Icon for Next Follow-Up -->
+            <strong>Next Follow-Up:</strong> {{ track.nextFollow }}
+        </div>
+        <!-- Confirmation Date -->
+        <div class="me-3" style="font-size: 0.9rem;"> <!-- Smaller Font -->
+            <i class="bi bi-calendar-event text-success me-1"></i> <!-- Icon for Confirmation -->
+            <strong>Confirmation:</strong> {{ track.confirmationDate }}
+        </div>
+    </div>
+                                        
+                                            <!-- Created Date -->
+                                            <div class="text-end mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock text-secondary me-1"></i> <!-- Icon for Created -->
+                                                    <strong>Created:</strong> {{ track.createdDate }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                {% empty %}
+                                    <div class="timeline-item text-center">
+                                        <p>No call tracks available.</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+
+
+
+
+                </div>
+            </div>
+        </div>
+        
+        
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const outcomeRadios = document.querySelectorAll('#outcomeGroup input[type="radio"]');
+        const nextFollowInput = document.querySelector("input[name='nextFollow']");
+        const confirmationInput = document.querySelector("input[name='confirmationDate']");
+    
+        if (!nextFollowInput || !confirmationInput || outcomeRadios.length === 0) {
+           // console.error("Required elements not found in the DOM.");
+            return;
+        }
+    
+        function updateFormState() {
+            const selectedOutcome = Array.from(outcomeRadios).find(radio => radio.checked)?.value;
+            //console.log("Selected outcome: ", selectedOutcome); // Debugging log
+    
+            if (selectedOutcome === "Rescheduled") {
+                 console.log("xx")
+                confirmationInput.disabled = true;
+                confirmationInput.required = false;
+                confirmationInput.value = "";
+                nextFollowInput.disabled = false;
+                nextFollowInput.required = true;
+            } else if (selectedOutcome === "Confirmed") {
+                nextFollowInput.disabled = true;
+                nextFollowInput.required = false;
+                nextFollowInput.value = "";
+                confirmationInput.disabled = false;
+                confirmationInput.required = true;
+
+            } else if (selectedOutcome === "Canceled") {
+                nextFollowInput.disabled = true;
+                nextFollowInput.required = false;
+                nextFollowInput.value = "";
+                confirmationInput.value = "";
+                confirmationInput.disabled = true;
+                confirmationInput.required = false;
+            } else {
+                nextFollowInput.disabled = false;
+                nextFollowInput.required = false;
+                confirmationInput.disabled = false;
+                confirmationInput.required = false;
+            }
+        }
+    
+        outcomeRadios.forEach(radio => {
+            radio.addEventListener("change", updateFormState);
+        });
+    
+        // Initialize the form state
+        updateFormState();
+    });
+    
+    
+</script>
+{%endblock%}

@@ -132,7 +132,7 @@ class PatientView(ListView):
         
         if request.method == 'POST':
             # Pass request to the form for message handling
-            form = MyModelForm(request=request, data=request.POST)
+            form = MyModelForm(request=request, data=request.POST)            
             if form.is_valid():
                 patient = form.save(commit=False)
                 patient.reservationCode = reservationCode
@@ -140,6 +140,8 @@ class PatientView(ListView):
                 patient.createdBy = request.user  # Assign the logged-in user
                 patient.createdDate = datetime.now().date()
                 patient.save()
+                
+                  
                 
                 # Return confirmation message
                 return render(
@@ -155,7 +157,9 @@ class PatientView(ListView):
         else:
             # Initialize the form with the generated reservation code
             form = MyModelForm(request=request, initial={'reservationCode': reservationCode})
-        
+            # Initial GET request
+           
+          
         # Render the new reservation form
         return render(request, 'callcenter/newReservation.html', {'form': form, 'code': reservationCode})
 
@@ -197,7 +201,7 @@ class PatientView(ListView):
             # Bind form data to the existing patient instance
             form = editPatientForm(request.POST, instance=patient)
             if form.is_valid():
-                print('y')
+                
                 form.save()  # Save the updated instance
                 #return redirect('patientForm', patientid=patient.patientid)  # Redirect to the reservation list page
                 return render(request, "ConfirmMsg.html", {
@@ -207,7 +211,7 @@ class PatientView(ListView):
                     'target': '_blank'
                 }, status=200)
             else:
-                print('Form is not valid')
+                
                 print(form.errors)  # Print the errors to the console
         else:
             # Display the form pre-filled with patient data

@@ -196,12 +196,13 @@
         
         mobileField.addEventListener('blur', function () {
             const mobile = mobileField.value;
+            const strmobile=mobile;
             if (mobile) {
                 fetch(`/validate-mobile/?mobile=${mobile}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = 'A patient with this Mobile Number already exists. <a href="/patient-detail/${mobile}" target="_blank">Click here to view</a>';
+                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/reservationListMobile/${strmobile}" target="_blank">Click here to view</a>`;
                             messageSpan.style.display = 'block'; // Show the message
                         } else {
                             messageSpan.style.display = 'none'; // Hide the message if no error

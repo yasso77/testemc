@@ -130,10 +130,21 @@ class Patient(models.Model):
         
         
 class CallTrack(models.Model):    
+    
+    outcomeStatus= [
+            ('Canceled', 'Canceled'),
+            ('Rescheduled', 'Rescheduled'),
+            ('Confirmed','Confirmed')
+            ]
+    
+    
     callTrackID=models.AutoField(primary_key=True)
     patientID=models.ForeignKey(Patient,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='call_patients')
     remarks=models.CharField(max_length=500, blank=True, null=True,verbose_name='Call Remarks')
-    confirmationDate = models.DateField(verbose_name='Confirmation Date', blank=True, null=True)    
+    nextFollow=models.DateField(verbose_name='Next Follow-Up Date', blank=True, null=True) 
+    confirmationDate = models.DateField(verbose_name='Confirmation Date', blank=True, null=True) 
+    outcome=models.CharField(max_length=100, blank=True, null=True,verbose_name='Outcome of Follow-Up',choices=outcomeStatus)
+    agentID=models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_agent')
     createdBy=models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='call_agent')
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     

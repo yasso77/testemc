@@ -4,11 +4,13 @@ from django.shortcuts import render
 from django.urls import reverse
 from manager.decorators import permission_required_with_redirect
 from django.contrib.auth.models import User
+
+from manager.forms.addFollowUp import insertCallTrackForm
 from manager.forms.editReservation import editReservationForm
 
 from django.contrib.auth.decorators import login_required,permission_required
 
-from manager.model.patient import Patient
+from manager.model.patient import CallTrack, Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
@@ -134,12 +136,30 @@ class CallCenterView(ListView):
                 )
             )
     
-       
-  # Select only the required fields
+    
+    def reservationsListviewMobile(request,strmobile):
+            
+            recent_patients = (
+            Patient.objects.active()
+            .filter(
+                
+                reservedBy=request.user,
+                mobile=strmobile,
+                #isDeleted=False
+            )
+            .select_related('sufferedcase')
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age',
+                'sufferedcase__caseName', 'expectedDate',
+                'gender', 'attendanceDate'
+            )
+        )
+        
         
         # Pass the data to the template      
         
-        return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':viewScope})
+            return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':strmobile})
        
     def check_reservationCode(request):
         if request.method == 'GET':
@@ -185,6 +205,47 @@ class CallCenterView(ListView):
         #return render(request, 'patients/confirm_delete.html', {'patient': patient})
     
 
+    def follow_reservation(request, patientid):
+        # Fetch the patient instance or return 404 if not found
+        patient = get_object_or_404(Patient, patientid=patientid)
+        calltracks=CallTrack.objects.filter(patientID=patientid).order_by('-createdDate')
+        if request.method == 'POST':
+            # Bind form data to the existing patient instance
+            form = insertCallTrackForm(request.POST)
+            if form.is_valid():
+                # Save form but do not commit to the database yet
+                calltrack = form.save(commit=False)
+                
+                # Assign additional fields
+                calltrack.patientID = patient
+                calltrack.createdBy = request.user
+                calltrack.agentID = request.user
+                
+                # Save the instance to the database
+                calltrack.save()
+                
+               
+               
+                # Return confirmation message
+                return render(
+                    request,
+                    "ConfirmMsg.html",
+                    {
+                        'message': 'Follow-UP is added successfully.',
+                        'returnUrl': reverse('reservationList'),
+                        'btnText': 'Return to Reservations List',
+                    },
+                    status=200,
+                )
+            else:
+                print(form.errors)
+        else:
+            # Display the form pre-filled with patient data
+            form = insertCallTrackForm(instance=patient)
+        
+        # Render the edit page with the form and patient data
+        return render(request, 'callcenter/followReservation.html', {'form': form, 'patient': patient,'calltracks':calltracks})
+    
     def get_patient_statistics_past_30_days(user):
         today = date.today()
         thirty_days_ago = today - timedelta(days=30)

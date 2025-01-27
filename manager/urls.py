@@ -37,11 +37,14 @@ urlpatterns = [
     # CallCenterView
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),
     path('reservationListScope/<str:viewScope>/', CallCenterView.reservationsListviewScope, name='reservationListScope'),
+    path('reservationListMobile/<str:strmobile>/', CallCenterView.reservationsListviewMobile, name='reservationListMobile'),
     path('edit_reservation/<int:patientid>/', CallCenterView.edit_reservation, name='edit_reservation'),
+    path('follow_reservation/<int:patientid>/', CallCenterView.follow_reservation, name='follow_reservation'),
     path('delete_patient/<int:patientid>/', CallCenterView.delete_patient, name='delete_patient'),
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
+    
 
     # DoctorView
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),

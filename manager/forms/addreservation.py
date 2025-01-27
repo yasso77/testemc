@@ -1,8 +1,8 @@
 # forms.py
 from datetime import date
 from django import forms
-from manager.model.patient import City, Offers, Patient, SufferedCases
-from django.contrib import messages
+from manager.model.patient import  City, Offers, Patient, SufferedCases
+
 
 class MyModelForm(forms.ModelForm):   
     
@@ -144,3 +144,5 @@ class MyModelForm(forms.ModelForm):
         if not (1 <= age <= 99):
             raise forms.ValidationError('Age must be a number between 1 and 99.')
         return age
+    
+    

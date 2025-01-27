@@ -91,6 +91,9 @@ DATABASES = {
 		'PASSWORD': 'Cocacola!1977',
 		'HOST':'localhost',
 		'PORT':'3306',
+        'OPTIONS': {
+                    'init_command': "SET sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'"
+                },
 	}
 }
 
