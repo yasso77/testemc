@@ -14,12 +14,12 @@ class editReservationForm(forms.ModelForm):
     offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
     class Meta:
         model = Patient
-        exclude = ['createdDate', 'createdby','fullName']  # Exclude non-editable fields
-        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection']
+        exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
+        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
-            #'fullname': forms.TextInput(attrs={'class': 'form-control'}),           
+            'fullname': forms.TextInput(attrs={'class': 'form-control'}),           
             'mobile': forms.TextInput(attrs={'class': 'form-control' }),           
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'age': forms.NumberInput(attrs={
@@ -33,6 +33,7 @@ class editReservationForm(forms.ModelForm):
             'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
            
             'leadSource': forms.Select(attrs={'class': 'form-select'}),
+            'checkUpprice': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
             'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
@@ -41,6 +42,9 @@ class editReservationForm(forms.ModelForm):
     
         }
         error_messages = {
+            'fullname': {
+                'required': 'Full name is required.',
+            },
            
             'mobile': {
                 'required': 'Mobile number is required.',

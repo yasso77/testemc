@@ -138,7 +138,7 @@ class PatientView(ListView):
                 patient.reservationCode = reservationCode
                 patient.reservedBy = request.user  # Assign the logged-in user
                 patient.createdBy = request.user  # Assign the logged-in user
-                patient.createdDate = datetime.now().date()
+                patient.createdDate = datetime.now()
                 patient.save()
                 
                   

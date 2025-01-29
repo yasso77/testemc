@@ -7,9 +7,9 @@ from django.contrib.auth.models import User
 
 from manager.forms.addFollowUp import insertCallTrackForm
 from manager.forms.editReservation import editReservationForm
-
+from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
-
+from django.db.models import Count, Max, Subquery, OuterRef
 from manager.model.patient import CallTrack, Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
@@ -20,34 +20,46 @@ from django.db.models import Q
 class CallCenterView(ListView):
     
     @login_required
-   
     def reservationsList(request):
-       # Get the current date
+        # Get the current date
         today = date.today()
         
-        # Calculate the date 10 days ago
-        ten_days_ago = today - timedelta(days=30)
+        # Calculate the date 30 days ago
+        thirty_days_ago = today - timedelta(days=30)
         
-        # Filter the Patient records created within the previous 10 days by a specific user (createdby)
-        # assuming `request.user` is the logged-in user
-        is_admin = request.user.groups.filter(name='Admin').exists()
-        #print(is_admin)
+        # Check if the user is an admin
+        is_admin_or_marketing = request.user.groups.filter(name__in=['Admin', 'Marketing']).exists()
+
+        
+        # Filter recent patients
         recent_patients = (
-        Patient.objects.active()
-         .filter(
-        Q(createdDate__gte=ten_days_ago) &
-        (Q(reservedBy=request.user) | Q() if not is_admin else Q())
+            Patient.objects.active()
+            .filter(
+                Q(createdDate__gte=thirty_days_ago) &
+                (Q(reservedBy=request.user) if not is_admin_or_marketing else Q())
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age',
+                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
         )
-        .select_related('sufferedcase')
-        .values(
-            'patientid', 'fullname', 'reservationCode', 'leadSource',
-            'createdDate', 'city', 'mobile', 'age',
-            'sufferedcase__caseName', 'expectedDate',
-            'gender', 'attendanceDate'
-        )
-    )
         
         return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients})
+
         
         
     @login_required
@@ -71,12 +83,23 @@ class CallCenterView(ListView):
                     isDeleted=False
                 )
                 .select_related('sufferedcase')
-                .values(
-                    'patientid', 'fullname', 'reservationCode', 'leadSource',
-                    'createdDate', 'city', 'mobile', 'age',
-                    'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate'
+                .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
                 )
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age',
+                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
             )
         elif viewScope=='missed':
                 recent_patients = (
@@ -91,32 +114,56 @@ class CallCenterView(ListView):
                     Q(expectedDate__lt=today) #| Q(confirmationDate__lt=today)  # Correct usage of Q object with OR logic
                 )
                 .select_related('sufferedcase')       # Optimize related model queries
+                .annotate(
+                    call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                    last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                    last_call_outcome=Subquery(
+                        CallTrack.objects.filter(
+                            patientID=OuterRef('pk')  # Reference the current patient
+                        )
+                        .order_by('-createdDate')
+                        .values('outcome')[:1]  # Get the outcome of the latest call
+                    )
+                )
                 .values(
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
-                    'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate'
+                    'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                    'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
                 )
             )
                 
         elif viewScope=='confirmed':
                 recent_patients = (
-                Patient.objects.active()
-                .filter(
-                    reservedBy=request.user,
-                    #confirmationDate__gt=today,
-                    createdDate__gte=thirty_days_ago,
-                    attendanceDate__isnull=True,
-                    isDeleted=False                # Exclude deleted patients
-                   
-                ).select_related('sufferedcase')       # Optimize related model queries
-                .values(
-                    'patientid', 'fullname', 'reservationCode', 'leadSource',
-                    'createdDate', 'city', 'mobile', 'age',
-                    'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate'
-                )
+    Patient.objects.active()
+    .filter(
+        reservedBy=request.user,
+        createdDate__gte=thirty_days_ago,
+        attendanceDate__isnull=True,
+        isDeleted=False
+    )
+    .annotate(
+        call_count=Count('call_patients', filter=Q(call_patients__outcome="Confirmed", call_patients__confirmationDate__gt=today)),  # Count only relevant calls
+        last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+        last_call_outcome=Subquery(
+            CallTrack.objects.filter(
+                patientID=OuterRef('pk'),
+                outcome="Confirmed",
+                confirmationDate__gt=today,
+                createdBy=request.user
             )
+            .order_by('-createdDate')
+            .values('outcome')[:1]  # Get the outcome of the latest call
+        )
+    )
+    .filter(call_count__gt=0)  # Ensure patients have at least one confirmed call
+    .values(
+        'patientid', 'fullname', 'reservationCode', 'leadSource',
+        'createdDate', 'city', 'mobile', 'age',
+        'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+        'call_count', 'last_call_date', 'last_call_outcome'
+    )
+)
                 
         elif viewScope=='willattend':
                 recent_patients = (
@@ -128,13 +175,25 @@ class CallCenterView(ListView):
                 ).filter(
                     Q(expectedDate=today) #| Q(confirmationDate=today)  # Either condition can be true
                 ).select_related('sufferedcase')       # Optimize related model queries
+                    .annotate(
+                    call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                    last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                    last_call_outcome=Subquery(
+                        CallTrack.objects.filter(
+                            patientID=OuterRef('pk')  # Reference the current patient
+                        )
+                        .order_by('-createdDate')
+                        .values('outcome')[:1]  # Get the outcome of the latest call
+                    )
+                )
                 .values(
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
-                    'sufferedcase__caseName', 'expectedDate',
-                    'gender', 'attendanceDate'
+                    'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                    'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
                 )
             )
+        return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':viewScope})
     
     
     def reservationsListviewMobile(request,strmobile):
@@ -148,11 +207,22 @@ class CallCenterView(ListView):
                 #isDeleted=False
             )
             .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age',
-                'sufferedcase__caseName', 'expectedDate',
-                'gender', 'attendanceDate'
+                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
             )
         )
         
@@ -258,13 +328,18 @@ class CallCenterView(ListView):
         ).count()
 
         # 2. Patients who confirmed their dates in the past 30 days & their confirmation date is greater than today
+        
+        today = now().date()
+
         confirmed_patients_count = Patient.objects.filter(
             reservedBy=user,
-            #confirmationDate__gt=today,
             createdDate__gte=thirty_days_ago,
             attendanceDate__isnull=True,
-            isDeleted=False
-        ).count()
+            isDeleted=False,
+            call_patients__outcome="Confirmed",  # Outcome is "Confirmed"
+            call_patients__confirmationDate__gt=today,            # Add condition: confirmationDate > today
+            call_patients__createdBy=user
+        ).distinct().count()
 
         # 3. Patients whose expected or confirmation date is today in the past 30 days
         expected_or_confirmed_today_count = Patient.objects.filter(

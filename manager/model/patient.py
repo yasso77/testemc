@@ -11,11 +11,27 @@ class CityManager(models.Manager):
 class OffersManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
-
-    
+class CheckUpPriceManager(models.Manager):
+    def active(self):
+            return self.filter(isVisible=True)
 class SufferedCasesManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)      
+
+class CheckUpPrice(models.Model):
+    checkupPriceID=models.AutoField(primary_key=True)
+    checkupPriceName=models.CharField(max_length=350, blank=True, null=True,verbose_name='check-Up Price')
+    isVisible=models.BooleanField(blank=True,null=True)    
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+    objects = CheckUpPriceManager()
+    def __str__(self):
+        return self.checkupPriceName
+    class Meta:
+        verbose_name='CheckUpPrice'
+        verbose_name_plural = "CheckUpPrices"
+    
+
 class City(models.Model):    
     cityID=models.AutoField(primary_key=True)
     cityName=models.CharField(max_length=100, blank=True, null=True,verbose_name='City Name')
@@ -73,7 +89,7 @@ class Patient(models.Model):
         ('N', 'No'),
         
     ]    
-    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend')]
+    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call')]
     
     CallDirection_CHOICES=[
         ('IN','INCOMING- Patient Call'),
@@ -92,7 +108,8 @@ class Patient(models.Model):
     mobile = models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=000)  # Field name made lowercase.
     address = models.CharField(max_length=1000, blank=True, null=True,verbose_name='Address')  # Field name made lowercase.
     city = models.ForeignKey(City,blank=True, null=True,on_delete=models.SET_NULL,verbose_name='City Name')  # Field name made lowercase.
-    email = models.CharField(max_length=150, blank=True, null=True,verbose_name='Email')  # Field name made lowercase.   
+    email = models.CharField(max_length=150, blank=True, null=True,verbose_name='Email')  # Field name made lowercase.  
+    checkUpprice =models.ForeignKey(CheckUpPrice, null=True, on_delete=models.DO_NOTHING,related_name='Check_UpPrice')
     reservedBy = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='reserved_patients')  # Field name made lowercase.
     offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
     sufferedcase = models.ForeignKey(

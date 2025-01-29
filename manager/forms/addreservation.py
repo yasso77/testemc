@@ -13,7 +13,7 @@ class MyModelForm(forms.ModelForm):
     class Meta:
         model = Patient
        
-        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection']
+        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection','checkUpprice']
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
@@ -38,6 +38,7 @@ class MyModelForm(forms.ModelForm):
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
 
             'leadSource': forms.Select(attrs={'class': 'form-select'}),
+            'checkUpprice': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             
             'expectedDate': forms.DateInput(attrs={

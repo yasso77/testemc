@@ -5,6 +5,7 @@ from manager.views.main import MainView
 from manager.views.report import ReportView
 from manager.views.callcenter import CallCenterView
 from django.views.generic import TemplateView
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 
 urlpatterns = [
     # MainView
@@ -52,4 +53,9 @@ urlpatterns = [
 
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),
+    # Password reset views
+    path('password-reset/', PasswordResetView.as_view(template_name='registration/changepassword.html'), name='password_reset'),
+    path('password-reset/done/', PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
 ]

@@ -16,7 +16,7 @@
   <section class="section">
 
  
-        <table id="patientsTable" class="display">
+        <table id="patientsTable" class="display" style="font-size: smaller;">
             <thead>
                 <tr>
                     <th>R.Code</th>
@@ -29,7 +29,7 @@
                     <th>Case</th>        
                     <th>Created Date</th>
                      <th>Expected Date</th> 
-                    {% comment %} <th>Confirmation Date</th>   {% endcomment %}
+                     <th>Follow Up Details</th>   
                     <th></th>
                 </tr>
             </thead>
@@ -47,7 +47,30 @@
                         
                         <td>{{ patient.createdDate }}</td>
                         <td>{{ patient.expectedDate }}</td>
-                        {% comment %} <td>{{ patient.confirmationDate }}</td>   {% endcomment %}
+                        <td>
+                            <div>
+                                <strong>Call Count:</strong> {{ patient.call_count }}
+                            </div>
+                            <div>
+                                <strong>Last Call Date:</strong> 
+                                {% if patient.last_call_date %}
+                                    {{ patient.last_call_date|date:"F d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">None</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <strong>Last Call Outcome:</strong> 
+                                {% if patient.last_call_outcome %}
+                                    <span class="{% if patient.last_call_outcome == 'Confirmed' %}text-success{% elif patient.last_call_outcome == 'Canceled' %}text-danger{% else %}text-warning{% endif %}">
+                                        {{ patient.last_call_outcome }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">None</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
                         <td>
                             {% if patient.attendanceDate %}
                             <!-- Attendance date is set -->

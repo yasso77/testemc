@@ -22,7 +22,7 @@
               <i class="bi bi-circle"></i><span>Upload Patients File</span>
             </a>
           </li> {% endcomment %}
-          {% if request.user|in_group:"Call Center" or request.user|in_group:"Admin" %}
+          {% if request.user|in_group:"Call Center" or request.user|in_group:"Admin" or request.user|in_group:"Marketing" %}
           <li>
             <a href="{%url 'newreservation'%}">
               <i class="bi bi-circle"></i><span>New Reservation</span>
