@@ -1,11 +1,11 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from manager.decorators import permission_required_with_redirect
 from django.contrib.auth.models import User
 from manager.forms.addreservation import MyModelForm
-
+from django.utils.timezone import make_aware, is_naive
 from django.contrib.auth.decorators import login_required,permission_required
 
 from manager.forms.editPatient import editPatientForm
@@ -86,7 +86,13 @@ class PatientView(ListView):
             patient.age = patientAge
             patient.rideglass = RideGlass
             patient.wearingconduct = wearingConduct
-            patient.attendanceDate = datetime.now().date()
+            if patient.attendanceDate is None:
+                   patient.attendanceDate = now()  # Assign a timezone-aware datetime
+
+            elif is_naive(patient.attendanceDate):  
+                   patient.attendanceDate = make_aware(patient.attendanceDate)   
+            
+            
             patient.arrivedOn = datetime.now().time().isoformat()
             
 
@@ -138,7 +144,12 @@ class PatientView(ListView):
                 patient.reservationCode = reservationCode
                 patient.reservedBy = request.user  # Assign the logged-in user
                 patient.createdBy = request.user  # Assign the logged-in user
-                patient.createdDate = datetime.now()
+                # Ensure createdDate has a value
+                if patient.createdDate is None:
+                   patient.createdDate = now()  # Assign a timezone-aware datetime
+
+                elif is_naive(patient.createdDate):  
+                   patient.createdDate = make_aware(patient.createdDate)   
                 patient.save()
                 
                   

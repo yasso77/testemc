@@ -137,6 +137,7 @@ fetch('/reservation-data/')
     .then(response => response.json())
     .then(data => {
         const reservationsData = data.reservationsData;
+        console.log(data)
 
     // Extract labels and datasets
     const labels = reservationsData.map(data => data.date);
@@ -151,14 +152,14 @@ fetch('/reservation-data/')
             labels: labels,
             datasets: [
                 {
-                    //label: 'Last 7 Days',
+                    label: 'Current Month',
                     data: currentData,
                     borderColor: '#007bff',
                     fill: false,
                     tension: 0.4,
                 },
                 {
-                    label: 'Same Period Last Month',
+                    label: 'Same days in last Month',
                     data: lastMonthData,
                     borderColor: '#28a745',
                     fill: false,

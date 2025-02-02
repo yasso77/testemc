@@ -17,6 +17,7 @@ from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from manager.views.callcenter import CallCenterView
+from manager.views.marketing import MarketingView
 
 # Create your views here.
 
@@ -25,15 +26,18 @@ class MainView(ListView):
     @login_required
     def dashboard(request):
         
-        userID=request.user
-        if request.user.groups.filter(name="Recepition").exists():
-             return render(request,'center/dashboard.html',{'name':'index'})
-         
-        elif request.user.groups.filter(name="Call center").exists(): 
-            
-            stats = CallCenterView.get_patient_statistics_past_30_days(request.user)
-           
-            return render(request,'callcenter/dashboard.html',{'stats': stats})
+        if request.user.groups.filter(name="admin").exists():
+            return render(request, 'center/dashboard.html', {'name': 'index'})
+        
+        # elif request.user.groups.filter(name="Marketing").exists():
+        #     context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
+        #     stats=MarketingView.get_patient_statistics_past_30_days()
+        #     return render(request, 'marketing/dashboard.html', {'context': context,'stats':stats})
+
+        elif request.user.groups.filter(name="Call center").exists():
+            stats = CallCenterView.get_patient_statistics_past_30_days(request)  # ✅ Pass request, not request.user
+            return render(request, 'callcenter/dashboard.html', {'stats': stats})        
+        
          
         else:
             return render(request,'index.html',{'name':'index'})

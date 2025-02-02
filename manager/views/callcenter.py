@@ -1,10 +1,10 @@
-from datetime import date, datetime, timedelta
+from datetime import date,  timedelta
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from manager.decorators import permission_required_with_redirect
-from django.contrib.auth.models import User
 
+from django.utils import timezone
 from manager.forms.addFollowUp import insertCallTrackForm
 from manager.forms.editReservation import editReservationForm
 from django.utils.timezone import now
@@ -104,17 +104,14 @@ class CallCenterView(ListView):
         elif viewScope=='missed':
                 recent_patients = (
                 Patient.objects.active()
-                .filter(
-                    createdDate__gte=thirty_days_ago,  # Patients created within the last 30 days
-                    reservedBy=request.user,          # Filter by the currently logged-in user
-                    attendanceDate__isnull=True,      # Patients who have not attended yet
-                    isDeleted=False,                  # Exclude deleted patients
-                   
-                ).filter(
-                    Q(expectedDate__lt=today) #| Q(confirmationDate__lt=today)  # Correct usage of Q object with OR logic
-                )
-                .select_related('sufferedcase')       # Optimize related model queries
-                .annotate(
+                .filter( 
+                        reservedBy=request.user,            
+                        createdDate__gte=thirty_days_ago,
+                        attendanceDate__isnull=True,
+                        fileserial__isnull=True,
+                        isDeleted=False,
+                        expectedDate__lt=today
+                ).select_related('sufferedcase').annotate(
                     call_count=Count('call_patients'),  # Count number of call tracks for each patient
                     last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
                     last_call_outcome=Subquery(
@@ -124,46 +121,45 @@ class CallCenterView(ListView):
                         .order_by('-createdDate')
                         .values('outcome')[:1]  # Get the outcome of the latest call
                     )
-                )
-                .values(
+                ).values(
                     'patientid', 'fullname', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                     'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
-                )
-            )
+                ) 
+                )          
                 
         elif viewScope=='confirmed':
                 recent_patients = (
-    Patient.objects.active()
-    .filter(
-        reservedBy=request.user,
-        createdDate__gte=thirty_days_ago,
-        attendanceDate__isnull=True,
-        isDeleted=False
-    )
-    .annotate(
-        call_count=Count('call_patients', filter=Q(call_patients__outcome="Confirmed", call_patients__confirmationDate__gt=today)),  # Count only relevant calls
-        last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
-        last_call_outcome=Subquery(
-            CallTrack.objects.filter(
-                patientID=OuterRef('pk'),
-                outcome="Confirmed",
-                confirmationDate__gt=today,
-                createdBy=request.user
+                Patient.objects.active()
+                .filter(
+                    reservedBy=request.user,
+                    createdDate__gte=thirty_days_ago,
+                    attendanceDate__isnull=True,
+                    isDeleted=False
+                )
+                .annotate(
+                    call_count=Count('call_patients', filter=Q(call_patients__outcome="Confirmed", call_patients__confirmationDate__gt=today)),  # Count only relevant calls
+                    last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                    last_call_outcome=Subquery(
+                        CallTrack.objects.filter(
+                            patientID=OuterRef('pk'),
+                            outcome="Confirmed",
+                            confirmationDate__gt=today,
+                            createdBy=request.user
+                        )
+                        .order_by('-createdDate')
+                        .values('outcome')[:1]  # Get the outcome of the latest call
+                    )
+                )
+                .filter(call_count__gt=0)  # Ensure patients have at least one confirmed call
+                .values(
+                    'patientid', 'fullname', 'reservationCode', 'leadSource',
+                    'createdDate', 'city', 'mobile', 'age',
+                    'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                    'call_count', 'last_call_date', 'last_call_outcome'
+                )
             )
-            .order_by('-createdDate')
-            .values('outcome')[:1]  # Get the outcome of the latest call
-        )
-    )
-    .filter(call_count__gt=0)  # Ensure patients have at least one confirmed call
-    .values(
-        'patientid', 'fullname', 'reservationCode', 'leadSource',
-        'createdDate', 'city', 'mobile', 'age',
-        'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
-        'call_count', 'last_call_date', 'last_call_outcome'
-    )
-)
                 
         elif viewScope=='willattend':
                 recent_patients = (
@@ -316,13 +312,13 @@ class CallCenterView(ListView):
         # Render the edit page with the form and patient data
         return render(request, 'callcenter/followReservation.html', {'form': form, 'patient': patient,'calltracks':calltracks})
     
-    def get_patient_statistics_past_30_days(user):
+    def get_patient_statistics_past_30_days(request):
         today = date.today()
         thirty_days_ago = today - timedelta(days=30)
 
         # 1. Patients reserved by the user in the past 30 days
         reserved_by_user_count = Patient.objects.filter(
-            reservedBy=user,
+            reservedBy=request.user,
             createdDate__gte=thirty_days_ago,
             isDeleted=False
         ).count()
@@ -332,18 +328,18 @@ class CallCenterView(ListView):
         today = now().date()
 
         confirmed_patients_count = Patient.objects.filter(
-            reservedBy=user,
+            reservedBy=request.user,
             createdDate__gte=thirty_days_ago,
             attendanceDate__isnull=True,
             isDeleted=False,
             call_patients__outcome="Confirmed",  # Outcome is "Confirmed"
             call_patients__confirmationDate__gt=today,            # Add condition: confirmationDate > today
-            call_patients__createdBy=user
+            call_patients__createdBy=request.user
         ).distinct().count()
 
         # 3. Patients whose expected or confirmation date is today in the past 30 days
         expected_or_confirmed_today_count = Patient.objects.filter(
-            reservedBy=user,
+            reservedBy=request.user,
             createdDate__gte=thirty_days_ago,
             isDeleted=False
                 ).filter(
@@ -352,18 +348,17 @@ class CallCenterView(ListView):
 
         # 4. Patients who missed their expected or confirmation date in the past 30 days
         missed_patients_count = Patient.objects.filter(
-            reservedBy=user,            
+            reservedBy=request.user,            
             createdDate__gte=thirty_days_ago,
             attendanceDate__isnull=True,
-            isDeleted=False
-                ).filter(
-                    Q(expectedDate__lt=today) #| Q(confirmationDate__lt=today)  # Either condition can be true
-                ).count()
+            fileserial__isnull=True,
+            isDeleted=False,
+            expectedDate__lt=today).count()
         
          # 5. Patients who atteneded in the past 30 days
         attended_patients_count= Patient.objects.filter(
-            reservedBy=user,
-            
+            reservedBy=request.user,
+            fileserial__isnull=False,            
             createdDate__gte=thirty_days_ago,
             attendanceDate__isnull=False,
             isDeleted=False
@@ -385,15 +380,21 @@ class CallCenterView(ListView):
 
 
     def get_reservation_data(request):
-        # Dates for the last 7 days
-        today = datetime.today()
+        # Get today's date and convert it to an aware datetime object
+        today = timezone.now()
+
+        # Generate the last 30 days, ensuring they are aware datetime objects
         last_30_days = [today - timedelta(days=i) for i in range(30)]
+
+        # Convert naive datetimes to aware datetimes (if they are naive)
+        last_30_days = [timezone.make_aware(date) if timezone.is_naive(date) else date for date in last_30_days]
+
         last_30_days.reverse()  # Keep it in chronological order
 
-        # Dates for the same period last month
+        # Dates for the same period last month (shift all dates by 30 days)
         last_month = [date - timedelta(days=30) for date in last_30_days]
 
-        # Fetch data for the last 7 days
+        # Fetch data for the last 30 days, using aware datetimes for filtering
         last_30_days_data = (
             Patient.objects.filter(createdDate__range=(last_30_days[0], last_30_days[-1]))
             .values('createdDate')
@@ -411,8 +412,8 @@ class CallCenterView(ListView):
         data = []
         for i, date in enumerate(last_30_days):
             date_str = date.strftime('%b %d')  # e.g., "Jan 24"
-            current_count = next((item['count'] for item in last_30_days_data if item['createdDate'] == date.date()), 0)
-            last_month_count = next((item['count'] for item in last_month_data if item['createdDate'] == last_month[i].date()), 0)
+            current_count = next((item['count'] for item in last_30_days_data if item['createdDate'].date() == date.date()), 0)
+            last_month_count = next((item['count'] for item in last_month_data if item['createdDate'].date() == last_month[i].date()), 0)
 
             data.append({
                 'date': date_str,
@@ -421,6 +422,7 @@ class CallCenterView(ListView):
             })
 
         return JsonResponse({'reservationsData': data})
+
     
     def validate_mobile(request):
         mobile = request.GET.get('mobile', None)

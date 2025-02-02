@@ -126,11 +126,12 @@ class Patient(models.Model):
     callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0])
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
       # Field name made lowercase.
-    attendanceDate = models.DateField(blank=True, null=True,verbose_name='Actual Attendance  Date')  # Field name made lowercase.
+    attendanceDate = models.DateTimeField(blank=True, null=True,verbose_name='Actual Attendance  Date')  # Field name made lowercase.
     rideglass = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='Ride Of Glass')
     wearingconduct = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='WEaring Conduct')
     createdBy = models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='created_patients')  # Field name made lowercase.
-    createdDate = models.DateField( blank=True, null=True,verbose_name='created Date')  # 
+    createdDate = models.DateTimeField(auto_now_add=True)
+
     latestupdate = models.DateField( blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField( blank=True, null=True)  # Field name made lowercase.
     isDeleted = models.BooleanField(default=False)

@@ -1,0 +1,310 @@
+{%extends 'master.html'%}
+
+        {% block content %}
+                  
+       
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      
+          <div class="pagetitle">
+            <h1>Call Center Dashboard</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+                <li class="breadcrumb-item active">Marekting-Admin DashBoard</li>
+              </ol>
+            </nav>
+          </div><!-- End Page Title -->
+      
+              <div class="container-fluid">
+                  <!-- Page Header -->
+                  <div class="row bg-primary text-white p-4 rounded shadow-sm mb-4">
+                    <div class="col">
+                        <h2 class="display-6 mb-2">Marekting-Admin Dashboard</h2>
+                        <p class="lead">Analyze reservations and follow-up leads at a glance</p>
+                        <div class="date-range mt-3 p-2 bg-light text-dark rounded">
+                            <strong>From:</strong> {{ stats.date_range.start }} 
+                            <strong>To:</strong> {{ stats.date_range.end }}
+                        </div>
+                    </div>
+                </div>
+                
+          
+                  <!-- Dashboard Summary Cards -->
+                  <div class="row text-center mb-4">
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #82B7F1FF; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Total </h5>
+                                <a href="{% url 'reservationList' %}" class="card-text display-6" style="color: white;">{{ stats.reserved_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #28a745; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Confirmed </h5>
+                                <a href="{% url 'reservationListScope' 'confirmed' %}"class="card-text display-6" style="color: white;">{{ stats.confirmed_patients_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm" style="background-color: #ffc107; color: black;">
+                            <div class="card-body">
+                                <h5 class="card-title">Will Attend Today</h5>
+                                <a href="{% url 'reservationListScope' 'willattend' %}"class="card-text display-6" style="color: black;">{{ stats.expected_today_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm" style="background-color: #dc3545; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Missed Reservations </h5>
+                                <a href="{% url 'reservationListScope' 'missed' %}" class="card-text display-6" style="color: white;">{{ stats.missed_patients_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #8B5FDFFF; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Attended</h5>
+                                <a href="{% url 'reservationListScope' 'attended' %}" class="card-text display-6" style="color: white;">{{ stats.attended_patients_count  }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+          
+                  <!-- Charts Section -->
+
+                  <div class="container mt-4">
+                    <div class="row">
+                        <!-- 1️⃣ Lead Source Percentage -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <!-- Header Section -->
+                                <div class="card-header">
+                                    <h4>Lead Source Distribution</h4>
+                                </div>
+                        
+                                <!-- Body Section -->
+                                <div class="card-body">
+                                    <canvas id="leadSourceChart"></canvas>
+                                </div>
+                        
+                                <!-- Footer Section -->
+                                <div class="card-footer">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- 2️⃣ Suffered Cases -->
+                        <div class="col-md-6">
+                            
+                            <div class="card">
+                                <!-- Header Section -->
+                                <div class="card-header">
+                                    <h4>Suffered Cases</h4>
+                                </div>
+                        
+                                <!-- Body Section -->
+                                <div class="card-body">
+                                        <canvas id="sufferedCaseChart"></canvas>
+                                </div>
+                        
+                                <!-- Footer Section -->
+                                <div class="card-footer">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row mt-4">
+                        <!-- 3️⃣ Check-Up Price -->
+                        <div class="col-md-6">
+                            
+                            <div class="card">
+                                <!-- Header Section -->
+                                <div class="card-header">
+                                    <h4>Check-Up Price Distribution</h4>
+                                </div>
+                        
+                                <!-- Body Section -->
+                                <div class="card-body">
+                                        <canvas id="checkUpPriceChart"></canvas>
+                                </div>
+                        
+                                <!-- Footer Section -->
+                                <div class="card-footer">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- 4️⃣ Age & Gender -->
+                        <div class="col-md-6">
+                           
+                            <div class="card">
+                                <!-- Header Section -->
+                                <div class="card-header">
+                                    <h4>Age & Gender Distribution</h4>
+                                </div>
+                        
+                                <!-- Body Section -->
+                                <div class="card-body">
+                                        <canvas id="ageGenderChart"></canvas>
+                                </div>
+                        
+                                <!-- Footer Section -->
+                                <div class="card-footer">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="row mt-4">
+                        <!-- 5️⃣ City Distribution (Spanning Full Width) -->
+                        <div class="col-md-12">
+                            
+                            <div class="card">
+                                <!-- Header Section -->
+                                <div class="card-header">
+                                    <h4>CallCenter-wise Reservations Count</h4>
+                                </div>
+                        
+                                <!-- Body Section -->
+                                <div class="card-body">
+                                    <canvas id="callCenterChart"></canvas>
+                                </div>
+                        
+                                <!-- Footer Section -->
+                                <div class="card-footer">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                  
+
+
+
+<!-- Chart.js Scripts -->
+<script>
+    var barColorsx = [
+        '#4CAF50', // Green (for positive or growth-related data)
+        '#2196F3', // Blue (trusted, professional)
+        '#FFC107', // Amber (energetic and attention-grabbing)
+        '#9C27B0', // Purple (creative or premium)
+        '#FF5722', // Deep Orange (bold, energetic)
+        '#009688', // Teal (calm, balanced)
+        '#3F51B5', // Indigo (serious, corporate)
+        '#795548'  // Brown (stable, earthy)
+    ];
+
+    var barColors = [
+    '#3E75ADFF', // Dark Blue Gray (Professional, serious)
+    '#E74C3C', // Red (Strong, urgent)
+    '#2ECC71', // Emerald Green (Growth, success)
+    '#A2A7ABFF', // Bright Blue (Trust, calm)
+    '#F39C12', // Orange (Energetic, attention-grabbing)
+    '#1ABC9C', // Turquoise (Fresh, modern)
+    '#9B59B6', // Purple (Creative, luxurious)
+    '#16A085'  // Sea Green (Stable, balanced)
+];
+
+    
+    // 🔹 Lead Source Chart
+    var leadSourceCtx = document.getElementById('leadSourceChart').getContext('2d');
+    new Chart(leadSourceCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ context.lead_source_labels|safe }},
+            datasets: [{
+                label: 'Lead Source',
+                data: {{ context.lead_source_counts|safe }},
+                backgroundColor: barColors
+            }]
+        }
+    });
+
+    // 🔹 Suffered Cases Chart
+    var sufferedCaseCtx = document.getElementById('sufferedCaseChart').getContext('2d');
+    new Chart(sufferedCaseCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ context.suffered_case_labels|safe }},
+            datasets: [{
+                label: 'Suffered Cases',
+                data: {{ context.suffered_case_counts|safe }},
+                backgroundColor: barColors
+            }]
+        }
+    });
+
+    // 🔹 Check-Up Price Chart
+    var checkUpPriceCtx = document.getElementById('checkUpPriceChart').getContext('2d');
+    new Chart(checkUpPriceCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ context.checkup_price_labels|safe }},
+            datasets: [{
+                label: 'Check-Up Price',
+                data: {{ context.checkup_price_counts|safe }},
+                backgroundColor: barColors
+            }]
+        }
+    });
+
+    // 🔹 Age & Gender Chart
+    var ageGenderCtx = document.getElementById('ageGenderChart').getContext('2d');
+    new Chart(ageGenderCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ context.age_labels|safe }},
+            datasets: [
+                {
+                    label: 'Male',
+                    data: {{ context.male_counts|safe }},
+                    backgroundColor: '#36a2eb'
+                },
+                {
+                    label: 'Female',
+                    data: {{ context.female_counts|safe }},
+                    backgroundColor: '#ff6384'
+                }
+            ]
+        }
+    });
+
+    // 🔹 City Distribution Chart
+    var callCenterCtx = document.getElementById('callCenterChart').getContext('2d');
+
+// Define a color array for each bar
+    
+new Chart(callCenterCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ context.callcenter_labels|safe }},
+        datasets: [{
+            label: 'Reservations #',
+            data: {{ context.reservations_counts|safe }},
+            backgroundColor: barColors // Use the array of colors here
+        }]
+    }
+});
+
+</script>
+              </div>
+          
+              <!-- Chart.js Scripts -->
+                     
+          
+       
+    {% endblock %}
+       
+    
