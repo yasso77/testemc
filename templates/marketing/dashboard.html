@@ -7,7 +7,7 @@
 
       
           <div class="pagetitle">
-            <h1>Call Center Dashboard</h1>
+            <h1>Marketing Dashboard</h1>
             <nav>
               <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
@@ -291,7 +291,7 @@ new Chart(callCenterCtx, {
     data: {
         labels: {{ context.callcenter_labels|safe }},
         datasets: [{
-            label: 'Reservations #',
+            label: '# Reservations added by call center agents',
             data: {{ context.reservations_counts|safe }},
             backgroundColor: barColors // Use the array of colors here
         }]

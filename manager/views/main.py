@@ -29,10 +29,10 @@ class MainView(ListView):
         if request.user.groups.filter(name="admin").exists():
             return render(request, 'center/dashboard.html', {'name': 'index'})
         
-        # elif request.user.groups.filter(name="Marketing").exists():
-        #     context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
-        #     stats=MarketingView.get_patient_statistics_past_30_days()
-        #     return render(request, 'marketing/dashboard.html', {'context': context,'stats':stats})
+        elif request.user.groups.filter(name="Marketing").exists():
+             context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
+             stats=MarketingView.get_patient_statistics_past_30_days()
+             return render(request, 'marketing/dashboard.html', {'context': context,'stats':stats})
 
         elif request.user.groups.filter(name="Call center").exists():
             stats = CallCenterView.get_patient_statistics_past_30_days(request)  # ✅ Pass request, not request.user

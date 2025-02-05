@@ -124,17 +124,24 @@ class PatientView(ListView):
         month_number = now().month  # Get the current month number
         latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
 
+        # Get the current month as a number
+        current_month = str(datetime.now().month)  # "2" for February, "3" for March, etc.
+
         # Determine incrementing part
         if latest_code and latest_code.reservationCode:
+            latest_code_parts = latest_code.reservationCode.split('-')
             
-            latest_increment = int(latest_code.reservationCode.split('-')[-1])
-            increment = latest_increment + 1
+            if len(latest_code_parts) >= 3 and latest_code_parts[1] == current_month:
+                latest_increment = int(latest_code_parts[-1])  # Get the last part and convert to int
+                increment = latest_increment + 1
+            else:
+                increment = 1  # Reset increment if month is different
         else:
             increment = 1
 
         # Format increment with leading zeros
         increment_part = f"{increment:03d}"
-        reservationCode = f"{username_prefix}-{month_number}-{increment_part}"
+        reservationCode = f"{username_prefix}-{current_month}-{increment_part}"
         
         if request.method == 'POST':
             # Pass request to the form for message handling

@@ -3,7 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count
 from django.views.generic.list import ListView
-from manager.model.patient import City, Patient, SufferedCases
+from manager.model.patient import CheckUpPrice, City, Patient, SufferedCases
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 
@@ -30,21 +30,46 @@ class MarketingView(ListView):
         suffered_case_counts = [entry['count'] for entry in suffered_casesx]
 
         # 3️⃣ Check-Up Price Distribution
-        checkup_prices = patients.values('checkUpprice_id').annotate(count=Count('patientid'))
-        checkup_price_labels = [str(entry['checkUpprice_id']) for entry in checkup_prices]
-        checkup_price_counts = [entry['count'] for entry in checkup_prices]
+        checkup_pricesx = patients.values('checkUpprice_id').annotate(count=Count('patientid'))
+        checkup_prices = CheckUpPrice.objects.values('checkupPriceID', 'checkupPriceName')
+        checkup_price_labels = [str(entry['checkupPriceName']) for entry in checkup_prices]
+        checkup_price_counts = [entry['count'] for entry in checkup_pricesx]
 
         # 4️⃣ Age & Gender Distribution
         male_counts = [entry['count'] for entry in patients.filter(gender='M').values('age').annotate(count=Count('patientid'))]
         female_counts = [entry['count'] for entry in patients.filter(gender='F').values('age').annotate(count=Count('patientid'))]
         age_labels = [str(entry['age']) for entry in patients.values('age').annotate(count=Count('patientid'))]
 
-        # 5️⃣ City Distribution
-        reservedByx = patients.values('reservedBy_id').annotate(count=Count('patientid'))
-        
-        callcenter = User.objects.values('id', 'username')  
-        callcenter_labels = [entry['username'] for entry in callcenter]  # Extract city names
-        reservations_counts = [entry['count'] for entry in reservedByx]
+        # 5️⃣ New reservations added by call center agent
+        # Aggregate count of patients grouped by reservedBy_id
+        # Count patients grouped by reservedBy_id
+        reservedBy_counts = patients.values('reservedBy_id').annotate(count=Count('patientid'))
+
+        # Extract reservedBy_id values
+        reserved_by_ids = [entry['reservedBy_id'] for entry in reservedBy_counts]
+
+        # Debugging: Print reservedBy_id values
+        #print("Reserved By IDs:", reserved_by_ids)
+
+        # Fetch call center user data
+        callcenter = User.objects.filter(id__in=reserved_by_ids).values('id', 'username')
+
+        # Debugging: Print retrieved user data
+        #print("Call Center Users:", list(callcenter))
+
+        # Create a mapping of user IDs to usernames
+        user_mapping = {entry['id']: entry['username'] for entry in callcenter}
+
+        # Debugging: Print user mapping
+        print("User Mapping:", user_mapping)
+
+        # Prepare labels and counts
+        callcenter_labels = [user_mapping.get(int(entry['reservedBy_id']), "Unknown") for entry in reservedBy_counts]
+        reservations_counts = [entry['count'] for entry in reservedBy_counts]
+
+        # Debugging: Print final output
+        #print("Final Labels:", callcenter_labels)
+        #print("Final Counts:", reservations_counts)
 
         context = {
             'lead_source_labels': lead_source_labels,
