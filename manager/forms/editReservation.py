@@ -4,7 +4,7 @@ from django import forms
 import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from manager.model.patient import City, Offers, Patient, SufferedCases
+from manager.model.patient import AgentCompany, CheckUpPrice, City, Offers, Patient, SufferedCases
 
 
 class editReservationForm(forms.ModelForm):   
@@ -12,10 +12,12 @@ class editReservationForm(forms.ModelForm):
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
     sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))
     offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
+    agentID= forms.ModelChoiceField(queryset=AgentCompany.objects.active(),required=False,  label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
+    checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice']
+        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
@@ -32,8 +34,7 @@ class editReservationForm(forms.ModelForm):
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
            
-            'leadSource': forms.Select(attrs={'class': 'form-select'}),
-            'checkUpprice': forms.Select(attrs={'class': 'form-select'}),
+            'leadSource': forms.Select(attrs={'class': 'form-select'}),            
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
             'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute

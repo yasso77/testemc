@@ -1,7 +1,7 @@
 # forms.py
 from datetime import date
 from django import forms
-from manager.model.patient import  City, Offers, Patient, SufferedCases
+from manager.model.patient import  AgentCompany, CheckUpPrice, City, Offers, Patient, SufferedCases
 
 
 class MyModelForm(forms.ModelForm):   
@@ -10,10 +10,13 @@ class MyModelForm(forms.ModelForm):
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
     sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))
     offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
+    agentID= forms.ModelChoiceField(queryset=AgentCompany.objects.active(),required=False,  label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
+    checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
+    
     class Meta:
         model = Patient
        
-        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection','checkUpprice']
+        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection','checkUpprice','agentID']
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
@@ -37,8 +40,8 @@ class MyModelForm(forms.ModelForm):
             
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
 
-            'leadSource': forms.Select(attrs={'class': 'form-select'}),
-            'checkUpprice': forms.Select(attrs={'class': 'form-select'}),
+            'leadSource': forms.Select(attrs={'class': 'form-select'}),          
+            
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             
             'expectedDate': forms.DateInput(attrs={

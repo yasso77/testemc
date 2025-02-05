@@ -1,6 +1,6 @@
 from django.contrib import admin
 from manager.model.doctor import Doctor, Specialties
-from manager.model.patient import CheckUpPrice, Offers, Patient,City, SufferedCases
+from manager.model.patient import AgentCompany, CheckUpPrice, Offers, Patient,City, SufferedCases
 from manager.models import ClassficationsOptions
 
 # Register your models here.
@@ -126,5 +126,25 @@ class CheckUpPriceAdmin(admin.ModelAdmin):
 # Register your models here.
 
 admin.site.register(CheckUpPrice,CheckUpPriceAdmin)
+
+class AgentCompanyAdmin(admin.ModelAdmin):
+    
+    list_display=['agentID','AgentCompany','isVisible','createdDate']
+    list_display_links=['AgentCompany']   
+    search_fields=['AgentCompany','isVisible']
+   # list_filter=['mobile']
+    #list_per_page=2
+    #fields=['fileserial','fullname','birthdate']
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'isVisible':
+            # Replace the BooleanField widget with a RadioSelect showing Yes/No
+            kwargs['widget'] = admin.widgets.AdminRadioSelect(
+                choices=[(True, 'Yes'), (False, 'No')]
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+# Register your models here.
+admin.site.register(AgentCompany,AgentCompanyAdmin)
+    
 
 

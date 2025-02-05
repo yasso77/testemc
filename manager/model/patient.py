@@ -8,6 +8,9 @@ class CityManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
 
+class AgentCompanyManager(models.Manager):
+     def active(self):
+            return self.filter(isVisible=True)
 class OffersManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
@@ -28,8 +31,8 @@ class CheckUpPrice(models.Model):
     def __str__(self):
         return self.checkupPriceName
     class Meta:
-        verbose_name='CheckUpPrice'
-        verbose_name_plural = "CheckUpPrices"
+        verbose_name='Check-Up Price'
+        verbose_name_plural = "Check-Up Prices"
     
 
 class City(models.Model):    
@@ -44,7 +47,21 @@ class City(models.Model):
     class Meta:
         verbose_name='City'
         verbose_name_plural = "Cities"
-        
+
+
+class AgentCompany(models.Model):    
+    agentID=models.AutoField(primary_key=True)
+    AgentCompany=models.CharField(max_length=200, blank=True, null=True,verbose_name='Agent Company Name')
+    isVisible=models.BooleanField(blank=True,null=True)
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+    objects = AgentCompanyManager()
+    def __str__(self):
+        return self.AgentCompany
+    class Meta:
+        verbose_name='Agent-Company'
+        verbose_name_plural = "Agent-Company"    
+         
 class Offers(models.Model):    
     offerID=models.AutoField(primary_key=True)
     offerName=models.CharField(max_length=350, blank=True, null=True,verbose_name='Offer Name')
@@ -71,7 +88,7 @@ class SufferedCases(models.Model):
         return self.caseName
     class Meta:
         verbose_name='Suffered Case'
-        verbose_name_plural = "Cases"
+        verbose_name_plural = "Suffered Cases"
 
 
 class PatientManager(models.Manager):
@@ -89,7 +106,7 @@ class Patient(models.Model):
         ('N', 'No'),
         
     ]    
-    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call')]
+    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call'),('Instagram','Instagram')]
     
     CallDirection_CHOICES=[
         ('IN','INCOMING- Patient Call'),
@@ -112,6 +129,7 @@ class Patient(models.Model):
     checkUpprice =models.ForeignKey(CheckUpPrice, null=True, on_delete=models.DO_NOTHING,related_name='Check_UpPrice')
     reservedBy = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='reserved_patients')  # Field name made lowercase.
     offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
+    agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company')  
     sufferedcase = models.ForeignKey(
         'SufferedCases',
         on_delete=models.SET_NULL,

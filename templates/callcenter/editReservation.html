@@ -146,6 +146,18 @@
             {% endif %}
         </div>
     </div>
+
+    <div class="form-group row">
+        <label for="{{ form.agentID.id_for_label }}" class="col-sm-3 col-form-label">Agent/Company </label>
+        <div class="col-sm-8">
+            {{ form.agentID }}
+            {% if form.agentID.errors %}
+                <div class="text-danger">
+                    {{ form.agentID.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
     
     <div class="form-group row">
         <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
