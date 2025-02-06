@@ -3,6 +3,14 @@
 {% block content %}
  <!-- Include DataTables CSS -->
  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+
+ <style>
+
+    td {
+        white-space: nowrap;
+    }
+    
+ </style>
 <div class="pagetitle">
     <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
     <nav>
@@ -45,9 +53,13 @@
                         {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
                         <td>{{ patient.sufferedcase__caseName }}</td>
                         
-                        <td>{{ patient.createdDate }}</td>
-                        <td>{{ patient.expectedDate }}</td>
+                        <td data-order="{{ patient.createdDate|date:'Y-m-d H:i:s' }}">
+                            {{ patient.createdDate|date:'M. j, Y, g:i a' }}
+                        </td>
+                        
+                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">{{ patient.expectedDate }}</td>
                         <td>
+                            
                             <div>
                                 <strong>Call Count:</strong> {{ patient.call_count }}
                             </div>
@@ -71,25 +83,22 @@
                             </div>
                         </td>
                         
-                        <td>
+                        <td class="text-nowrap">
                             {% if patient.attendanceDate %}
-                            <!-- Attendance date is set -->
-                            
-                            <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning">ATT:{{patient.attendanceDate}}</a>
-                        {% else %}
-                            <!-- Attendance date is null -->
-                            <!-- Edit Button -->
-
-                            <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning">Follow-Up</a>
-                            <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary">Edit</a>
-                    
-                            <!-- Delete Button -->
-                            <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this patient?');">Hide</button>
-                            </form>
-                        {% endif %}
+                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block">
+                                    ATT: {{ patient.attendanceDate }}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
+                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
+                                <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger d-inline-block mx-1" 
+                                        onclick="return confirm('Are you sure you want to delete this patient?');">Hide</button>
+                                </form>
+                            {% endif %}
                         </td>
+                        
                          
                     </tr>
                 {% empty %}

@@ -14,10 +14,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='patient',
-            name='comingsource',
-        ),
+       
         migrations.AlterField(
             model_name='patient',
             name='address',

@@ -10,34 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='doctor',
-            old_name='DoctorID',
-            new_name='doctorID',
-        ),
-        migrations.RenameField(
-            model_name='doctor',
-            old_name='FullName',
-            new_name='fullName',
-        ),
-        migrations.RenameField(
-            model_name='doctor',
-            old_name='Mobile',
-            new_name='mobile',
-        ),
-        migrations.RenameField(
-            model_name='doctor',
-            old_name='SpecialtyID',
-            new_name='specialtyID',
-        ),
-        migrations.RenameField(
-            model_name='specialties',
-            old_name='SpecialtyID',
-            new_name='specialtyID',
-        ),
-        migrations.RenameField(
-            model_name='specialties',
-            old_name='SpecialtyNam',
-            new_name='specialtyNam',
-        ),
+        
     ]

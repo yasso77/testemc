@@ -61,7 +61,7 @@ class MarketingView(ListView):
         user_mapping = {entry['id']: entry['username'] for entry in callcenter}
 
         # Debugging: Print user mapping
-        print("User Mapping:", user_mapping)
+        #print("User Mapping:", user_mapping)
 
         # Prepare labels and counts
         callcenter_labels = [user_mapping.get(int(entry['reservedBy_id']), "Unknown") for entry in reservedBy_counts]

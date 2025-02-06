@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ('address', models.CharField(blank=True, db_column='Address', max_length=1000, null=True)),
                 ('city', models.CharField(blank=True, db_column='City', max_length=150, null=True)),
                 ('email', models.CharField(blank=True, db_column='Email', max_length=150, null=True)),
-                ('comingsource', models.CharField(blank=True, choices=[('Facebook', 'Facebook'), ('Newspaper', 'Newspaper'), ('Friend', 'Friend')], max_length=100, null=True)),
+                
                 ('reservedBy', models.CharField(blank=True, db_column='ReservedBy', max_length=150, null=True)),
                 ('arrivedOn', models.CharField(blank=True, db_column='ArrivedOn', max_length=150, null=True)),
                 ('remarks', models.CharField(blank=True, db_column='Remarks', max_length=2055, null=True)),
