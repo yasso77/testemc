@@ -24,16 +24,7 @@ class Migration(migrations.Migration):
             model_name='doctor',
             old_name='Mobile',
             new_name='mobile',
-        ),
-        migrations.RenameField(
-            model_name='doctor',
-            old_name='SpecialtyID',
-            new_name='specialtyID',
-        ),
-        migrations.RenameField(
-            model_name='specialties',
-            old_name='SpecialtyID',
-            new_name='specialtyID',
-        ),
+        ),       
+        
        
     ]

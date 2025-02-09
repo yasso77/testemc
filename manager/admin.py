@@ -8,7 +8,7 @@ from manager.models import ClassficationsOptions
 admin.site.site_header='EMC-Administration'
 admin.site.site_title='EMC'
 class DoctorAdmin(admin.ModelAdmin):
-    list_display=['doctorID','fullName','mobile','specialtyID','active']
+    list_display=['doctorID','fullName','mobile','active']
     list_display_links=['fullName']   
     search_fields=['fullName','mobile']
 # Register your models here.

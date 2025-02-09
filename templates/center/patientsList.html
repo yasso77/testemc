@@ -54,7 +54,7 @@
                         <td>{{ patient.gender }}</td>                      
                         
                        
-                        <td>{{ patient.sufferedcase }}</td>
+                        <td>{{ patient.sufferedcase__caseName }}</td>
                         
                         <td>{% if patient.expectedDate|is_today %}
                             <span class="btn btn-sm btn-info">Today: {{ patient.expectedDate }}</span>

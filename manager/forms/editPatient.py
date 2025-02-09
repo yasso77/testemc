@@ -4,11 +4,18 @@ from django import forms
 import re
 from django.core.exceptions import ValidationError
 
-from manager.model.patient import Patient
+from manager.model.patient import Patient, SufferedCases
 
 
-class editPatientForm(forms.ModelForm):   
+class editPatientForm(forms.ModelForm):  
+     
+    sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))
     
+    attendanceDate = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        initial=date.today  # Set default value to today's date
+    )
+
     
     class Meta:
         model = Patient
@@ -28,12 +35,12 @@ class editPatientForm(forms.ModelForm):
             'max': 99,  # Maximum age (restricts to two digits)
             'placeholder': 'Enter age',
                 }),
-            'sufferedcase': forms.TextInput(attrs={'class': 'form-control'}),
+            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}), 
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),  
             'wearingconduct': forms.RadioSelect(attrs={'class': 'form-check-input'}),    
             'rideglass':forms.RadioSelect(attrs={'class': 'form-check-input'}), 
-            'attendanceDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+            #'attendanceDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
              
     
         }

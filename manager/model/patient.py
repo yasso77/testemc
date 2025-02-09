@@ -24,7 +24,7 @@ class SufferedCasesManager(models.Manager):
 class CheckUpPrice(models.Model):
     checkupPriceID=models.AutoField(primary_key=True)
     checkupPriceName=models.CharField(max_length=350, blank=True, null=True,verbose_name='check-Up Price')
-    isVisible=models.BooleanField(blank=True,null=True)    
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')    
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     
     objects = CheckUpPriceManager()
@@ -38,7 +38,7 @@ class CheckUpPrice(models.Model):
 class City(models.Model):    
     cityID=models.AutoField(primary_key=True)
     cityName=models.CharField(max_length=100, blank=True, null=True,verbose_name='City Name')
-    isVisible=models.BooleanField(blank=True,null=True)
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     
     objects = CityManager()
@@ -52,7 +52,7 @@ class City(models.Model):
 class AgentCompany(models.Model):    
     agentID=models.AutoField(primary_key=True)
     AgentCompany=models.CharField(max_length=200, blank=True, null=True,verbose_name='Agent Company Name')
-    isVisible=models.BooleanField(blank=True,null=True)
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     
     objects = AgentCompanyManager()
@@ -65,7 +65,7 @@ class AgentCompany(models.Model):
 class Offers(models.Model):    
     offerID=models.AutoField(primary_key=True)
     offerName=models.CharField(max_length=350, blank=True, null=True,verbose_name='Offer Name')
-    isVisible=models.BooleanField(blank=True,null=True)
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
     validFromDate=models.DateField(verbose_name='Valid from',blank=True,null=True)
     validToDate=models.DateField(verbose_name='Valid To',blank=True,null=True)
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
@@ -80,7 +80,7 @@ class Offers(models.Model):
 class SufferedCases(models.Model):    
     sufferedcaseID=models.AutoField(primary_key=True)
     caseName=models.CharField(max_length=350, blank=True, null=True,verbose_name='Case Name')
-    isVisible=models.BooleanField(blank=True,null=True)
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
     
     objects = SufferedCasesManager()
@@ -131,7 +131,7 @@ class Patient(models.Model):
     offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
     agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company')  
     sufferedcase = models.ForeignKey(
-        'SufferedCases',
+        SufferedCases,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

@@ -43,9 +43,16 @@
               <i class="bi bi-circle"></i><span>2-Attended Patient</span>
             </a>
           </li> {% endcomment %}
+
+          <li>
+            <a href="{%url 'newreservation'%}">
+              <i class="bi bi-circle"></i><span>New Reservation</span>
+            </a>
+          </li>
+          
           <li>
             <a href="{%url 'centerPatients'%}">
-              <i class="bi bi-circle"></i><span>Patients List</span>
+              <i class="bi bi-circle"></i><span>Reservation List</span>
             </a>
           </li>
           {%endif%}
@@ -71,7 +78,7 @@
         
         </ul>
       </li><!-- End Components Nav -->
-      {%if request.user.is_staff%}
+      {% comment %} {%if request.user.is_staff%}
       <li class="nav-item">
         <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -101,7 +108,7 @@
         
         </ul>
       </li><!-- End Components Nav -->
-      {%endif%}
+      {%endif%} {% endcomment %}
       {%if request.user.is_staff%}
       <li class="nav-item">
         <a class="nav-link " href="{%url 'admin:index'%}">

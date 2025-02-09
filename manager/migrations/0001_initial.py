@@ -54,8 +54,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Specialties',
             fields=[
-                ('SpecialtyID', models.AutoField(primary_key=True, serialize=False)),
-                ('SpecialtyNam', models.CharField(max_length=255)),
+                ('specialtyID', models.AutoField(primary_key=True, serialize=False)),
+                ('specialtyName', models.CharField(max_length=255)),
             ],
         ),
         migrations.CreateModel(
@@ -73,9 +73,9 @@ class Migration(migrations.Migration):
                 ('patientid', models.ForeignKey(blank=True, db_column='PatientID', null=True, on_delete=django.db.models.deletion.CASCADE, to='manager.patient')),
             ],
         ),
-        migrations.AddField(
-            model_name='doctor',
-            name='SpecialtyID',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='manager.specialties', verbose_name='Speciality Name'),
-        ),
+        # migrations.AddField(
+        #     model_name='doctor',
+        #     name='specialtyID',
+        #     field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='manager.specialties', verbose_name='Speciality Name'),
+        # ),
     ]

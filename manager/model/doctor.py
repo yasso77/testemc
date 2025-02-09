@@ -15,7 +15,7 @@ class Doctor(models.Model):
     doctorID=models.AutoField(primary_key=True,verbose_name='Dcotor ID')
     fullName=models.CharField(max_length=255,verbose_name='Doctor Name')
     mobile=models.CharField(max_length=155,null=True)
-    specialtyID=models.ForeignKey(Specialties,on_delete=models.PROTECT,verbose_name='Speciality Name')
+    specialtyID=models.ForeignKey(Specialties,on_delete=models.PROTECT,verbose_name='Speciality Name',default=1)
     active=models.BooleanField(default=True)
     image=models.ImageField(upload_to='doctors/photos/%y/%m/%d',null=True,default='photos/doctor.jpg')
 

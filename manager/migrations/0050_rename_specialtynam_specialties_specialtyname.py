@@ -9,10 +9,4 @@ class Migration(migrations.Migration):
         ('manager', '0049_rename_doctorid_doctor_doctorid_and_more'),
     ]
 
-    operations = [
-        migrations.RenameField(
-            model_name='specialties',
-            old_name='SpecialtyNam',
-            new_name='specialtyName',
-        ),
-    ]
+    

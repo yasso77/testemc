@@ -8,7 +8,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ('manager', '0020_remove_patient_comingsource_alter_patient_address_and_more'),
     ]
-
+    
     operations = [
-        
-    ]
+      ]
+
+    

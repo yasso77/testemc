@@ -197,7 +197,7 @@ class PatientView(ListView):
         recent_patients = Patient.objects.active().filter(
         createdDate__gte=ten_days_ago        
         ).values(
-            'fileserial','patientid','fullname', 'reservationCode', 'createdDate','city','age','sufferedcase__id','expectedDate','gender','confirmationDate','attendanceDate')  # Select only the required fields
+            'fileserial','patientid','fullname', 'reservationCode', 'createdDate','city','age','sufferedcase__caseName','expectedDate','gender','attendanceDate')  # Select only the required fields
         
         # Pass the data to the template      
         
@@ -207,13 +207,17 @@ class PatientView(ListView):
     def edit_patient(request, patientid):
         # Fetch the patient instance or return 404 if not found
         patient = get_object_or_404(Patient, patientid=patientid)
-        calltrack=CallTrack.objects.filter(patientid=patientid)
+        calltrack=CallTrack.objects.filter(patientID=patientid)
         
         try:
              patient_form_url = reverse('patientForm', kwargs={'patientid': patientid})
         except Exception as e:
                 print(f"Error in URL reversing: {e}")
                 patient_form_url = "#"
+        # Pre-fill attendanceDate with today's date only if it's NULL
+        initial_data = {}
+        if patient.attendanceDate is None:
+            initial_data['attendanceDate'] = date.today()  # Set default for form only
         
         if request.method == 'POST':
             # Bind form data to the existing patient instance
@@ -233,7 +237,7 @@ class PatientView(ListView):
                 print(form.errors)  # Print the errors to the console
         else:
             # Display the form pre-filled with patient data
-            print('x')
+            # print('x')
             form = editPatientForm(instance=patient)
         
         # Render the edit page with the form and patient data
