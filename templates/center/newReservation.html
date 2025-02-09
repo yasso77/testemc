@@ -1,0 +1,242 @@
+{% extends 'master.html'%}
+
+
+{% block content %}
+<style>
+  .form-group {
+      margin-bottom: 20px; /* Adjust this value as needed */
+  }
+  .text-danger {
+    color: red;
+}
+</style>
+<div class="pagetitle">
+    <h1>New Reservation</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Call Center</li>
+        <li class="breadcrumb-item active">Add New Reservation</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+    <div class="row">
+      <div class="col-lg-10">
+     
+
+<div class="form-container">
+  <form method="post" class="form-horizontal">
+    {% csrf_token %}
+    <div class="form-group row">
+        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code</label>
+        <div class="col-sm-8">
+            {{ form.reservationCode }}
+            {% if form.reservationCode.errors %}
+                <div class="text-danger">
+                    {{ form.reservationCode.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.fullname }}
+            {% if form.fullname.errors %}
+                <div class="text-danger">
+                    {{ form.fullname.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        
+            <label for="id_mobile" class="col-sm-3 col-form-label">Mobile</label>
+            <div class="col-sm-8">
+            <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control">
+           
+            <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
+            </div>
+        
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.city }}
+            {% if form.city.errors %}
+                <div class="text-danger">
+                    {{ form.city.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.age }}
+            {% if form.age.errors %}
+                <div class="text-danger">
+                    {{ form.age.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            <div>
+                {% for radio in form.gender %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label">{{ radio.choice_label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.gender.errors %}
+                <div class="text-danger">
+                    {{ form.gender.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Comming Source<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.leadSource }}
+            {% if form.leadSource.errors %}
+                <div class="text-danger">
+                    {{ form.leadSource.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.sufferedcase }}
+            {% if form.sufferedcase.errors %}
+                <div class="text-danger">
+                    {{ form.sufferedcase.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers </label>
+        <div class="col-sm-8">
+            {{ form.offerID }}
+            {% if form.offerID.errors %}
+                <div class="text-danger">
+                    {{ form.offerID.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+
+    <div class="form-group row">
+        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up price </label>
+        <div class="col-sm-8">
+            {{ form.checkUpprice }}
+            {% if form.checkUpprice.errors %}
+                <div class="text-danger">
+                    {{ form.checkUpprice.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.agentID.id_for_label }}" class="col-sm-3 col-form-label">Agent/Company </label>
+        <div class="col-sm-8">
+            {{ form.agentID }}
+            {% if form.agentID.errors %}
+                <div class="text-danger">
+                    {{ form.agentID.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="form-group row">
+        <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
+        <div class="col-sm-8">
+            {{ form.remarks }}
+            
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction </label>
+      
+        <div class="col-sm-8">
+            <div>
+                {% for radio in form.callDirection %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label">{{ radio.choice_label }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if form.callDirection.errors %}
+                <div class="text-danger">
+                    {{ form.callDirection.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.expectedDate.id_for_label }}" class="col-sm-3 col-form-label">Expeceted Date <span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.expectedDate  }}
+            {% if form.expectedDate.errors %}
+            <div class="text-danger">
+                {{ form.expectedDate.errors }}
+            </div>
+        {% endif %}
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
+            <button type="submit" class="btn btn-primary">Create Reservation</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+        </div>
+    </div>
+    
+</form>
+          
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileField = document.getElementById('id_mobile');
+        const messageSpan = document.getElementById('mobile-validation-message');
+        
+        mobileField.addEventListener('blur', function () {
+            const mobile = mobileField.value;
+            const strmobile=mobile;
+            if (mobile) {
+                fetch(`/validate-mobile/?mobile=${mobile}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/reservationListMobile/${strmobile}" target="_blank">Click here to view</a>`;
+                            messageSpan.style.display = 'block'; // Show the message
+                        } else {
+                            messageSpan.style.display = 'none'; // Hide the message if no error
+                            messageSpan.textContent = ''; // Clear message if mobile is valid
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+</script>
+
+{%endblock%}

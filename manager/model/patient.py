@@ -112,17 +112,32 @@ class Patient(models.Model):
         ('IN','INCOMING- Patient Call'),
         ('OUT','OUTGOING - Call Center Call'),
         
-    ]    
+    ]
+    
+    reservations_CHOICES=[
+        ('First Visit','First Visit'),
+        ('Follow-up Re-examination','Follow-up Re-examination'),
+        ('Follow-up Eye surgery','Follow-up Eye surgery'),
+        
+    ] 
+    
+    firstVisit_CHOICES=[
+        ('ًWalk-In','Walk-In'),
+        ('Referred by someone','Referred by someone'),
+     ]       
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.
     reservationCode = models.CharField( max_length=150, blank=False, null=True,verbose_name='Confirmation Code',error_messages='Reservation code is requiered')
     fileserial = models.CharField( max_length=150, blank=False, null=True,verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
+    reservationType=models.CharField(max_length=150,choices=reservations_CHOICES,verbose_name='Reservation Type',default=reservations_CHOICES[1][0])
+    typeFirstVisit=models.CharField(max_length=150,choices=firstVisit_CHOICES,verbose_name='First Visit Type',default=firstVisit_CHOICES[1][0])
     leadSource=models.CharField(choices=leadSource_Choices,max_length=100, verbose_name='Lead Source',null=True, blank=True)
     fullname = models.CharField(max_length=250, blank=False, null=True,verbose_name='Patient Name')  # Field name made lowercase.
     birthdate = models.DateField( blank=False, null=True,verbose_name='Birth Date')  # Field name made lowercase.
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     image=models.ImageField(upload_to='patients/photos/%y/%m/%d',null=True,default='photos/patient.png')
     mobile = models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=000)  # Field name made lowercase.
+    otherMobile= models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True, blank=True) 
     address = models.CharField(max_length=1000, blank=True, null=True,verbose_name='Address')  # Field name made lowercase.
     city = models.ForeignKey(City,blank=True, null=True,on_delete=models.SET_NULL,verbose_name='City Name')  # Field name made lowercase.
     email = models.CharField(max_length=150, blank=True, null=True,verbose_name='Email')  # Field name made lowercase.  
@@ -137,10 +152,19 @@ class Patient(models.Model):
         blank=True,
         verbose_name='Suffered Case'
     )
+    sufferedcaseByPatient = models.ForeignKey(
+        SufferedCases,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Suffered Case by Patient',
+        related_name='caseBypatient'
+    )
     arrivedOn = models.CharField(max_length=150, blank=True, null=True,)  # Field name made lowercase.
     remarks = models.CharField(max_length=2055, blank=True, null=True,verbose_name='Remarks')
     
     age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=0,verbose_name='Age')  # Field name made lowercase.
+    birthdDate = models.DateField( blank=True, null=True,verbose_name='Birth Date')
     callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0])
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
       # Field name made lowercase.

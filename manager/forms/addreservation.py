@@ -86,25 +86,31 @@ class MyModelForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         # Extract 'request' before calling the parent constructor
+        # Extract 'request' and 'required_fields' before calling the parent constructor
         self.request = kwargs.pop('request', None)
-        
+        required_fields = kwargs.pop('required_fields', [])
+
         # Call the parent constructor
         super().__init__(*args, **kwargs)
         
-        # Initialize field values
+       # Initialize field values
         self.fields['expectedDate'].initial = ''
         self.fields['mobile'].initial = ''
         self.fields['age'].initial = ''
-        
+
         # Explicitly set choices for the gender field to avoid null values
-        self.fields['gender'].choices = [
-            ('M', 'Male'),
-            ('F', 'Female'),
-        ]
-        
+        self.fields['gender'].choices = [('M', 'Male'), ('F', 'Female')]
+
         # Ensure RadioSelect fields are marked as required
         self.fields['gender'].widget.attrs.update({'required': True})
         self.fields['leadSource'].widget.attrs.update({'required': True})
+
+        # Dynamically update required fields
+        for field_name in self.fields:
+            if field_name in required_fields:
+                self.fields[field_name].required = True
+            else:
+                self.fields[field_name].required = False
 
         
     # def clean_mobile(self): 

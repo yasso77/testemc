@@ -145,9 +145,11 @@ class PatientView(ListView):
         
         if request.method == 'POST':
             # Pass request to the form for message handling
-            form = MyModelForm(request=request, data=request.POST)            
-            if form.is_valid():
-                patient = form.save(commit=False)
+            
+            callCenterform = MyModelForm(request=request, data=request.POST, required_fields=['age', 'fullname', 'mobile'])
+            
+            if callCenterform.is_valid():
+                patient = callCenterform.save(commit=False)
                 patient.reservationCode = reservationCode
                 patient.reservedBy = request.user  # Assign the logged-in user
                 patient.createdBy = request.user  # Assign the logged-in user
@@ -174,12 +176,12 @@ class PatientView(ListView):
                 )
         else:
             # Initialize the form with the generated reservation code
-            form = MyModelForm(request=request, initial={'reservationCode': reservationCode})
+            callCenterform = MyModelForm(request=request, initial={'reservationCode': reservationCode})
             # Initial GET request
            
           
         # Render the new reservation form
-        return render(request, 'callcenter/newReservation.html', {'form': form, 'code': reservationCode})
+        return render(request, 'callcenter/newReservation.html', {'form': callCenterform, 'code': reservationCode})
 
     
     
