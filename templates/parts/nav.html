@@ -37,7 +37,7 @@
 
           {%endif%}
 
-          {% if request.user|in_group:"Recepition" or request.user|in_group:"Admin" %}
+          {% if request.user|in_group:"Reception" or request.user|in_group:"Admin" %}
           {% comment %} <li>
             <a href="{%url 'showPatientData'%}">
               <i class="bi bi-circle"></i><span>2-Attended Patient</span>
@@ -45,7 +45,7 @@
           </li> {% endcomment %}
 
           <li>
-            <a href="{%url 'newreservation'%}">
+            <a href="{%url 'centerNewreservation'%}">
               <i class="bi bi-circle"></i><span>New Reservation</span>
             </a>
           </li>

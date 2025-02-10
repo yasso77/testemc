@@ -15,7 +15,7 @@
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Call Center</li>
+        <li class="breadcrumb-item">Center</li>
         <li class="breadcrumb-item active">Add New Reservation</li>
       </ol>
     </nav>
@@ -25,21 +25,48 @@
     <div class="row">
       <div class="col-lg-10">
      
-
+    
 <div class="form-container">
   <form method="post" class="form-horizontal">
     {% csrf_token %}
+
     <div class="form-group row">
-        <label for="{{ form.reservationCode.id_for_label }}" class="col-sm-3 col-form-label">Reservation Code</label>
+        <label for="{{ form.fileserial.id_for_label }}" class="col-sm-3 col-form-label">File Serial</label>
         <div class="col-sm-8">
-            {{ form.reservationCode }}
-            {% if form.reservationCode.errors %}
+            {{ form.fileserial }}
+            {% if fileserial.errors %}
                 <div class="text-danger">
-                    {{ form.reservationCode.errors }}
+                    {{ form.fileserial.errors }}
                 </div>
             {% endif %}
         </div>
     </div>
+
+    <div class="form-group row">
+        <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">Reservation Type<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.reservationType }}
+            {% if form.reservationType.errors %}
+                <div class="text-danger">
+                    {{ form.reservationType.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="{{ form.referral.id_for_label }}" class="col-sm-3 col-form-label">Referral<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.referral }}
+            {% if form.referral.errors %}
+                <div class="text-danger">
+                    {{ form.referral.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+  
     <div class="form-group row">
         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
         <div class="col-sm-8">
@@ -62,6 +89,46 @@
         
     </div>
     <div class="form-group row">
+        
+        <label for="id_othermobile" class="col-sm-3 col-form-label">Other Mobile</label>
+        <div class="col-sm-8">
+        <input type="text" id="id_othermobile" name="othermobile" maxlength="12" class="form-control">
+       
+        <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
+        </div>
+    
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
+    <div class="col-sm-8">
+        <div>
+            {% for radio in form.gender %}
+                <div class="form-check form-check-inline">
+                    {{ radio.tag }}
+                    <label class="form-check-label">{{ radio.choice_label }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        {% if form.gender.errors %}
+            <div class="text-danger">
+                {{ form.gender.errors }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-group row">
+    <label for="{{ form.birthdate.id_for_label }}" class="col-sm-3 col-form-label">Birth Date <span style="color: red;">*</span></label>
+    <div class="col-sm-8">
+        {{ form.birthdate  }}
+        {% if form.birthdate.errors %}
+        <div class="text-danger">
+            {{ form.birthdate.errors }}
+        </div>
+    {% endif %}
+    </div>
+</div>
+    <div class="form-group row">
         <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.city }}
@@ -72,71 +139,23 @@
             {% endif %}
         </div>
     </div>
-    <div class="form-group row">
-        <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.age }}
-            {% if form.age.errors %}
-                <div class="text-danger">
-                    {{ form.age.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            <div>
-                {% for radio in form.gender %}
-                    <div class="form-check form-check-inline">
-                        {{ radio.tag }}
-                        <label class="form-check-label">{{ radio.choice_label }}</label>
-                    </div>
-                {% endfor %}
-            </div>
-            {% if form.gender.errors %}
-                <div class="text-danger">
-                    {{ form.gender.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Comming Source<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.leadSource }}
-            {% if form.leadSource.errors %}
-                <div class="text-danger">
-                    {{ form.leadSource.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.sufferedcase }}
-            {% if form.sufferedcase.errors %}
-                <div class="text-danger">
-                    {{ form.sufferedcase.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers </label>
-        <div class="col-sm-8">
-            {{ form.offerID }}
-            {% if form.offerID.errors %}
-                <div class="text-danger">
-                    {{ form.offerID.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
     
+   
+
+    
+    <div class="form-group row">
+        <label for="{{ form.sufferedcaseByPatient.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case by patient<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+            {{ form.sufferedcaseByPatient }}
+            {% if form.sufferedcaseByPatient.errors %}
+                <div class="text-danger">
+                    {{ form.sufferedcaseByPatient.errors }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+   
 
     <div class="form-group row">
         <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up price </label>
@@ -150,17 +169,7 @@
         </div>
     </div>
 
-    <div class="form-group row">
-        <label for="{{ form.agentID.id_for_label }}" class="col-sm-3 col-form-label">Agent/Company </label>
-        <div class="col-sm-8">
-            {{ form.agentID }}
-            {% if form.agentID.errors %}
-                <div class="text-danger">
-                    {{ form.agentID.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
+    
     
     <div class="form-group row">
         <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
@@ -170,37 +179,11 @@
         </div>
     </div>
 
-    <div class="form-group row">
-        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction </label>
-      
-        <div class="col-sm-8">
-            <div>
-                {% for radio in form.callDirection %}
-                    <div class="form-check form-check-inline">
-                        {{ radio.tag }}
-                        <label class="form-check-label">{{ radio.choice_label }}</label>
-                    </div>
-                {% endfor %}
-            </div>
-            {% if form.callDirection.errors %}
-                <div class="text-danger">
-                    {{ form.callDirection.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
+   
 
-    <div class="form-group row">
-        <label for="{{ form.expectedDate.id_for_label }}" class="col-sm-3 col-form-label">Expeceted Date <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.expectedDate  }}
-            {% if form.expectedDate.errors %}
-            <div class="text-danger">
-                {{ form.expectedDate.errors }}
-            </div>
-        {% endif %}
-        </div>
-    </div>
+    
+
+   
     <div class="form-group row">
         <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
             <button type="submit" class="btn btn-primary">Create Reservation</button>

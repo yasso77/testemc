@@ -115,22 +115,22 @@ class Patient(models.Model):
     ]
     
     reservations_CHOICES=[
-        ('First Visit','First Visit'),
-        ('Follow-up Re-examination','Follow-up Re-examination'),
-        ('Follow-up Eye surgery','Follow-up Eye surgery'),
+        ('FV','First Visit'),
+        ('FX','Follow-up Re-examination'),
+        ('FS','Follow-up Eye surgery'),
         
     ] 
     
-    firstVisit_CHOICES=[
-        ('ًWalk-In','Walk-In'),
-        ('Referred by someone','Referred by someone'),
+    referral_CHOICES=[
+        ('ًW','Walk-In'),
+        ('R','Referred by someone'),
      ]       
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.
     reservationCode = models.CharField( max_length=150, blank=False, null=True,verbose_name='Confirmation Code',error_messages='Reservation code is requiered')
     fileserial = models.CharField( max_length=150, blank=False, null=True,verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
-    reservationType=models.CharField(max_length=150,choices=reservations_CHOICES,verbose_name='Reservation Type',default=reservations_CHOICES[1][0])
-    typeFirstVisit=models.CharField(max_length=150,choices=firstVisit_CHOICES,verbose_name='First Visit Type',default=firstVisit_CHOICES[1][0])
+    reservationType=models.CharField(max_length=150,choices=reservations_CHOICES,verbose_name='Reservation Type',default=reservations_CHOICES[1][0],null=True)
+    referral=models.CharField(max_length=150,choices=referral_CHOICES,verbose_name='Referral',default=referral_CHOICES[1][0],null=True)
     leadSource=models.CharField(choices=leadSource_Choices,max_length=100, verbose_name='Lead Source',null=True, blank=True)
     fullname = models.CharField(max_length=250, blank=False, null=True,verbose_name='Patient Name')  # Field name made lowercase.
     birthdate = models.DateField( blank=False, null=True,verbose_name='Birth Date')  # Field name made lowercase.

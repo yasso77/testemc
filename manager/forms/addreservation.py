@@ -9,6 +9,8 @@ class MyModelForm(forms.ModelForm):
     # Explicitly define city field outside Meta
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
     sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))
+    
+    sufferedcaseByPatient= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient", widget=forms.Select(attrs={'class': 'form-select'}))
     offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
     agentID= forms.ModelChoiceField(queryset=AgentCompany.objects.active(),required=False,  label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
     checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
@@ -16,7 +18,7 @@ class MyModelForm(forms.ModelForm):
     class Meta:
         model = Patient
        
-        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection','checkUpprice','agentID']
+        fields = ['reservationCode','fullname', 'mobile', 'city','age','gender','sufferedcase','offerID','leadSource','remarks','expectedDate','callDirection','checkUpprice','agentID','fileserial','birthdate','reservationType','referral','otherMobile','sufferedcaseByPatient']
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
@@ -29,29 +31,39 @@ class MyModelForm(forms.ModelForm):
             'class': 'form-control',
             'min': 1,  # Minimum age
             'max': 99,  # Maximum age (restricts to two digits)
-               }),
-            
+               }),            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),            
             'reservationCode': forms.TextInput(attrs={
             'readonly': 'readonly',
             'class': 'form-control',
             'style': 'background-color: yellow;font-weight:bold'}),
-            
-            
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-
-            'leadSource': forms.Select(attrs={'class': 'form-select'}),          
-            
-            'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            
+            'leadSource': forms.Select(attrs={'class': 'form-select'}),
+            'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),            
             'expectedDate': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control',
-                'required': True,  # Add required attribute here
+                            'type': 'date',
+                            'class': 'form-control',
+                            'required': True,  # Add required attribute here
             }),
             
-             
-    
+            # center fields
+            # center fields
+            # center fields
+            'fileserial': forms.TextInput(attrs={
+                        'readonly': 'readonly',
+                        'class': 'form-control',
+                        'style': 'background-color: yellow;font-weight:bold'}),
+            'otherMobile':forms.TextInput(attrs={'class': 'form-control'}), 
+            'reservationType': forms.Select(attrs={'class': 'form-select'}),
+            'referral': forms.Select(attrs={'class': 'form-select'}),
+            
+            'birthdate': forms.DateInput(attrs={
+                            'type': 'date',
+                            'class': 'form-control',
+                            'required': True,  # Add required attribute here
+            }),
+            
+            
         }
         error_messages = {
             'callDirection': {
@@ -97,6 +109,12 @@ class MyModelForm(forms.ModelForm):
         self.fields['expectedDate'].initial = ''
         self.fields['mobile'].initial = ''
         self.fields['age'].initial = ''
+        self.fields['reservationType'].choices = [('', '---------')] + list(self.fields['reservationType'].choices)
+        self.fields['reservationType'].initial = ''
+        
+        self.fields['referral'].choices = [('', '---------')] + list(self.fields['referral'].choices)
+        self.fields['referral'].initial = ''
+        
 
         # Explicitly set choices for the gender field to avoid null values
         self.fields['gender'].choices = [('M', 'Male'), ('F', 'Female')]

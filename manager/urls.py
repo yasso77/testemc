@@ -1,4 +1,5 @@
 from django.urls import include, path
+from manager.views.center import CenterView
 from manager.views.doctor import DoctorView
 from manager.views.patient import PatientView
 from manager.views.main import MainView
@@ -34,6 +35,10 @@ urlpatterns = [
     path('edit_patient/<int:patientid>/', PatientView.edit_patient, name='edit_patient'),
     path('newreservation', PatientView.addNewPatient, name='newreservation'),
     path('check_fileserial/', PatientView.check_fileserial, name='check_fileserial'),
+    
+    
+    #Center
+    path('centerNewreservation', CenterView.addNewReservation, name='centerNewreservation'),
 
     # CallCenterView
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),

@@ -67,6 +67,8 @@ class CenterView(ListView):
     def addNewReservation(request):
         """View function to add a new reservation."""
         latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code
+        
+        
 
         if request.method == 'POST':
             # Pass request to the form and specify required fields
@@ -105,4 +107,5 @@ class CenterView(ListView):
             centerform = MyModelForm(request=request, initial={'fileserial': latest_fileserial})
 
         # Render the new reservation form
-        return render(request, 'center/newReservation.html', {'form': centerform, 'code': latest_fileserial})
+        
+        return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
