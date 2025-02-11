@@ -13,7 +13,7 @@ class MyModelForm(forms.ModelForm):
     sufferedcaseByPatient= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient", widget=forms.Select(attrs={'class': 'form-select'}))
     offerID= forms.ModelChoiceField(queryset=Offers.objects.active(),required=False,  label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
     agentID= forms.ModelChoiceField(queryset=AgentCompany.objects.active(),required=False,  label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
-    checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
+    checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=True,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
     
     class Meta:
         model = Patient
@@ -22,10 +22,9 @@ class MyModelForm(forms.ModelForm):
         
         widgets = {
             'fullname': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'mobile': forms.TextInput(attrs={
-            # 'class': 'form-control',
-            # #'placeholder': '7xx1234567'  # Guide user to input correct format
-            # }),           
+            'mobile': forms.TextInput(attrs={
+             'class': 'form-control','required': True
+             }),           
             
             'age': forms.NumberInput(attrs={
             'class': 'form-control',
@@ -54,7 +53,7 @@ class MyModelForm(forms.ModelForm):
                         'class': 'form-control',
                         'style': 'background-color: yellow;font-weight:bold'}),
             'otherMobile':forms.TextInput(attrs={'class': 'form-control'}), 
-            'reservationType': forms.Select(attrs={'class': 'form-select'}),
+            'reservationType': forms.Select(attrs={'class': 'form-select','required': True, }),
             'referral': forms.Select(attrs={'class': 'form-select'}),
             
             'birthdate': forms.DateInput(attrs={
@@ -169,8 +168,14 @@ class MyModelForm(forms.ModelForm):
     
     def clean_age(self):
         age = self.cleaned_data.get('age')
+
+        if age is None:  # Skip validation if age is not provided
+            return None
+
         if not (1 <= age <= 99):
             raise forms.ValidationError('Age must be a number between 1 and 99.')
+
         return age
+
     
     

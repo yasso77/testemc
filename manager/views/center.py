@@ -9,11 +9,12 @@ from manager.forms.addreservation import MyModelForm
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
 
-from manager.model.patient import Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
-
-
+from django.db.models import Count
+from django.db.models import Q
+from django.db.models import Count, Max, Subquery, OuterRef
+from manager.model.patient import CallTrack, Patient
 
 class CenterView(ListView):
     def generateFileSerial():
@@ -66,27 +67,33 @@ class CenterView(ListView):
     @login_required
     def addNewReservation(request):
         """View function to add a new reservation."""
-        latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code
-        
+        latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
         
 
         if request.method == 'POST':
             # Pass request to the form and specify required fields
             centerform = MyModelForm(
-                request=request, data=request.POST, required_fields=['age', 'fullname', 'mobile']
+                request=request, data=request.POST, required_fields=['fullname', 'mobile','reservationType','sufferedcaseByPatient','checkUpprice']
             )
 
             if centerform.is_valid():
                 patient = centerform.save(commit=False)
                 patient.fileserial = latest_fileserial  # Assign generated file serial
-                patient.reservedBy = request.user  # Assign logged-in user
+                #patient.reservedBy = request.user  # Assign logged-in user
                 patient.createdBy = request.user  # Assign logged-in user
+                patient.callDirection=None              
+               
 
                 # Ensure createdDate has a value
                 if patient.createdDate is None:
                     patient.createdDate = now()  # Assign a timezone-aware datetime
                 elif is_naive(patient.createdDate):
                     patient.createdDate = make_aware(patient.createdDate)
+                
+                if patient.attendancedate is None:
+                    patient.attendancedate = now()  # Assign a timezone-aware datetime
+                elif is_naive(patient.attendancedate):
+                    patient.attendancedate = make_aware(patient.attendancedate)
 
                 patient.save()
 
@@ -101,6 +108,8 @@ class CenterView(ListView):
                     },
                     status=200,
                 )
+            else:
+                print(centerform.errors)
 
         else:
             # Initialize the form with the generated reservation code
@@ -109,3 +118,38 @@ class CenterView(ListView):
         # Render the new reservation form
         
         return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
+    
+    def centerReservationByMobile(request,strmobile):
+            
+            recent_patients = (
+            Patient.objects.active()
+            .filter(
+                
+                reservedBy=request.user,
+                mobile=strmobile,
+                #isDeleted=False
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age',
+                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
+        )
+        
+        
+        # Pass the data to the template      
+        
+            return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strmobile})

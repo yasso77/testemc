@@ -1,0 +1,137 @@
+{% extends 'master.html'%}
+
+{% block content %}
+ <!-- Include DataTables CSS -->
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+
+ <style>
+
+    td {
+        white-space: nowrap;
+    }
+    
+ </style>
+<div class="pagetitle">
+    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Center</li>
+        <li class="breadcrumb-item active">Reservations List</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+ 
+        <table id="patientsTable" class="display" style="font-size: smaller;">
+            <thead>
+                <tr>
+                    <th>R.Code</th>
+                    <th>File #</th>
+                    <th>Full Name</th> 
+                    <th>Mobile</th>
+                    <th>Age</th>  
+                   
+                               
+                    {% comment %} <th>Lead Source</th> {% endcomment %}
+                    <th>Case-Call</th>
+                    <th>Case-Patient</th>        
+                    <th>Attendance Date</th>
+                     <th>ChK-Price</th> 
+                     <th>Follow Up Details</th>   
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.reservationCode }}</td>
+                        <td>{{ patient.fileserial }}</td>
+                        <td>{{ patient.fullname }}</td>
+                        <td>{{ patient.mobile }}</td>
+                        <td>{{ patient.age }}</td>
+                                           
+                        
+                        {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
+                        <td>{{ patient.sufferedcase__caseName }}</td>
+                        <td>{{ patient.sufferedcaseByPatient__caseName }}</td>
+                        
+                        <td data-order="{{ patient.attendanceDate|date:'Y-m-d H:i:s' }}">
+                            {{ patient.attendanceDate|date:'M. j, Y, g:i a' }}
+                        </td>
+                        
+                        <td> {{ patient.checkUpprice }}</td>
+                        <td>
+                            
+                            <div>
+                                <strong>Call Count:</strong> {{ patient.call_count }}
+                            </div>
+                            <div>
+                                <strong>Last Call Date:</strong> 
+                                {% if patient.last_call_date %}
+                                    {{ patient.last_call_date|date:"F d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">None</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <strong>Last Call Outcome:</strong> 
+                                {% if patient.last_call_outcome %}
+                                    <span class="{% if patient.last_call_outcome == 'Confirmed' %}text-success{% elif patient.last_call_outcome == 'Canceled' %}text-danger{% else %}text-warning{% endif %}">
+                                        {{ patient.last_call_outcome }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">None</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <td class="text-nowrap">
+                            {% if patient.attendanceDate %}
+                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block">
+                                    ATT: {{ patient.attendanceDate }}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
+                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
+                                <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                   
+                                </form>
+                            {% endif %}
+                        </td>
+                        
+                         
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No patients found created within the last 10 days.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+</section>
+
+<!-- Include jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<!-- Initialize DataTables -->
+<script>
+    $(document).ready(function() {
+        $('#patientsTable').DataTable({
+            "order": [[0, 'desc']],  // Sort by 'createdDate' column (index 3) in descending order by default
+            "searching": true,      // Enable search
+            "paging": true,         // Enable pagination
+            "lengthChange": false,  // Disable length change dropdown
+            "info": false,
+            "pageLength": 25           // Disable info display
+        });
+    });
+</script>
+{%endblock%}

@@ -122,7 +122,7 @@ class Patient(models.Model):
     ] 
     
     referral_CHOICES=[
-        ('ًW','Walk-In'),
+        ('W','Walk-In'),
         ('R','Referred by someone'),
      ]       
 
@@ -133,7 +133,7 @@ class Patient(models.Model):
     referral=models.CharField(max_length=150,choices=referral_CHOICES,verbose_name='Referral',default=referral_CHOICES[1][0],null=True)
     leadSource=models.CharField(choices=leadSource_Choices,max_length=100, verbose_name='Lead Source',null=True, blank=True)
     fullname = models.CharField(max_length=250, blank=False, null=True,verbose_name='Patient Name')  # Field name made lowercase.
-    birthdate = models.DateField( blank=False, null=True,verbose_name='Birth Date')  # Field name made lowercase.
+    
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     image=models.ImageField(upload_to='patients/photos/%y/%m/%d',null=True,default='photos/patient.png')
     mobile = models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=000)  # Field name made lowercase.
@@ -163,9 +163,9 @@ class Patient(models.Model):
     arrivedOn = models.CharField(max_length=150, blank=True, null=True,)  # Field name made lowercase.
     remarks = models.CharField(max_length=2055, blank=True, null=True,verbose_name='Remarks')
     
-    age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=0,verbose_name='Age')  # Field name made lowercase.
-    birthdDate = models.DateField( blank=True, null=True,verbose_name='Birth Date')
-    callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0])
+    age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True, blank=False,verbose_name='Age')  # Field name made lowercase.
+    birthdate = models.DateField( blank=True, null=True,verbose_name='Birth Date')
+    callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0],null=True)
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
       # Field name made lowercase.
     attendanceDate = models.DateTimeField(blank=True, null=True,verbose_name='Actual Attendance  Date')  # Field name made lowercase.

@@ -10,6 +10,30 @@
     color: red;
 }
 </style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function toggleReferralField() {
+                let reservationType = $("#{{ form.reservationType.id_for_label }}").val();
+                let referralField = $("#{{ form.referral.id_for_label }}");
+    
+                if (reservationType === "FV") {
+                    referralField.prop("disabled", false);  // Enable if FV
+                } else {
+                    referralField.prop("disabled", true).val("");  // Disable and clear if not FV
+                }
+            }
+    
+            // Run on page load
+            toggleReferralField();
+    
+            // Run on change
+            $("#{{ form.reservationType.id_for_label }}").change(function () {
+                toggleReferralField();
+            });
+        });
+    </script>
+
 <div class="pagetitle">
     <h1>New Reservation</h1>
     <nav>
@@ -66,7 +90,16 @@
         </div>
     </div>
 
-  
+    <div class="form-group row">
+        
+        <label for="id_mobile" class="col-sm-3 col-form-label">Mobile<span style="color: red;">*</span></label>
+        <div class="col-sm-8">
+        <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control">
+       
+        <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
+        </div>
+    
+</div>
     <div class="form-group row">
         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
         <div class="col-sm-8">
@@ -78,16 +111,7 @@
             {% endif %}
         </div>
     </div>
-    <div class="form-group row">
-        
-            <label for="id_mobile" class="col-sm-3 col-form-label">Mobile</label>
-            <div class="col-sm-8">
-            <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control">
-           
-            <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
-            </div>
-        
-    </div>
+   
     <div class="form-group row">
         
         <label for="id_othermobile" class="col-sm-3 col-form-label">Other Mobile</label>
@@ -118,7 +142,7 @@
 </div>
 
 <div class="form-group row">
-    <label for="{{ form.birthdate.id_for_label }}" class="col-sm-3 col-form-label">Birth Date <span style="color: red;">*</span></label>
+    <label for="{{ form.birthdate.id_for_label }}" class="col-sm-3 col-form-label">Birth Date </label>
     <div class="col-sm-8">
         {{ form.birthdate  }}
         {% if form.birthdate.errors %}
@@ -158,7 +182,7 @@
    
 
     <div class="form-group row">
-        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up price </label>
+        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up price <span style="color: red;">*</span></label>
         <div class="col-sm-8">
             {{ form.checkUpprice }}
             {% if form.checkUpprice.errors %}
@@ -209,7 +233,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/reservationListMobile/${strmobile}" target="_blank">Click here to view</a>`;
+                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/centerReservationByMobile/${strmobile}" target="_blank">Click here to view</a>`;
                             messageSpan.style.display = 'block'; // Show the message
                         } else {
                             messageSpan.style.display = 'none'; // Hide the message if no error
