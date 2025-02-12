@@ -31,7 +31,7 @@
                     <th>File #</th>
                     <th>Full Name</th> 
                     <th>Mobile</th>
-                    <th>Age</th>  
+                    <th>Birth Date</th>  
                    
                                
                     {% comment %} <th>Lead Source</th> {% endcomment %}
@@ -50,7 +50,7 @@
                         <td>{{ patient.fileserial }}</td>
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
-                        <td>{{ patient.age }}</td>
+                        <td>{{ patient.birthdate }}</td>
                                            
                         
                         {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
@@ -88,18 +88,14 @@
                         </td>
                         
                         <td class="text-nowrap">
-                            {% if patient.attendanceDate %}
-                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block">
-                                    ATT: {{ patient.attendanceDate }}
-                                </a>
-                            {% else %}
+                           
                                 <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
                                 <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}
                                    
                                 </form>
-                            {% endif %}
+                           
                         </td>
                         
                          

@@ -143,8 +143,8 @@ class CenterView(ListView):
             )
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age',
-                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'createdDate', 'city', 'mobile', 'age','sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
             )
         )
@@ -153,3 +153,41 @@ class CenterView(ListView):
         # Pass the data to the template      
         
             return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strmobile})
+        
+    def centerSearchOnPatient(request):
+         
+        strText = request.GET.get('strText', '')  
+        print(strText) 
+        recent_patients = (
+            Patient.objects.active()
+            .filter(
+                Q(mobile__icontains=strText) |  # Search in mobile
+                Q(fullname__icontains=strText) |  # Search in name
+                Q(birthdate__icontains=strText) |  # Search in birthdate
+                Q(attendanceDate__icontains=strText),  # Search in attendance date
+                reservedBy=request.user  # Keep the reservedBy filter
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
+        )
+        
+        
+        # Pass the data to the template      
+        
+        return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})

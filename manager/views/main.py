@@ -12,12 +12,15 @@ from manager.forms.UploadForm import ExcelUploadForm
 
 from django.contrib.auth.decorators import login_required,permission_required
 from manager.forms.forms import LoginForm
-from manager.model.patient import Patient
+from manager.model.patient import CallTrack, Patient
 from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from manager.views.callcenter import CallCenterView
 from manager.views.marketing import MarketingView
+from django.db.models import Count
+from django.db.models import Q
+from django.db.models import Count, Max, Subquery, OuterRef
 
 # Create your views here.
 
@@ -46,6 +49,9 @@ class MainView(ListView):
  
     def no_permission_view(request):
         return render(request, 'no_permission.html')
+
+
+   
 
     @login_required
     

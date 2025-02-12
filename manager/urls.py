@@ -20,6 +20,7 @@ urlpatterns = [
     
     
     
+    
     # ReportView
     path('showPatientData', ReportView.showPatientData, name='showPatientData'),
     path('getattendedpatient', ReportView.showPatientDataAttendedToday, name='getattendedpatient'),
@@ -29,7 +30,7 @@ urlpatterns = [
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),
-    path('centerPatients', PatientView.patientsList, name='centerPatients'),
+   
     path('UpdatePatientData', PatientView.UpdatePatientData, name='update_patient_data'),
     path('patientForm/<int:patientid>/', PatientView.patientForm, name='patientForm'),
     path('edit_patient/<int:patientid>/', PatientView.edit_patient, name='edit_patient'),
@@ -40,6 +41,8 @@ urlpatterns = [
     #Center
     path('centerNewreservation', CenterView.addNewReservation, name='centerNewreservation'),
     path('centerReservationByMobile/<str:strmobile>/', CenterView.centerReservationByMobile, name='centerReservationByMobile'),
+    path('centerPatients', PatientView.patientsList, name='centerPatients'),
+    path('centerSearchOnPatinet/',CenterView.centerSearchOnPatient,name='centerSearchOnPatinet'),
 
     # CallCenterView
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),
@@ -51,6 +54,7 @@ urlpatterns = [
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
+    path('callCentersearchOnPatinet/',CenterView.centerSearchOnPatient,name='callCentersearchOnPatinet'),
     
 
     # DoctorView
