@@ -43,6 +43,8 @@ urlpatterns = [
     path('centerReservationByMobile/<str:strmobile>/', CenterView.centerReservationByMobile, name='centerReservationByMobile'),
     path('centerPatients', PatientView.patientsList, name='centerPatients'),
     path('centerSearchOnPatinet/',CenterView.centerSearchOnPatient,name='centerSearchOnPatinet'),
+    path('followup/<int:patientid>/', CenterView.follow_reservation, name='followup'),
+    
 
     # CallCenterView
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),

@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
 from django.db.models import Q
 from django.db.models import Count, Max, Subquery, OuterRef
+from manager.forms.centerFollowUp import centerTrackForm
 from manager.model.patient import CallTrack, Patient
 
 class CenterView(ListView):
@@ -191,3 +192,44 @@ class CenterView(ListView):
         # Pass the data to the template      
         
         return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
+    
+    def follow_reservation(request, patientid):
+        # Fetch the patient instance or return 404 if not found
+        patient = get_object_or_404(Patient, patientid=patientid)
+        calltracks=CallTrack.objects.filter(patientID=patientid).order_by('-createdDate')
+        if request.method == 'POST':
+            # Bind form data to the existing patient instance
+            form = centerTrackForm(request.POST)
+            if form.is_valid():
+                # Save form but do not commit to the database yet
+                calltrack = form.save(commit=False)
+                
+                # Assign additional fields
+                calltrack.patientID = patient
+                calltrack.createdBy = request.user
+                calltrack.agentID = request.user
+                
+                # Save the instance to the database
+                calltrack.save()
+                
+               
+               
+                # Return confirmation message
+                return render(
+                    request,
+                    "ConfirmMsg.html",
+                    {
+                        'message': 'Follow-UP is added successfully.',
+                        'returnUrl': reverse('reservationList'),
+                        'btnText': 'Return to Reservations List',
+                    },
+                    status=200,
+                )
+            else:
+                print(form.errors)
+        else:
+            # Display the form pre-filled with patient data
+            form = centerTrackForm(instance=patient)
+        
+        # Render the edit page with the form and patient data
+        return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})

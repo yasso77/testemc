@@ -89,7 +89,7 @@
                         
                         <td class="text-nowrap">
                            
-                                <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
+                                <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
                                 <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}

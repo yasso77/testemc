@@ -197,8 +197,11 @@ class CallTrack(models.Model):
             ('Confirmed','Confirmed')
             ]
     
+    trackTypes=[('CC','Call Center'),('CA','Center'),('MK','Marketing')]
+    
     
     callTrackID=models.AutoField(primary_key=True)
+    trackType=models.CharField(max_length=100, blank=True, null=True,verbose_name='Track Type',choices=trackTypes)
     patientID=models.ForeignKey(Patient,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='call_patients')
     remarks=models.CharField(max_length=500, blank=True, null=True,verbose_name='Call Remarks')
     nextFollow=models.DateField(verbose_name='Next Follow-Up Date', blank=True, null=True) 
