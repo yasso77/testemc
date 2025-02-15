@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from manager.decorators import permission_required_with_redirect
 from django.contrib.auth.models import User
-from manager.forms.addreservation import MyModelForm
+
 from django.utils.timezone import make_aware, is_naive
 from django.contrib.auth.decorators import login_required,permission_required
 
@@ -118,70 +118,7 @@ class PatientView(ListView):
         
 
     @login_required
-    def addNewPatient(request):        
-        # Generate reservation code
-        username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
-        month_number = now().month  # Get the current month number
-        latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
-
-        # Get the current month as a number
-        current_month = str(datetime.now().month)  # "2" for February, "3" for March, etc.
-
-        # Determine incrementing part
-        if latest_code and latest_code.reservationCode:
-            latest_code_parts = latest_code.reservationCode.split('-')
-            
-            if len(latest_code_parts) >= 3 and latest_code_parts[1] == current_month:
-                latest_increment = int(latest_code_parts[-1])  # Get the last part and convert to int
-                increment = latest_increment + 1
-            else:
-                increment = 1  # Reset increment if month is different
-        else:
-            increment = 1
-
-        # Format increment with leading zeros
-        increment_part = f"{increment:03d}"
-        reservationCode = f"{username_prefix}-{current_month}-{increment_part}"
-        
-        if request.method == 'POST':
-            # Pass request to the form for message handling
-            
-            callCenterform = MyModelForm(request=request, data=request.POST, required_fields=['age', 'fullname', 'mobile'])
-            
-            if callCenterform.is_valid():
-                patient = callCenterform.save(commit=False)
-                patient.reservationCode = reservationCode
-                patient.reservedBy = request.user  # Assign the logged-in user
-                patient.createdBy = request.user  # Assign the logged-in user
-                # Ensure createdDate has a value
-                if patient.createdDate is None:
-                   patient.createdDate = now()  # Assign a timezone-aware datetime
-
-                elif is_naive(patient.createdDate):  
-                   patient.createdDate = make_aware(patient.createdDate)   
-                patient.save()
-                
-                  
-                
-                # Return confirmation message
-                return render(
-                    request,
-                    "ConfirmMsg.html",
-                    {
-                        'message': 'The Reservation is Added Successfully.',
-                        'returnUrl': 'newreservation',
-                        'btnText': 'Add New Reservation',
-                    },
-                    status=200,
-                )
-        else:
-            # Initialize the form with the generated reservation code
-            callCenterform = MyModelForm(request=request, initial={'reservationCode': reservationCode})
-            # Initial GET request
-           
-          
-        # Render the new reservation form
-        return render(request, 'callcenter/newReservation.html', {'form': callCenterform, 'code': reservationCode})
+   
 
     
     

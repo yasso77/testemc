@@ -74,7 +74,7 @@
         <div class="container">
             <div class="row">
                 <!-- Left Column: Form Section -->
-                <div class="col-lg-6">
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Follow-Up Form</h5>
@@ -122,23 +122,23 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                            
+                             <!-- Next Follow-up Date -->
+                             <div class="form-group row">
+                                <label for="{{ form.nextFollow.id_for_label }}" class="col-sm-4 col-form-label">
+                                    Next Follow-up <span style="color: red;">*</span>
+                                </label>
+                                <div class="col-sm-8">
+                                    {{ form.nextFollow }}
+                                    {% if form.nextFollow.errors %}
+                                        <div class="text-danger">
+                                            {{ form.nextFollow.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                                
                             
-                                <!-- Confirmation Date -->
-                                <div class="form-group row">
-                                    <label for="{{ form.createdDate.id_for_label }}" class="col-sm-4 col-form-label">
-                                        Created Date <span style="color: red;">*</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        {{ form.createdDate }}
-                                        {% if form.createdDate.errors %}
-                                            <div class="text-danger">
-                                                {{ form.createdDate.errors }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                                
                             
                                 <!-- Submit Buttons -->
                                 <div class="form-group row">
@@ -153,7 +153,7 @@
                 </div>
         
                 <!-- Right Column: Call Tracks Section -->
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Follow-Up Tracks</h5>
@@ -178,7 +178,11 @@
                                            <!-- Dates Section -->
     <div class="d-flex justify-content-start align-items-center mt-2">
         
-        
+        <!-- Next Follow-Up -->
+        <div class="me-3" style="font-size: 0.9rem;"> <!-- Smaller Font -->
+            <i class="bi bi-calendar-check text-warning me-1"></i> <!-- Icon for Next Follow-Up -->
+            <strong>Next Follow-Up:</strong> {{ track.nextFollow }}
+        </div>
     </div>
                                         
                                             <!-- Created Date -->

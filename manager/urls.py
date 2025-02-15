@@ -34,19 +34,20 @@ urlpatterns = [
     path('UpdatePatientData', PatientView.UpdatePatientData, name='update_patient_data'),
     path('patientForm/<int:patientid>/', PatientView.patientForm, name='patientForm'),
     path('edit_patient/<int:patientid>/', PatientView.edit_patient, name='edit_patient'),
-    path('newreservation', PatientView.addNewPatient, name='newreservation'),
+   
     path('check_fileserial/', PatientView.check_fileserial, name='check_fileserial'),
     
     
     #Center
     path('centerNewreservation', CenterView.addNewReservation, name='centerNewreservation'),
     path('centerReservationByMobile/<str:strmobile>/', CenterView.centerReservationByMobile, name='centerReservationByMobile'),
-    path('centerPatients', PatientView.patientsList, name='centerPatients'),
+    path('centerPatients', CenterView.centerReservationToday, name='centerPatients'),
     path('centerSearchOnPatinet/',CenterView.centerSearchOnPatient,name='centerSearchOnPatinet'),
     path('followup/<int:patientid>/', CenterView.follow_reservation, name='followup'),
     
 
     # CallCenterView
+    path('newreservation', CallCenterView.addNewPatient, name='newreservation'),
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),
     path('reservationListScope/<str:viewScope>/', CallCenterView.reservationsListviewScope, name='reservationListScope'),
     path('reservationListMobile/<str:strmobile>/', CallCenterView.reservationsListviewMobile, name='reservationListMobile'),

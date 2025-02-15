@@ -1,4 +1,4 @@
-from datetime import date,  timedelta
+from datetime import date, datetime,  timedelta
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -15,9 +15,75 @@ from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
 from django.db.models import Q
-
+from manager.forms.CallCenterReservation import CCFormAddReservation
+from django.utils.timezone import make_aware, is_naive
+from django.db.models import F
 
 class CallCenterView(ListView):
+    
+    @login_required
+    def addNewPatient(request):        
+        # Generate reservation code
+        username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
+        
+        latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
+
+        # Get the current month as a number
+        current_month = str(datetime.now().month)  # "2" for February, "3" for March, etc.
+
+        # Determine incrementing part
+        if latest_code and latest_code.reservationCode:
+            latest_code_parts = latest_code.reservationCode.split('-')
+            
+            if len(latest_code_parts) >= 3 and latest_code_parts[1] == current_month:
+                latest_increment = int(latest_code_parts[-1])  # Get the last part and convert to int
+                increment = latest_increment + 1
+            else:
+                increment = 1  # Reset increment if month is different
+        else:
+            increment = 1
+
+        # Format increment with leading zeros
+        increment_part = f"{increment:03d}"
+        reservationCode = f"{username_prefix}-{current_month}-{increment_part}"
+        
+        if request.method == 'POST':
+            # Pass request to the form for message handling
+            
+            callCenterform = CCFormAddReservation(request=request, data=request.POST)
+            
+            if callCenterform.is_valid():
+                patient = callCenterform.save(commit=False)
+                patient.reservationCode = reservationCode
+                patient.reservedBy = request.user  # Assign the logged-in user
+                patient.createdBy = request.user  # Assign the logged-in user
+                # Ensure createdDate has a value
+                if patient.createdDate is None:
+                   patient.createdDate = now()  
+                elif is_naive(patient.createdDate):  
+                   patient.createdDate = make_aware(patient.createdDate)   
+                patient.save()           
+                
+                # Return confirmation message
+                return render(
+                    request,
+                    "ConfirmMsg.html",
+                    {
+                        'message': 'The Reservation is Added Successfully.',
+                        'returnUrl': 'newreservation',
+                        'btnText': 'Add New Reservation',
+                    },
+                    status=200,
+                )
+        else:
+            # Initialize the form with the generated reservation code
+            callCenterform = CCFormAddReservation(request=request, initial={'reservationCode': reservationCode})
+            # Initial GET request
+           
+          
+        # Render the new reservation form
+        return render(request, 'callcenter/newReservation.html', {'form': callCenterform, 'code': reservationCode})
+    
     
     @login_required
     def reservationsList(request):
@@ -40,16 +106,20 @@ class CallCenterView(ListView):
             )
             .select_related('sufferedcase')
             .annotate(
-                call_count=Count('call_patients'),  # Count number of call tracks for each patient
-                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                call_count=Count('call_patients', filter=Q(call_patients__trackType='CC')),  
+                last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CC')),
                 last_call_outcome=Subquery(
                     CallTrack.objects.filter(
-                        patientID=OuterRef('pk')  # Reference the current patient
+                        patientID=OuterRef('pk'),
+                        trackType='CC'
+                        # Reference the current patient
+                        
                     )
                     .order_by('-createdDate')
                     .values('outcome')[:1]  # Get the outcome of the latest call
                 )
             )
+            .order_by('-createdDate')  # Ensure descending order
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age',
@@ -286,6 +356,7 @@ class CallCenterView(ListView):
                 calltrack.patientID = patient
                 calltrack.createdBy = request.user
                 calltrack.agentID = request.user
+                calltrack.trackType='CC'
                 
                 # Save the instance to the database
                 calltrack.save()

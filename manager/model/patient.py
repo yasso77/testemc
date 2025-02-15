@@ -194,10 +194,13 @@ class CallTrack(models.Model):
     outcomeStatus= [
             ('Canceled', 'Canceled'),
             ('Rescheduled', 'Rescheduled'),
-            ('Confirmed','Confirmed')
+            ('Confirmed','Confirmed'),
+            ('Re-examination','Re-examination'),
+            ('Eye surgery','Eye surgery'),
+            ('After surgery','After surgery')
             ]
     
-    trackTypes=[('CC','Call Center'),('CA','Center'),('MK','Marketing')]
+    trackTypes=[('CC','Call Center'),('CE','Center'),('MK','Marketing')]
     
     
     callTrackID=models.AutoField(primary_key=True)

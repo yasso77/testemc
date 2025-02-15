@@ -10,6 +10,7 @@ class insertCallTrackForm(forms.ModelForm):
     
     class Meta:
         model = CallTrack
+        exclude = ['createdDate']
        
         fields = ['patientID', 'remarks', 'confirmationDate','nextFollow','outcome','agentID','createdBy']
         

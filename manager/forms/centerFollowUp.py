@@ -14,14 +14,14 @@ class centerTrackForm(forms.ModelForm):
     class Meta:
         model = CallTrack
        
-        fields = ['patientID', 'remarks','outcome','createdBy','createdDate']
+        fields = ['patientID', 'remarks','outcome','createdBy','nextFollow']
         
         widgets = {
             'remarks': forms.TextInput(attrs={'class': 'form-control'}), 
             
             'outcome': forms.RadioSelect(attrs={'class': 'form-check-input'}), 
             
-            'createdDate': forms.DateInput(attrs={
+            'nextFollow': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control',
                 
@@ -48,12 +48,19 @@ class centerTrackForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Initialize field values
-        self.fields['createdDate'].initial = '' 
+        self.fields['nextFollow'].initial = '' 
         # Explicitly set choices for the gender field to avoid null values
         self.fields['outcome'].choices = [
             ('Re-examination','Re-examination'),
             ('Eye surgery','Eye surgery'),
-        ]        
+            ('After surgery','After surgery'),
+        ] 
+        
+    def clean_nextFollow(self):
+        nextFollow_date = self.cleaned_data.get('nextFollow')
+        if nextFollow_date and nextFollow_date < date.today():
+            raise forms.ValidationError("Next Follow_date Date cannot be earlier than today.")
+        return nextFollow_date       
         
     
     

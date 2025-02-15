@@ -27,11 +27,11 @@
         <table id="patientsTable" class="display" style="font-size: smaller;">
             <thead>
                 <tr>
-                    <th>R.Code</th>
+                    {% comment %} <th>R.Code</th> {% endcomment %}
                     <th>File #</th>
                     <th>Full Name</th> 
                     <th>Mobile</th>
-                    <th>Birth Date</th>  
+                    {% comment %} <th>Birth Date</th>   {% endcomment %}
                    
                                
                     {% comment %} <th>Lead Source</th> {% endcomment %}
@@ -46,11 +46,11 @@
             <tbody>
                 {% for patient in patients %}
                     <tr>
-                        <td>{{ patient.reservationCode }}</td>
+                        {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
                         <td>{{ patient.fileserial }}</td>
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
-                        <td>{{ patient.birthdate }}</td>
+                        {% comment %} <td>{{ patient.birthdate }}</td> {% endcomment %}
                                            
                         
                         {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
@@ -78,7 +78,7 @@
                             <div>
                                 <strong>Last Call Outcome:</strong> 
                                 {% if patient.last_call_outcome %}
-                                    <span class="{% if patient.last_call_outcome == 'Confirmed' %}text-success{% elif patient.last_call_outcome == 'Canceled' %}text-danger{% else %}text-warning{% endif %}">
+                                    <span class="{% if patient.last_call_outcome == 'Eye surgery' %}text-success{% elif patient.last_call_outcome == 'Re-examination' %}text-danger{% else %}text-info{% endif %}">
                                         {{ patient.last_call_outcome }}
                                     </span>
                                 {% else %}
@@ -90,6 +90,7 @@
                         <td class="text-nowrap">
                            
                                 <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
+                                <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-primary">Prepear Form</a>
                                 <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}
@@ -121,7 +122,7 @@
 <script>
     $(document).ready(function() {
         $('#patientsTable').DataTable({
-            "order": [[0, 'desc']],  // Sort by 'createdDate' column (index 3) in descending order by default
+            "order": [],  // Sort by 'createdDate' column (index 3) in descending order by default
             "searching": true,      // Enable search
             "paging": true,         // Enable pagination
             "lengthChange": false,  // Disable length change dropdown

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import now, make_aware, is_naive
 from django.utils import timezone
-from manager.forms.addreservation import MyModelForm
+from manager.forms.centerReservation import CEAddReservationForm
 
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
@@ -73,9 +73,8 @@ class CenterView(ListView):
 
         if request.method == 'POST':
             # Pass request to the form and specify required fields
-            centerform = MyModelForm(
-                request=request, data=request.POST, required_fields=['fullname', 'mobile','reservationType','sufferedcaseByPatient','checkUpprice']
-            )
+            centerform = CEAddReservationForm(
+                request=request, data=request.POST)
 
             if centerform.is_valid():
                 patient = centerform.save(commit=False)
@@ -91,10 +90,10 @@ class CenterView(ListView):
                 elif is_naive(patient.createdDate):
                     patient.createdDate = make_aware(patient.createdDate)
                 
-                if patient.attendancedate is None:
-                    patient.attendancedate = now()  # Assign a timezone-aware datetime
-                elif is_naive(patient.attendancedate):
-                    patient.attendancedate = make_aware(patient.attendancedate)
+                if patient.attendanceDate is None:
+                    patient.attendanceDate = now()  # Assign a timezone-aware datetime
+                elif is_naive(patient.attendanceDate):
+                    patient.attendanceDate = make_aware(patient.attendanceDate)
 
                 patient.save()
 
@@ -114,36 +113,76 @@ class CenterView(ListView):
 
         else:
             # Initialize the form with the generated reservation code
-            centerform = MyModelForm(request=request, initial={'fileserial': latest_fileserial})
+            centerform = CEAddReservationForm(request=request, initial={'fileserial': latest_fileserial})
 
         # Render the new reservation form
         
         return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
     
+    
+    def centerReservationToday(request):
+            
+            recent_patients = (
+            Patient.objects.active()
+            .filter(  
+                #mobile=strmobile,
+                #isDeleted=False
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
+                last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk'),  # Reference the current patient
+                        trackType='CE'
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
+            .order_by('-createdDate')
+            .values(
+                'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
+        )
+        
+        
+        # Pass the data to the template      
+        
+            return render(request, 'center/reservationsList.html', {'patients': recent_patients})
+        
+        
+        
     def centerReservationByMobile(request,strmobile):
             
             recent_patients = (
             Patient.objects.active()
             .filter(
                 
-                reservedBy=request.user,
+                #reservedBy=request.user,
                 mobile=strmobile,
                 #isDeleted=False
             )
             .select_related('sufferedcase')
             .annotate(
-                call_count=Count('call_patients'),  # Count number of call tracks for each patient
-                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
+                last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
                 last_call_outcome=Subquery(
                     CallTrack.objects.filter(
-                        patientID=OuterRef('pk')  # Reference the current patient
+                        patientID=OuterRef('pk'),  # Reference the current patient
+                        trackType='CE'
                     )
                     .order_by('-createdDate')
                     .values('outcome')[:1]  # Get the outcome of the latest call
                 )
             )
+            .order_by('-createdDate')
             .values(
-                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age','sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
@@ -208,6 +247,7 @@ class CenterView(ListView):
                 calltrack.patientID = patient
                 calltrack.createdBy = request.user
                 calltrack.agentID = request.user
+                calltrack.trackType='CE'
                 
                 # Save the instance to the database
                 calltrack.save()
