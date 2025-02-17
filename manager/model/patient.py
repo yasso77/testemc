@@ -163,7 +163,8 @@ class Patient(models.Model):
     arrivedOn = models.CharField(max_length=150, blank=True, null=True,)  # Field name made lowercase.
     remarks = models.CharField(max_length=2055, blank=True, null=True,verbose_name='Remarks')
     
-    age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True, blank=False,verbose_name='Age')  # Field name made lowercase.
+    age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True,  # Allows NULL values in the database
+    blank=True,verbose_name='Age')  # Allows blank values in forms,verbose_name='Age')  # Field name made lowercase.
     birthdate = models.DateField( blank=True, null=True,verbose_name='Birth Date')
     callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0],null=True)
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
@@ -220,6 +221,30 @@ class CallTrack(models.Model):
     class Meta:
         verbose_name='Call Track'
         verbose_name_plural = "Call Tracks"
+        
+class MedicalCondition(models.Model):
+    
+    conditionName = models.CharField(max_length=100, primary_key=True)
+
+    def __str__(self):
+        return self.conditionName
+    
+class PatientMedicalHistory(models.Model):
+    RELATION_CHOICES = [
+        ('SELF', 'Self'),
+        ('REL', 'Relative'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    condition = models.ForeignKey(MedicalCondition, on_delete=models.CASCADE)
+    relation = models.CharField(max_length=10, choices=RELATION_CHOICES)
+    createdBy=models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='creator')
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+
+           
+
+    def __str__(self):
+        return f"{self.patient} - {self.condition} ({self.relation})"
         
     
         

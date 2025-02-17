@@ -1,7 +1,7 @@
 # forms.py
 from datetime import date
 from django import forms
-from manager.model.patient import  AgentCompany, CheckUpPrice, City, Offers, Patient, SufferedCases
+from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalCondition, Offers, Patient, SufferedCases
 
 
 class CEAddReservationForm(forms.ModelForm):
@@ -11,24 +11,50 @@ class CEAddReservationForm(forms.ModelForm):
         error_messages={'required': 'Full Name is required!'},
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'})
     )
-    mobile=forms.CharField(required=True, error_messages={'required': 'Mobile is required!'})
-    city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
+    mobile = forms.CharField(required=True, error_messages={'required': 'Mobile is required!'})
+    city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City",
+                                  widget=forms.Select(attrs={'class': 'form-select'}))
     
-    sufferedcaseByPatient = forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient", widget=forms.Select(attrs={'class': 'form-select'}))
-    offerID = forms.ModelChoiceField(queryset=Offers.objects.active(), required=False, label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
-    agentID = forms.ModelChoiceField(queryset=AgentCompany.objects.active(), required=False, label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
-    checkUpprice = forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(), required=True, label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
+    sufferedcaseByPatient = forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient",widget=forms.Select(attrs={'class': 'form-select'}))
+    offerID = forms.ModelChoiceField(queryset=Offers.objects.active(), required=False, label="Offers",
+                                     widget=forms.Select(attrs={'class': 'form-select'}))
+    agentID = forms.ModelChoiceField(queryset=AgentCompany.objects.active(), required=False, label="Agent/Company",widget=forms.Select(attrs={'class': 'form-select'}))
+    checkUpprice = forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(), required=True, label="Check-Up price",widget=forms.Select(attrs={'class': 'form-select'}))
+
+    # Medical history fields
+    medical_conditions = forms.ModelMultipleChoiceField(
+        queryset=MedicalCondition.objects.all(),
+        required=False,
+        label="Medical Conditions",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    relation_choices = [
+        ('SELF', 'Self'),
+        ('REL', 'Relative'),
+    ]
+    
+    condition_relation = forms.ChoiceField(
+        choices=relation_choices,
+        required=False,
+        label="Relation",
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
 
     class Meta:
         model = Patient
-        fields = [ 'fullname', 'mobile', 'city', 'gender',  'offerID', 'leadSource', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass']
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks',
+                  'checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile',
+                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass']
         widgets = {
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            'age': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 99}),
+            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
-            'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 'style': 'background-color: yellow;font-weight:bold'}),           
+            'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
+                                                      'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 'style': 'background-color: yellow;font-weight:bold'}),
+            'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control',
+                                                 'style': 'background-color: yellow;font-weight:bold'}),
             'otherMobile': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationType': forms.Select(attrs={'class': 'form-select'}),
             'referral': forms.Select(attrs={'class': 'form-select'}),
@@ -38,18 +64,18 @@ class CEAddReservationForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)       
-
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        
+        # Customizing gender choices
         self.fields['gender'].choices = [('M', 'Male'), ('F', 'Female')]
         self.fields['gender'].required = True
         self.fields['wearingconduct'].required = True
         self.fields['rideglass'].required = True
         self.fields['fullname'].error_messages = {'required': 'Full Name is required!'}
         self.fields['mobile'].error_messages = {'required': 'Mobile is required!'}
-        self.fields['referral'].required= False
-
-            
+        self.fields['referral'].required = False
+   
     # def clean_mobile(self):
     #     mobile = self.cleaned_data.get('mobile')        
     #     # Regex pattern to match 7xx1234567

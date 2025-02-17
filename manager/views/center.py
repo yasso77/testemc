@@ -1,5 +1,6 @@
 from datetime import date,  timedelta
 import string
+from urllib import request
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import now, make_aware, is_naive
@@ -8,14 +9,15 @@ from manager.forms.centerReservation import CEAddReservationForm
 
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
 from django.db.models import Q
 from django.db.models import Count, Max, Subquery, OuterRef
 from manager.forms.centerFollowUp import centerTrackForm
-from manager.model.patient import CallTrack, Patient
+from manager.model import patient
+from manager.model.patient import CallTrack, MedicalCondition, Patient, PatientMedicalHistory
 
 class CenterView(ListView):
     def generateFileSerial():
@@ -67,35 +69,64 @@ class CenterView(ListView):
 
     @login_required
     def addNewReservation(request):
-        """View function to add a new reservation."""
-        latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
         
+        latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
 
         if request.method == 'POST':
             # Pass request to the form and specify required fields
-            centerform = CEAddReservationForm(
-                request=request, data=request.POST)
+            centerform = CEAddReservationForm(request=request, data=request.POST)
 
             if centerform.is_valid():
                 patient = centerform.save(commit=False)
                 patient.fileserial = latest_fileserial  # Assign generated file serial
-                #patient.reservedBy = request.user  # Assign logged-in user
                 patient.createdBy = request.user  # Assign logged-in user
-                patient.callDirection=None              
-               
+                patient.reservedBy = request.user  # Assign logged-in user
+                patient.callDirection = None              
 
                 # Ensure createdDate has a value
                 if patient.createdDate is None:
                     patient.createdDate = now()  # Assign a timezone-aware datetime
                 elif is_naive(patient.createdDate):
                     patient.createdDate = make_aware(patient.createdDate)
-                
+
                 if patient.attendanceDate is None:
                     patient.attendanceDate = now()  # Assign a timezone-aware datetime
                 elif is_naive(patient.attendanceDate):
                     patient.attendanceDate = make_aware(patient.attendanceDate)
 
                 patient.save()
+
+                # Initialize an empty list to store the conditions and relations
+                # Initialize an empty list to store the conditions and relations
+                medical_conditions = []
+                
+                # Iterate through all items in the POST data (request.POST)
+                for condition_name, relation in request.POST.items():
+                    # Only process the keys that start with 'medical_conditions'
+                    if condition_name.startswith('medical_conditions'):
+                        condition_key = condition_name.split('[')[1].split(']')[0]  # Extract the disease name from the key
+                        
+                        # Check if the value is either 'self' or 'relative'
+                        if relation in ['self', 'relative']:
+                            try:
+                                # Try to get the MedicalCondition object
+                                condition_obj = MedicalCondition.objects.get(conditionName=condition_key)
+                            except ObjectDoesNotExist:
+                                # Handle the case where the condition doesn't exist in the database
+                                print(f"Condition '{condition_key}' does not exist in the database.")
+                                continue  # Skip to the next condition
+                            
+                            # Append the condition and relation as a tuple
+                            medical_conditions.append((condition_obj, relation))
+
+                # Now save the PatientMedicalHistory records
+                for condition_obj, relation in medical_conditions:
+                    PatientMedicalHistory.objects.create(
+                        patient=patient,
+                        condition=condition_obj,
+                        relation=relation,
+                        createdBy=request.user
+                    )
 
                 # Return confirmation message
                 return render(
@@ -116,9 +147,8 @@ class CenterView(ListView):
             centerform = CEAddReservationForm(request=request, initial={'fileserial': latest_fileserial})
 
         # Render the new reservation form
-        
         return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
-    
+        
     
     def centerReservationToday(request):
             
