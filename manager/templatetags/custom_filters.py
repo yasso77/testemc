@@ -3,6 +3,12 @@ from datetime import date
 
 register = template.Library()
 
+
+@register.filter
+def get_item(dictionary, key):
+    """Custom template filter to get dictionary values safely."""
+    return dictionary.get(key, "")
+
 @register.filter
 def is_today(value):
     """

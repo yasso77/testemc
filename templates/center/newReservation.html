@@ -9,7 +9,21 @@
   .text-danger {
     color: red;
 }
-</style>
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .left{
+            text-align: left !important;
+            font-weight:500;
+        }
+        /* Increase radio button size */
+        .custom-radio {
+            transform: scale(1.5); /* Increase size */
+            margin: 5px; /* Add spacing */
+        }
+    </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -274,63 +288,103 @@
             </div>
         </div>
         <!-- Medical Conditions Selection -->
-        <div class="table-responsive">
+         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
-                        <th>Disease</th>
-                        <th>Self</th>
-                        <th>Relative</th>
-                        <th>Disease</th>
-                        <th>Self</th>
-                        <th>Relative</th>
+                        <th class="left">Disease</th>
+                        <th class="text-center">Self</th>
+                        <th class="text-center">Relative</th>
+                        <th class="left">Disease</th>
+                        <th class="text-center">Self</th>
+                        <th class="text-center">Relative</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Diabetes</td>
-                        <td><input type="radio" name="medical_conditions[diabetes]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[diabetes]" value="relative"></td>
-                        <td>Heart Disease</td>
-                        <td><input type="radio" name="medical_conditions[heart_disease]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[heart_disease]" value="relative"></td>
+                        <td class="left">DIABETES</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[DIABETES]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[DIABETES]" value="relative" class="form-check-input custom-radio">
+                        </td>
+                        <td class="left">HEART DISEASE</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[HEART DISEASE]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[HEART DISEASE]" value="relative" class="form-check-input custom-radio">
+                        </td>
                     </tr>
                     <tr>
-                        <td>HTN</td>
-                        <td><input type="radio" name="medical_conditions[htn]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[htn]" value="relative"></td>
-                        <td>Asthma/Allergy</td>
-                        <td><input type="radio" name="medical_conditions[asthma_allergy]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[asthma_allergy]" value="relative"></td>
+                        <td class="left">HTN</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[HTN]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[HTN]" value="relative" class="form-check-input custom-radio">
+                        </td>
+                        <td class="left">ASTHMA ALLERGY</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="relative" class="form-check-input custom-radio">
+                        </td>
                     </tr>
                     <tr>
-                        <td>Cataract</td>
-                        <td><input type="radio" name="medical_conditions[cataract]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[cataract]" value="relative"></td>
-                        <td>Eye Injury</td>
-                        <td><input type="radio" name="medical_conditions[eye_injury]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[eye_injury]" value="relative"></td>
+                        <td class="left">CANCER</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[CANCER]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[CANCER]" value="relative" class="form-check-input custom-radio">
+                        </td>
+                        <td class="left">GLAUCOMA</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[GLAUCOMA]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[GLAUCOMA]" value="relative" class="form-check-input custom-radio">
+                        </td>
                     </tr>
                     <tr>
-                        <td>Thyroid</td>
-                        <td><input type="radio" name="medical_conditions[thyroid]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[thyroid]" value="relative"></td>
-                        <td>Cancer</td>
-                        <td><input type="radio" name="medical_conditions[cancer]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[cancer]" value="relative"></td>
+                        <td class="left">CATARACT</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[CATARACT]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[CATARACT]" value="relative" class="form-check-input custom-radio">
+                        </td>
+                        <td class="left">RETINAL D.</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[RETINAL D.]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[RETINAL D.]" value="relative" class="form-check-input custom-radio">
+                        </td>
                     </tr>
                     <tr>
-                        <td>Retinal D.</td>
-                        <td><input type="radio" name="medical_conditions[retinal_d]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[retinal_d]" value="relative"></td>
-                        <td>Eye Surgery</td>
-                        <td><input type="radio" name="medical_conditions[eye_surgery]" value="self"></td>
-                        <td><input type="radio" name="medical_conditions[eye_surgery]" value="relative"></td>
+                        <td class="left">EYE SURGERY</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[EYE SURGERY]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[EYE SURGERY]" value="relative" class="form-check-input custom-radio">
+                        </td>
+                        <td class="left">EYE INJURY</td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[EYE INJURY]" value="self" class="form-check-input custom-radio">
+                        </td>
+                        <td class="text-center">
+                            <input type="radio" name="medical_conditions[EYE INJURY]" value="relative" class="form-check-input custom-radio">
+                        </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-
+             
+                </div>
    
 
     

@@ -12,9 +12,8 @@ from django.contrib.auth.decorators import login_required,permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Count
-from django.db.models import Q
-from django.db.models import Count, Max, Subquery, OuterRef
+from django.db.models import Count,Exists, Q
+from django.db.models import Max, Subquery, OuterRef
 from manager.forms.centerFollowUp import centerTrackForm
 from manager.model import patient
 from manager.model.patient import CallTrack, MedicalCondition, Patient, PatientMedicalHistory
@@ -69,6 +68,18 @@ class CenterView(ListView):
 
     @login_required
     def addNewReservation(request):
+        
+        # List of medical conditions to add
+        conditions = [
+            "DIABETES", "HTN", "THYROID", "HEART DISEASE",
+            "ASTHMA ALLERGY", "CANCER", "GLAUCOMA",
+            "CATARACT", "RETINAL D.", "EYE SURGERY", "EYE INJURY"
+        ]
+
+        # Bulk insert while avoiding duplicates
+        MedicalCondition.objects.bulk_create(
+            [MedicalCondition(conditionName=cond) for cond in conditions], ignore_conflicts=True
+        )
         
         latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
 
@@ -169,14 +180,16 @@ class CenterView(ListView):
                     )
                     .order_by('-createdDate')
                     .values('outcome')[:1]  # Get the outcome of the latest call
-                )
-            )
+                ),
+                 has_medical_history=Exists(
+                 PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+            ))
             .order_by('-createdDate')
             .values(
                 'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
-                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
             )
         )
         
@@ -227,7 +240,7 @@ class CenterView(ListView):
     def centerSearchOnPatient(request):
          
         strText = request.GET.get('strText', '')  
-        print(strText) 
+        #print(strText) 
         recent_patients = (
             Patient.objects.active()
             .filter(
@@ -247,17 +260,20 @@ class CenterView(ListView):
                     )
                     .order_by('-createdDate')
                     .values('outcome')[:1]  # Get the outcome of the latest call
-                )
+                ),
+                 has_medical_history=Exists(
+                 PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+            )  # ✅ Check if patient has a medical history
             )
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
-                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
             )
         )
         
-        
+       
         # Pass the data to the template      
         
         return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})

@@ -1,5 +1,5 @@
 {% load static%}
-
+{% load custom_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -287,6 +287,7 @@
             <h4>HAVE ANY OF THESE CONDITIONS BELLOW:</h4>
         </div>
        
+               
         <table id="tableSpecs" style="border-collapse: collapse;">
             <tr>
                 <th class="footer-image"></th>
@@ -302,52 +303,33 @@
                 <th style="border-left: 2px solid #fff; width:7%">SELF</th>
                 <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
             </tr>
-
-            <tr>
-                <td>DIABETES</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>HEART DISEASE</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>GALUCOMA</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>EYE SURGERY</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-left: 2px solid #928469;"></td>
-            </tr>
-
-            <tr>
-                <td>HTN</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>ASTHMA ALLERGY</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>CATARACT</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>EYE INJURY</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-left: 2px solid #928469;"></td>
-            </tr>
-
-            <tr>
-                <td>THYROID</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>CANCER</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td>RETINAL D.</td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-right: 2px solid #928469;"></td>
-                <td style="border-left: 2px solid #928469;"></td>
-                <td style="border-left: 2px solid #928469;border-right: 2px solid #928469;"></td>
-            </tr>
+        
+            {% for condition, relation in medical_history.items %}
+                {% if forloop.first or forloop.counter0|divisibleby:4 %}
+                    <tr>
+                {% endif %}
+        
+                <td>{{ condition }}</td>
+                <td style="border-left: 2px solid #928469;">
+                    {% if relation == "self" %}<svg width="40" height="40" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+                    </svg>{% endif %}
+                </td>
+                <td style="border-right: 2px solid #928469;">
+                    {% if relation == "relative" %}
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+        </svg>
+    {% endif %}
+                </td>
+        
+                {% if forloop.last or forloop.counter|divisibleby:4 %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
         </table>
-       
+        
+        
         <br />
         <table>
             <tr>

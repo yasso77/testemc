@@ -51,7 +51,36 @@
           
           <li>
             <a href="{%url 'centerPatients'%}">
-              <i class="bi bi-circle"></i><span>Reservations List</span>
+              {% comment %} all reservation added by receiption {% endcomment %}
+              <i class="bi bi-circle"></i><span>Attendance Today</span>
+            </a>
+          </li>
+          <li>
+            <a href="{%url 'centerPatients'%}">
+                {% comment %} all reservation added by call center and expected to attend today or in future {% endcomment %}
+              <i class="bi bi-circle"></i><span>Call Center Reservations </span>
+            </a>
+          </li>
+
+          <li>
+            <a href="{%url 'centerPatients'%}">
+              {% comment %} all reservation added by call center and and missed the time {% endcomment %}
+              <i class="bi bi-circle"></i><span>Will Attend Today </span>
+            </a>
+          </li>
+
+          <li>
+            <a href="{%url 'centerPatients'%}">
+              {% comment %} all patients who come to follow up re-eximnation or  added by call center and and missed the time {% endcomment %}
+              <i class="bi bi-circle"></i><span>Follow Up List </span>
+            </a>
+          </li>
+
+
+          <li>
+            <a href="{%url 'centerPatients'%}">
+              {% comment %} all reservation added by call center and and missed the time {% endcomment %}
+              <i class="bi bi-circle"></i><span>Missed List </span>
             </a>
           </li>
 

@@ -9,7 +9,7 @@ from django.utils.timezone import make_aware, is_naive
 from django.contrib.auth.decorators import login_required,permission_required
 
 from manager.forms.editPatient import editPatientForm
-from manager.model.patient import CallTrack, Patient
+from manager.model.patient import CallTrack, Patient, PatientMedicalHistory
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
@@ -18,8 +18,49 @@ from django.utils.timezone import now
 
 class PatientView(ListView):
     
-    def patientForm(request,patientid):
-        return render(request,'center/patientForm.html',{'patientData':Patient.objects.get(patientid=patientid)})
+    
+
+
+    def patient_form_view(request, patient_id):
+        
+        CONDITIONS_LIST = [
+            ('DIABETES', 'HEART DISEASE', 'GLAUCOMA', 'EYE SURGERY'),
+            ('HTN', 'ASTHMA ALLERGY', 'CATARACT', 'EYE INJURY'),
+            ('THYROID', 'CANCER', 'RETINAL D.', None)
+            ]
+        patientData = get_object_or_404(Patient, id=patient_id)
+        medical_history = PatientMedicalHistory.objects.filter(patient=patientData).first()
+
+        # Debugging:
+        print(f"Patient Data: {patientData}")  
+        print(f"Medical History: {medical_history}")  
+        return render(request, 'center/patientForm.html',  {
+            #'patientData': patientData,
+            'medical_history': medical_history,
+            'conditions_list': CONDITIONS_LIST  # Pass list from view
+        })
+    
+    def patientForm(request, patientid):
+        CONDITIONS_LIST = [
+            ('DIABETES', 'HEART DISEASE', 'GLAUCOMA', 'EYE SURGERY'),
+            ('HTN', 'ASTHMA ALLERGY', 'CATARACT', 'EYE INJURY'),
+            ('THYROID', 'CANCER', 'RETINAL D.', None)
+            ]
+        patientData = get_object_or_404(Patient, patientid=patientid)
+        medical_history = PatientMedicalHistory.objects.filter(patient=patientData)
+        
+        # Convert to dictionary for easy lookup
+        history_dict = {entry.condition: entry.relation for entry in medical_history}
+
+        # Debugging:       
+        print(f"Medical History: {history_dict}")  
+        
+        return render(request, 'center/patientForm.html',  {
+            'patientData': patientData,
+            'medical_history': history_dict,
+            'conditions_list': CONDITIONS_LIST  # Pass list from view
+        })
+
 
     def get_patientData(request):
 

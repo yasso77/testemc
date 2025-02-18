@@ -12,7 +12,7 @@
     
  </style>
 <div class="pagetitle">
-    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
+    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> </h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
@@ -88,9 +88,13 @@
                         </td>
                         
                         <td class="text-nowrap">
-                           
+                            
                                 <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
+                                {% if patient.has_medical_history %}
                                 <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-primary">Prepear Form</a>
+                                {% else %}
+                                <span class="badge bg-danger">No Medical History</span>
+                                {% endif %}
                                 <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}
