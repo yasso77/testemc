@@ -178,6 +178,7 @@ class Patient(models.Model):
     latestupdate = models.DateField( blank=True, null=True)  # Field name made lowercase.
     updatedby = models.IntegerField( blank=True, null=True)  # Field name made lowercase.
     isDeleted = models.BooleanField(default=False)
+    formPrinted = models.BooleanField(default=False)
     
     objects = PatientManager()
     

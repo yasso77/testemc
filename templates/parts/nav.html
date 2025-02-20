@@ -50,27 +50,22 @@
           
           
           <li>
-            <a href="{%url 'centerPatients'%}">
+            <a href="{%url 'centerPatients' 'today'%}">
               {% comment %} all reservation added by receiption {% endcomment %}
               <i class="bi bi-circle"></i><span>Attendance Today</span>
             </a>
           </li>
           <li>
-            <a href="{%url 'centerPatients'%}">
+            <a href="{%url 'centerPatients' 'callcenter'%}">
                 {% comment %} all reservation added by call center and expected to attend today or in future {% endcomment %}
               <i class="bi bi-circle"></i><span>Call Center Reservations </span>
             </a>
           </li>
 
-          <li>
-            <a href="{%url 'centerPatients'%}">
-              {% comment %} all reservation added by call center and and missed the time {% endcomment %}
-              <i class="bi bi-circle"></i><span>Will Attend Today </span>
-            </a>
-          </li>
+         
 
           <li>
-            <a href="{%url 'centerPatients'%}">
+            <a href="{%url 'centerPatients' 'followup'%}">
               {% comment %} all patients who come to follow up re-eximnation or  added by call center and and missed the time {% endcomment %}
               <i class="bi bi-circle"></i><span>Follow Up List </span>
             </a>
@@ -78,14 +73,14 @@
 
 
           <li>
-            <a href="{%url 'centerPatients'%}">
+            <a href="{%url 'centerPatients' 'missed'%}">
               {% comment %} all reservation added by call center and and missed the time {% endcomment %}
               <i class="bi bi-circle"></i><span>Missed List </span>
             </a>
           </li>
 
           <li>
-            <a href="{%url 'centerPatients'%}">
+            <a href="{%url 'centerPatients' 'some_value'%}">
               <i class="bi bi-circle"></i><span>Search for patient</span>
             </a>
           </li>
