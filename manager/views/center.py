@@ -1,4 +1,4 @@
-from datetime import date,  timedelta
+from datetime import date, datetime, time,  timedelta
 import string
 from urllib import request
 from django.shortcuts import render
@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils.timezone import now, make_aware, is_naive
 from django.utils import timezone
 from manager.forms.centerReservation import CEAddReservationForm
+from django.db.models.functions import Coalesce
 
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
@@ -13,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count,Exists, Q
-from django.db.models import Max, Subquery, OuterRef
+from django.db.models import IntegerField,Max, Subquery, OuterRef, BooleanField, Case, Value, When, Exists, DateField
 from manager.forms.centerFollowUp import centerTrackForm
 from manager.model import patient
 from manager.model.patient import CallTrack, MedicalCondition, Patient, PatientMedicalHistory
@@ -161,10 +162,14 @@ class CenterView(ListView):
         return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
         
     
-    def centerReservations(request, scopeView):
+    def centerReservations(request, ScopeView):
         
+        today_date = datetime.today().date()
+        start_of_day = datetime.combine(today_date, datetime.min.time())  # 2025-02-21 00:00:00
+        end_of_day = datetime.combine(today_date, time(23, 59, 59))  # 2025-02-21 23:59:59
+
         # Get today's date
-        today_date = now().date()
+        
         # Get the date 90 days ago (starting from yesterday)
         past_90_days_date = today_date - timedelta(days=90)
         # Get the date 3 days from today
@@ -190,71 +195,114 @@ class CenterView(ListView):
 
             # Determine filtering condition based on scopeView
             # get all patients who should attend today (attendance today - expected date - confirmation date is =today and printform=false)
-        if scopeView == 'today':
-            recent_patients = Patient.objects.filter(
-                            Q(attendanceDate=today_date) | Q(expectedDate=today_date) |  # Expected to attend today
-                            Q(Exists(confirmed_today)),   # Has confirmation date today in CallTrack,  # Confirmation date is today,  # Correct OR condition
-                            isDeleted=False,
-                            formPrinted=False
-               
-            ).distinct()
+        if ScopeView == 'today':
+            # Query with annotation
+         
+
+            # Count records where expectedDate is NULL
+            null_count = Patient.objects.filter(expectedDate__isnull=True).count()
+            print(f"NULL expectedDate count: {null_count}")
+            patients_without_nulls = Patient.objects.filter(expectedDate__isnull=False)
+            print(patients_without_nulls.count())  # Should NOT include those 22 NULL records
+            print(patients_without_nulls.query)  # Check actual SQL query
+
+
+            recent_patients = Patient.objects.annotate(
+                is_confirmed_today=Case(
+                When(Exists(confirmed_today), then=Value(1)),  # Use 1 instead of True
+                default=Value(0),  # Use 0 instead of False
+                output_field=IntegerField()  ),
+                has_medical_history=Exists(
+                PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))),
+                 safe_expectedDate=Coalesce("expectedDate", Value("1900-01-01", output_field=DateField()))  # ✅ Correct type
+                ).filter(
+                    ~Q(safe_expectedDate="1900-01-01"),  # ✅ Now, NULL values are removed
+                    Q(attendanceDate__range=(start_of_day, end_of_day))
+                    | Q(safe_expectedDate=today_date)  # ✅ Ensures NULLs are no longer included
+                ).distinct()
+                            # # Debugging
+            for patient in recent_patients:
+                print(f"Patient ID: {patient.patientid}, Confirmed Today: {patient.is_confirmed_today}")
+          
+
             # get all patients who should attend today (expected date - confirmation date is =today and printform=false and added by call center)
            
-        elif scopeView=='callcenter':
+        elif ScopeView=='callcenter':
             recent_patients = Patient.objects.filter(
                             Q(expectedDate=today_date) | Q(Exists(confirmed_today)),   # Correct OR condition
                             isDeleted=False,
-                            reservationCode__null=False,
-                            formPrinted=False
+                            reservationCode__isnull=False,                            formPrinted=False
             ).distinct()
             
             # get all patients who should who their follow update is today or 3 days in future
-        elif scopeView=='followup':
+        elif ScopeView=='followup':
              recent_patients = Patient.objects.filter(
                             Q(Exists(upcoming_followups)),   # Correct OR condition
                             isDeleted=False,                            
                             formPrinted=False
             ).distinct()
             
-        elif scopeView=='missed':
+        elif ScopeView=='missed':
             recent_patients = Patient.objects.filter(
                             Q(expectedDate__gte=past_90_days_date) | Q(Exists(missed_past_90_days)),   # Correct OR condition
                             isDeleted=False,
                             formPrinted=False
             ).distinct()
                 
-        recent_patients = (                
-        recent_patients.select_related('sufferedcase')
-        .annotate(
-            call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
-            last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
-            last_call_outcome=Subquery(
-                CallTrack.objects.filter(
-                    patientID=OuterRef('pk'),  # Reference the current patient
-                    trackType='CE'
-                )
-                .order_by('-createdDate')
-                .values('outcome')[:1]  # Get the outcome of the latest call
-            ),
-            has_medical_history=Exists(
-            PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
-        ))
-        .order_by('-createdDate')
-        .values(
-            'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
-            'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
-            'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
-            'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
+            recent_patients = (                
+            recent_patients.select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
+                last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk'),  # Reference the current patient
+                        trackType='CE'
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                ),
+                has_medical_history=Exists(
+                PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+            ))
+            .order_by('-createdDate')
+            .values(
+                'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
+            )
         )
-    )
         
             
             # Pass the data to the template      
-            
+           
         return render(request, 'center/reservationsList.html', {'patients': recent_patients})
             
             
+    def patientForm(request, patientid):
+        CONDITIONS_LIST = [
+            ('DIABETES', 'HEART DISEASE', 'GLAUCOMA', 'EYE SURGERY'),
+            ('HTN', 'ASTHMA ALLERGY', 'CATARACT', 'EYE INJURY'),
+            ('THYROID', 'CANCER', 'RETINAL D.', None)
+            ]
+        patientData = get_object_or_404(Patient, patientid=patientid)
+        medical_history = PatientMedicalHistory.objects.filter(patient=patientData)
+        patientData.formPrinted=True
+        patientData.save()
         
+        # Convert to dictionary for easy lookup
+        history_dict = {entry.condition: entry.relation for entry in medical_history}
+
+        # Debugging:       
+        #print(f"Medical History: {history_dict}")  
+        
+        return render(request, 'center/patientForm.html',  {
+            'patientData': patientData,
+            'medical_history': history_dict,
+            'conditions_list': CONDITIONS_LIST  # Pass list from view
+        })
+   
     def centerReservationByMobile(request,strmobile):
             
             recent_patients = (

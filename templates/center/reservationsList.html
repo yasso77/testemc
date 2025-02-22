@@ -45,9 +45,11 @@
             </thead>
             <tbody>
                 {% for patient in patients %}
-                    <tr>
+               
+                    <tr {% if patient.is_confirmed_today %} style="background-color: yellow;" {% endif %}>
                         {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
-                        <td>{{ patient.fileserial }}</td>
+                        <td>{{ patient.fileserial }} 
+                        </td>
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
                         {% comment %} <td>{{ patient.birthdate }}</td> {% endcomment %}
@@ -91,9 +93,9 @@
                             
                                 <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
                                 {% if patient.has_medical_history %}
-                                <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-primary">Prepear Form</a>
+                                <a target="_blank" href="{% url 'patientForm' patient.patientid %}" class="btn btn-sm btn-success">Print Form</a>
                                 {% else %}
-                                <span class="badge bg-danger">No Medical History</span>
+                                <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a>
                                 {% endif %}
                                 <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
