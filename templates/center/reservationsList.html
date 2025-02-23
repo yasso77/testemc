@@ -59,8 +59,8 @@
                         <td>{{ patient.sufferedcase__caseName }}</td>
                         <td>{{ patient.sufferedcaseByPatient__caseName }}</td>
                         
-                        <td data-order="{{ patient.attendanceDate|date:'Y-m-d H:i:s' }}">
-                            {{ patient.attendanceDate|date:'M. j, Y, g:i a' }}
+                        <td data-order="{{ patient.attendanceDate }}">
+                            {{ patient.attendanceDate}}
                         </td>
                         
                         <td> {{ patient.checkUpprice }}</td>
@@ -97,7 +97,7 @@
                                 {% else %}
                                 <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a>
                                 {% endif %}
-                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
+                                <a href="{% url 'centeredit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}
                                    

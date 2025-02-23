@@ -1,12 +1,15 @@
-from datetime import date, datetime, time,  timedelta
+from datetime import  datetime, time,  timedelta
+import datetime
 import string
 from urllib import request
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import now, make_aware, is_naive
 from django.utils import timezone
+
+from manager.forms.CenterEditReservation import CenterEditReservationForm
 from manager.forms.centerReservation import CEAddReservationForm
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce,TruncDate
 
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
@@ -14,10 +17,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count,Exists, Q
-from django.db.models import IntegerField,Max, Subquery, OuterRef, BooleanField, Case, Value, When, Exists, DateField
+from django.db.models import IntegerField,Max, Subquery, OuterRef,  Case, Value, When, Exists, DateField
 from manager.forms.centerFollowUp import centerTrackForm
 from manager.model import patient
 from manager.model.patient import CallTrack, MedicalCondition, Patient, PatientMedicalHistory
+
 
 class CenterView(ListView):
     def generateFileSerial():
@@ -125,7 +129,7 @@ class CenterView(ListView):
                                 condition_obj = MedicalCondition.objects.get(conditionName=condition_key)
                             except ObjectDoesNotExist:
                                 # Handle the case where the condition doesn't exist in the database
-                                print(f"Condition '{condition_key}' does not exist in the database.")
+                                #print(f"Condition '{condition_key}' does not exist in the database.")
                                 continue  # Skip to the next condition
                             
                             # Append the condition and relation as a tuple
@@ -164,9 +168,10 @@ class CenterView(ListView):
     
     def centerReservations(request, ScopeView):
         
-        today_date = datetime.today().date()
-        start_of_day = datetime.combine(today_date, datetime.min.time())  # 2025-02-21 00:00:00
-        end_of_day = datetime.combine(today_date, time(23, 59, 59))  # 2025-02-21 23:59:59
+        today_date = datetime.date.today() # Ensures it matches expectedDate format
+        #start_of_day = datetime.combine(today_date, datetime.min.time())  # 2025-02-21 00:00:00
+        #end_of_day = datetime.combine(today_date, time(23, 59, 59))  # 2025-02-21 23:59:59
+        FALLBACK_DATE = datetime.date(1900, 1, 1)
 
         # Get today's date
         
@@ -195,34 +200,41 @@ class CenterView(ListView):
 
             # Determine filtering condition based on scopeView
             # get all patients who should attend today (attendance today - expected date - confirmation date is =today and printform=false)
-        if ScopeView == 'today':
-            # Query with annotation
-         
-
-            # Count records where expectedDate is NULL
-            null_count = Patient.objects.filter(expectedDate__isnull=True).count()
-            print(f"NULL expectedDate count: {null_count}")
-            patients_without_nulls = Patient.objects.filter(expectedDate__isnull=False)
-            print(patients_without_nulls.count())  # Should NOT include those 22 NULL records
-            print(patients_without_nulls.query)  # Check actual SQL query
-
+        if ScopeView == 'today':  
+            # ✅ Ensure today_date is a proper date object
+            today_date = datetime.date.today() # Ensures it matches expectedDate format
+            print("today_date type:", type(today_date), "value:", today_date)
+            # Get a fallback old date
+            FALLBACK_DATE = datetime.date(1900, 1, 1)
 
             recent_patients = Patient.objects.annotate(
-                is_confirmed_today=Case(
-                When(Exists(confirmed_today), then=Value(1)),  # Use 1 instead of True
-                default=Value(0),  # Use 0 instead of False
-                output_field=IntegerField()  ),
-                has_medical_history=Exists(
-                PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))),
-                 safe_expectedDate=Coalesce("expectedDate", Value("1900-01-01", output_field=DateField()))  # ✅ Correct type
-                ).filter(
-                    ~Q(safe_expectedDate="1900-01-01"),  # ✅ Now, NULL values are removed
-                    Q(attendanceDate__range=(start_of_day, end_of_day))
-                    | Q(safe_expectedDate=today_date)  # ✅ Ensures NULLs are no longer included
-                ).distinct()
-                            # # Debugging
-            for patient in recent_patients:
-                print(f"Patient ID: {patient.patientid}, Confirmed Today: {patient.is_confirmed_today}")
+                        is_confirmed_today=Case(
+                            When(Exists(confirmed_today), then=Value(1)),
+                            default=Value(0),
+                            output_field=IntegerField()
+                        ),
+                        has_medical_history=Exists(
+                            PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+                        ),
+                        # ✅ Ensure consistent date format for filtering
+                        safe_expectedDate=Coalesce("expectedDate", Value(FALLBACK_DATE, output_field=DateField())),  
+                        safe_attendanceDate=Coalesce("attendanceDate", Value(FALLBACK_DATE, output_field=DateField()))  
+                    ).filter(
+                        # ✅ Ensures at least one date is present (excludes records where both are NULL)
+                        ~Q(safe_expectedDate=FALLBACK_DATE) | ~Q(safe_attendanceDate=FALLBACK_DATE),
+
+                        # ✅ Include cases where attendanceDate is today even if expectedDate is NULL
+                        Q(safe_attendanceDate=today_date) | Q(safe_expectedDate=today_date),
+                        isDeleted=False
+                    ).distinct()
+            
+           
+
+            #                 # # Debugging
+            # for patient in recent_patients:
+            #     print(f"Patient ID: {patient.patientid}, Confirmed Today: {patient.is_confirmed_today}")
+            #     print("Today Date:", today_date)
+                
           
 
             # get all patients who should attend today (expected date - confirmation date is =today and printform=false and added by call center)
@@ -231,7 +243,8 @@ class CenterView(ListView):
             recent_patients = Patient.objects.filter(
                             Q(expectedDate=today_date) | Q(Exists(confirmed_today)),   # Correct OR condition
                             isDeleted=False,
-                            reservationCode__isnull=False,                            formPrinted=False
+                            reservationCode__isnull=False,
+                            formPrinted=False
             ).distinct()
             
             # get all patients who should who their follow update is today or 3 days in future
@@ -422,3 +435,22 @@ class CenterView(ListView):
         
         # Render the edit page with the form and patient data
         return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})
+
+    def edit_reservation(request, patientid):
+        # Fetch the patient instance or return 404 if not found
+        patient = get_object_or_404(Patient, patientid=patientid)
+        
+        if request.method == 'POST':
+            # Bind form data to the existing patient instance
+            form = CenterEditReservationForm(request.POST, instance=patient)
+            if form.is_valid():
+                form.save()  # Save the updated instance
+                return redirect(reverse('centerPatients', args=['today']))  # Redirect to the reservation list page
+            else:
+                print(form.errors)
+        else:
+            # Display the form pre-filled with patient data
+            form = CenterEditReservationForm(instance=patient)
+        
+        # Render the edit page with the form and patient data
+        return render(request, 'center/editReservation.html', {'form': form, 'patient': patient})
