@@ -22,8 +22,8 @@ class CenterEditReservationForm(forms.ModelForm):
 )
     
     otherMobile = forms.CharField(    
-    widget=forms.TextInput(attrs={'id': 'id_otherMobile', 'class': 'form-control'})
-)
+    widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City",
                                   widget=forms.Select(attrs={'class': 'form-select'}))    
     sufferedcaseByPatient = forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient",widget=forms.Select(attrs={'class': 'form-select'}))
@@ -54,13 +54,11 @@ class CenterEditReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = [ 'fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks',
-                  'checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile',
-                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass']
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass']
         
-        widgets = {
+        widgets = {            
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            
+            'otherMobile': forms.TextInput(attrs={'class': 'form-control'}),            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
                                                       'style': 'background-color: yellow;font-weight:bold'}),

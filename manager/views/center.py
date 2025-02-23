@@ -437,20 +437,40 @@ class CenterView(ListView):
         return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})
 
     def edit_reservation(request, patientid):
-        # Fetch the patient instance or return 404 if not found
         patient = get_object_or_404(Patient, patientid=patientid)
-        
+
         if request.method == 'POST':
-            # Bind form data to the existing patient instance
             form = CenterEditReservationForm(request.POST, instance=patient)
             if form.is_valid():
-                form.save()  # Save the updated instance
-                return redirect(reverse('centerPatients', args=['today']))  # Redirect to the reservation list page
-            else:
-                print(form.errors)
+                patient = form.save()
+
+                # Clear existing medical history before saving new ones
+                PatientMedicalHistory.objects.filter(patient=patient).delete()
+
+                # Loop through medical conditions and save the new selections
+                for condition in MedicalCondition.objects.all():
+                    choice = request.POST.get(f"medical_conditions_{condition.conditionName}")
+                    if choice:  # If a selection is made (Self/Relative)
+                        PatientMedicalHistory.objects.create(
+                            patient=patient,
+                            condition=condition,
+                            relation=choice,
+                            createdBy=request.user  # Assuming user is logged in
+                        )
+
+                return redirect(reverse('centerPatients', args=['today']))
+
         else:
-            # Display the form pre-filled with patient data
             form = CenterEditReservationForm(instance=patient)
+
+        # Fetch existing medical history for this patient
+        existing_medical_history = {entry.condition.conditionName: entry.relation for entry in PatientMedicalHistory.objects.filter(patient=patient)}
         
-        # Render the edit page with the form and patient data
-        return render(request, 'center/editReservation.html', {'form': form, 'patient': patient})
+        print(existing_medical_history)
+
+        return render(request, 'center/editReservation.html', {
+            'form': form,
+            'patient': patient,
+            'existing_medical_history': existing_medical_history,
+            'medical_conditions': MedicalCondition.objects.all()
+        })

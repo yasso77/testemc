@@ -18,3 +18,8 @@ def is_today(value):
 @register.filter
 def in_group(user, group_name):
     return user.groups.filter(name=group_name).exists() if user.is_authenticated else False
+
+@register.filter
+def dict_get(dictionary, key):
+    """Returns the value of a dictionary given a key, or None if the key doesn't exist."""
+    return dictionary.get(key, None)

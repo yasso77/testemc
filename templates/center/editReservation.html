@@ -1,4 +1,5 @@
 {% extends 'master.html'%}
+{% load custom_filters %}
 
 
 {% block content %}
@@ -141,13 +142,13 @@
    
     <div class="form-group row">
         
-        <label for="id_othermobile" class="col-sm-3 col-form-label">Other Mobile</label>
+        <label for="{{ form.otherMobile.id_for_label }}" class="col-sm-3 col-form-label">Other Mobilex</label>
        
             <div class="col-sm-8">
-                {{ form.othermobile }}
-                {% if form.othermobile.errors %}
+                {{ form.otherMobile }}
+                {% if form.otherMobile.errors %}
                     <div class="text-danger">
-                        {{ form.othermobile.errors }}
+                        {{ form.otherMobile.errors }}
                     </div>
                 {% endif %}
             </div>
@@ -303,104 +304,36 @@
             </div>
         </div>
         <!-- Medical Conditions Selection -->
-         <div class="table-responsive">
+        <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
                         <th class="left">Disease</th>
                         <th class="text-center">Self</th>
                         <th class="text-center">Relative</th>
-                        <th class="left">Disease</th>
-                        <th class="text-center">Self</th>
-                        <th class="text-center">Relative</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for condition in medical_conditions %}
                     <tr>
-                        <td class="left">DIABETES</td>
+                        <td class="left">{{ condition.conditionName }}</td>
                         <td class="text-center">
-                            <input type="radio" name="medical_conditions[DIABETES]" value="self" class="form-check-input custom-radio">
+                            <input type="radio" name="medical_conditions_{{ condition.conditionName }}" value="self"
+                                class="form-check-input custom-radio"
+                                {% if existing_medical_history|dict_get:condition.relation == 'self' %} checked {% endif %}>
                         </td>
                         <td class="text-center">
-                            <input type="radio" name="medical_conditions[DIABETES]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                        <td class="left">HEART DISEASE</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[HEART DISEASE]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[HEART DISEASE]" value="relative" class="form-check-input custom-radio">
+                            <input type="radio" name="medical_conditions_{{ condition.conditionName }}" value="relative"
+                                class="form-check-input custom-radio"
+                                {% if existing_medical_history|dict_get:condition.relation == 'relative' %} checked {% endif %}>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="left">HTN</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[HTN]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[HTN]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                        <td class="left">ASTHMA ALLERGY</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="left">CANCER</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[CANCER]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[CANCER]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                        <td class="left">GLAUCOMA</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[GLAUCOMA]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[GLAUCOMA]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="left">CATARACT</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[CATARACT]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[CATARACT]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                        <td class="left">RETINAL D.</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[RETINAL D.]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[RETINAL D.]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="left">EYE SURGERY</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[EYE SURGERY]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[EYE SURGERY]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                        <td class="left">EYE INJURY</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[EYE INJURY]" value="self" class="form-check-input custom-radio">
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions[EYE INJURY]" value="relative" class="form-check-input custom-radio">
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-             
-                </div>
-   
+        </div>
+        
+        
 
     
 
