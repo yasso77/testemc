@@ -19,7 +19,11 @@ class CheckUpPriceManager(models.Manager):
             return self.filter(isVisible=True)
 class SufferedCasesManager(models.Manager):
         def active(self):
-            return self.filter(isVisible=True)      
+            return self.filter(isVisible=True)  
+
+class MedicalConditionManager(models.Manager):
+        def active(self):
+            return self.filter(isVisible=True)    
 
 class CheckUpPrice(models.Model):
     checkupPriceID=models.AutoField(primary_key=True)
@@ -224,13 +228,24 @@ class CallTrack(models.Model):
         verbose_name='Call Track'
         verbose_name_plural = "Call Tracks"
         
-class MedicalCondition(models.Model):
+# class MedicalCondition(models.Model):
     
-    conditionName = models.CharField(max_length=100, primary_key=True)
+#     conditionName = models.CharField(max_length=100, primary_key=True)
 
+#     def __str__(self):
+#         return self.conditionName
+
+class MedicalConditionData(models.Model):
+    
+    conditionID=models.AutoField(primary_key=True)
+    conditionName = models.CharField(max_length=100)
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')    
+    createdDate=models.DateField(verbose_name='Created date',blank=True,null=True)
+    
+    objects = MedicalConditionManager()
     def __str__(self):
         return self.conditionName
-    
+     
 class PatientMedicalHistory(models.Model):
     RELATION_CHOICES = [
         ('SELF', 'Self'),
@@ -238,7 +253,7 @@ class PatientMedicalHistory(models.Model):
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    condition = models.ForeignKey(MedicalCondition, on_delete=models.CASCADE)
+    condition = models.ForeignKey(MedicalConditionData, on_delete=models.CASCADE)
     relation = models.CharField(max_length=10, choices=RELATION_CHOICES)
     createdBy=models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='creator')
     createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')

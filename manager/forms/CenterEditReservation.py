@@ -4,7 +4,7 @@ from django import forms
 import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from manager.model.patient import AgentCompany, CheckUpPrice, City, MedicalCondition, Offers, Patient, SufferedCases
+from manager.model.patient import AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
 
 
 class CenterEditReservationForm(forms.ModelForm):   
@@ -34,7 +34,7 @@ class CenterEditReservationForm(forms.ModelForm):
 
     # Medical history fields
     medical_conditions = forms.ModelMultipleChoiceField(
-        queryset=MedicalCondition.objects.all(),
+        queryset=MedicalConditionData.objects.all(),
         required=False,
         label="Medical Conditions",
         widget=forms.CheckboxSelectMultiple()

@@ -1,7 +1,7 @@
 # forms.py
 from datetime import date
 from django import forms
-from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalCondition, Offers, Patient, SufferedCases
+from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
 
 
 class CEAddReservationForm(forms.ModelForm):
@@ -23,7 +23,7 @@ class CEAddReservationForm(forms.ModelForm):
 
     # Medical history fields
     medical_conditions = forms.ModelMultipleChoiceField(
-        queryset=MedicalCondition.objects.all(),
+        queryset=MedicalConditionData.objects.all(),
         required=False,
         label="Medical Conditions",
         widget=forms.CheckboxSelectMultiple()

@@ -308,29 +308,44 @@
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
-                        <th class="left">Disease</th>
-                        <th class="text-center">Self</th>
-                        <th class="text-center">Relative</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for condition in medical_conditions %}
-                    <tr>
-                        <td class="left">{{ condition.conditionName }}</td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions_{{ condition.conditionName }}" value="self"
-                                class="form-check-input custom-radio"
-                                {% if existing_medical_history|dict_get:condition.relation == 'self' %} checked {% endif %}>
-                        </td>
-                        <td class="text-center">
-                            <input type="radio" name="medical_conditions_{{ condition.conditionName }}" value="relative"
-                                class="form-check-input custom-radio"
-                                {% if existing_medical_history|dict_get:condition.relation == 'relative' %} checked {% endif %}>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                    <th class="footer-image">Disease</th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                    <th></th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                  
+                    
+                </tr>
+            </thead>
+            <tbody>
+            
+                {% for condition in conditions_list %}
+                    {% if forloop.first or forloop.counter0|divisibleby:2 %}
+                        <tr>
+                    {% endif %}
+            
+                    <td>{{ condition }}</td>  {# Show all conditions from CONDITIONS_LIST #}
+                    {% with medical_history|get_item:condition as relation %}  {# Check if the condition exists in medical_history #}
+                    <td >
+                        <input type="radio" name="medical_conditions_{{ condition }}" value="self" 
+                             {% if relation == "self" %} checked {% endif %}>
+                    </td>
+                    <td >
+                        <input type="radio" name="medical_conditions_{{ condition }}" value="relative" 
+                                 {% if relation == "relative" %} checked {% endif %}>
+                    </td>
+                    
+                    {% endwith %}
+            
+                    {% if forloop.last or forloop.counter|divisibleby:2 %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
             </table>
+            
+            
         </div>
         
         

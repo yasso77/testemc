@@ -20,7 +20,7 @@ from django.db.models import Count,Exists, Q
 from django.db.models import IntegerField,Max, Subquery, OuterRef,  Case, Value, When, Exists, DateField
 from manager.forms.centerFollowUp import centerTrackForm
 from manager.model import patient
-from manager.model.patient import CallTrack, MedicalCondition, Patient, PatientMedicalHistory
+from manager.model.patient import CallTrack,MedicalConditionData, Patient, PatientMedicalHistory
 
 
 class CenterView(ListView):
@@ -74,18 +74,7 @@ class CenterView(ListView):
     @login_required
     def addNewReservation(request):
         
-        # List of medical conditions to add
-        conditions = [
-            "DIABETES", "HTN", "THYROID", "HEART DISEASE",
-            "ASTHMA ALLERGY", "CANCER", "GLAUCOMA",
-            "CATARACT", "RETINAL D.", "EYE SURGERY", "EYE INJURY"
-        ]
-
-        # Bulk insert while avoiding duplicates
-        MedicalCondition.objects.bulk_create(
-            [MedicalCondition(conditionName=cond) for cond in conditions], ignore_conflicts=True
-        )
-        
+                
         latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
 
         if request.method == 'POST':
@@ -115,36 +104,37 @@ class CenterView(ListView):
                 # Initialize an empty list to store the conditions and relations
                 # Initialize an empty list to store the conditions and relations
                 medical_conditions = []
-                
+
                 # Iterate through all items in the POST data (request.POST)
                 for condition_name, relation in request.POST.items():
-                    # Only process the keys that start with 'medical_conditions'
-                    if condition_name.startswith('medical_conditions'):
-                        condition_key = condition_name.split('[')[1].split(']')[0]  # Extract the disease name from the key
-                        
-                        # Check if the value is either 'self' or 'relative'
+                    if condition_name.startswith('medical_conditions[') and condition_name.endswith(']'):
+                        condition_key = condition_name.split('[')[1].split(']')[0]  # Extract condition name
+
                         if relation in ['self', 'relative']:
-                            try:
-                                # Try to get the MedicalCondition object
-                                condition_obj = MedicalCondition.objects.get(conditionName=condition_key)
-                            except ObjectDoesNotExist:
-                                # Handle the case where the condition doesn't exist in the database
-                                #print(f"Condition '{condition_key}' does not exist in the database.")
-                                continue  # Skip to the next condition
-                            
-                            # Append the condition and relation as a tuple
-                            medical_conditions.append((condition_obj, relation))
+                            print(f"Searching for condition: {condition_key}")
 
-                # Now save the PatientMedicalHistory records
+                            # Ensure we fetch a single instance, not a QuerySet
+                            condition_obj = MedicalConditionData.objects.filter(conditionName=condition_key).first()
+
+                            if condition_obj:
+                                print(f"Found condition: {condition_obj} (ID: {condition_obj.conditionID})")
+                                medical_conditions.append((condition_obj, relation))
+                            else:
+                                print(f"Condition '{condition_key}' not found in MedicalCondition table.")
+
+                # Ensure we are passing an **instance**, not a string
                 for condition_obj, relation in medical_conditions:
-                    PatientMedicalHistory.objects.create(
-                        patient=patient,
-                        condition=condition_obj,
-                        relation=relation,
-                        createdBy=request.user
-                    )
+                    if isinstance(condition_obj, MedicalConditionData):  # Ensure it's a model instance
+                        PatientMedicalHistory.objects.create(
+                            patient=patient,
+                            condition=condition_obj,  # Must be an instance, NOT a string
+                            relation=relation,
+                            createdBy=request.user
+                        )
+                    else:
+                        print(f"Skipping invalid condition: {condition_obj}")
 
-                # Return confirmation message
+
                 return render(
                     request,
                     "ConfirmMsg.html",
@@ -448,8 +438,10 @@ class CenterView(ListView):
                 PatientMedicalHistory.objects.filter(patient=patient).delete()
 
                 # Loop through medical conditions and save the new selections
-                for condition in MedicalCondition.objects.all():
-                    choice = request.POST.get(f"medical_conditions_{condition.conditionName}")
+                for condition in MedicalConditionData.objects.active():
+                    choice = request.POST.get(f"medical_conditions_{condition}")  # ✅ Works!
+
+                    print(choice)
                     if choice:  # If a selection is made (Self/Relative)
                         PatientMedicalHistory.objects.create(
                             patient=patient,
@@ -464,13 +456,30 @@ class CenterView(ListView):
             form = CenterEditReservationForm(instance=patient)
 
         # Fetch existing medical history for this patient
-        existing_medical_history = {entry.condition.conditionName: entry.relation for entry in PatientMedicalHistory.objects.filter(patient=patient)}
+         # Fetch existing medical history for this patient
+        history_dict = CenterView.getPatientMedicalCases(patient)
+        CONDITIONS_LIST=MedicalConditionData.objects.active()
         
-        print(existing_medical_history)
+        if not history_dict:
+            history_dict = {"": ""}
+        
+        #print(history_dict)
+        print('condition',CONDITIONS_LIST)
+
 
         return render(request, 'center/editReservation.html', {
             'form': form,
-            'patient': patient,
-            'existing_medical_history': existing_medical_history,
-            'medical_conditions': MedicalCondition.objects.all()
+            'patient': patient,            
+            'medical_history': history_dict,  # Pass history_dict to template
+            'conditions_list': CONDITIONS_LIST  # Pass CONDITIONS_LIST to template
         })
+        
+    def getPatientMedicalCases(PatientObj):        
+                
+        medical_history = PatientMedicalHistory.objects.filter(patient=PatientObj)      
+        
+        # Convert to dictionary for easy lookup
+        history_dict = {entry.condition: entry.relation for entry in medical_history}
+        
+        return history_dict
+      
