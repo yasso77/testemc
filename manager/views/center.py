@@ -284,27 +284,25 @@ class CenterView(ListView):
             
             
     def patientForm(request, patientid):
-        CONDITIONS_LIST = [
-            ('DIABETES', 'HEART DISEASE', 'GLAUCOMA', 'EYE SURGERY'),
-            ('HTN', 'ASTHMA ALLERGY', 'CATARACT', 'EYE INJURY'),
-            ('THYROID', 'CANCER', 'RETINAL D.', None)
-            ]
+        CONDITIONS_LIST = MedicalConditionData.objects.active()
         patientData = get_object_or_404(Patient, patientid=patientid)
         medical_history = PatientMedicalHistory.objects.filter(patient=patientData)
-        patientData.formPrinted=True
+        patientData.formPrinted = True
         patientData.save()
         
-        # Convert to dictionary for easy lookup
-        history_dict = {entry.condition: entry.relation for entry in medical_history}
+        # Convert queryset to dictionary with condition names as keys
+        history_dict = {entry.condition.conditionName: entry.relation for entry in medical_history}
 
-        # Debugging:       
-        #print(f"Medical History: {history_dict}")  
-        
+        # Debugging:
+        print(f"Medical History: {history_dict}")  
+
         return render(request, 'center/patientForm.html',  {
             'patientData': patientData,
-            'medical_history': history_dict,
+            'medical_history': history_dict,  # Dictionary now uses condition names as keys
             'conditions_list': CONDITIONS_LIST  # Pass list from view
         })
+
+
    
     def centerReservationByMobile(request,strmobile):
             

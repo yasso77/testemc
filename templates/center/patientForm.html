@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Page Title</title>
+    <title>{{patientData.fullname}}:Form</title>
 
     <style>
         @media print {
@@ -288,46 +288,55 @@
         </div>
        
                
-        <table id="tableSpecs" style="border-collapse: collapse;">
+      
+<table id="tableSpecs" style="border-collapse: collapse;">
+    <tr>
+        <th class="footer-image"></th>
+        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+        <th style="border-right: 2px solid #fff; width:7%">REL</th>
+        <th></th>
+        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+        <th style="border-right: 2px solid #fff; width:7%">REL</th>
+        <th></th>
+        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+        <th style="border-right: 2px solid #fff; width:7%">REL</th>
+        <th></th>
+        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+        <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
+    </tr>
+
+    {% for condition in conditions_list %}
+        {% if forloop.first or forloop.counter0|divisibleby:4 %}
             <tr>
-                <th class="footer-image"></th>
-                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                <th style="border-right: 2px solid #fff; width:7%">REL</th>
-                <th></th>
-                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                <th style="border-right: 2px solid #fff; width:7%">REL</th>
-                <th></th>
-                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                <th style="border-right: 2px solid #fff; width:7%">REL</th>
-                <th></th>
-                <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
+        {% endif %}
+
+        <td>{{ condition.conditionName }}</td>
+
+        <!-- Self column -->
+        <td style="border-left: 2px solid #928469; text-align: center;">
+            {% if medical_history|dict_key:condition.conditionName == "self" %}
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+                </svg>
+            {% endif %}
+        </td>
+
+        <!-- Relative column -->
+        <td style="border-right: 2px solid #928469; text-align: center;">
+            {% if medical_history|dict_key:condition.conditionName == "relative" %}
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+                </svg>
+            {% endif %}
+        </td>
+
+        {% if forloop.last or forloop.counter|divisibleby:4 %}
             </tr>
+        {% endif %}
+    {% endfor %}
+</table>
         
-            {% for condition, relation in medical_history.items %}
-                {% if forloop.first or forloop.counter0|divisibleby:4 %}
-                    <tr>
-                {% endif %}
         
-                <td>{{ condition }}</td>
-                <td style="border-left: 2px solid #928469;">
-                    {% if relation == "self" %}<svg width="40" height="40" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
-                    </svg>{% endif %}
-                </td>
-                <td style="border-right: 2px solid #928469;">
-                    {% if relation == "relative" %}
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
-        </svg>
-    {% endif %}
-                </td>
-        
-                {% if forloop.last or forloop.counter|divisibleby:4 %}
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </table>
         
         
         <br />

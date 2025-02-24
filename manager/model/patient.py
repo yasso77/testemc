@@ -228,12 +228,12 @@ class CallTrack(models.Model):
         verbose_name='Call Track'
         verbose_name_plural = "Call Tracks"
         
-# class MedicalCondition(models.Model):
+class MedicalCondition(models.Model):
     
-#     conditionName = models.CharField(max_length=100, primary_key=True)
+    conditionName = models.CharField(max_length=100, primary_key=True)
 
-#     def __str__(self):
-#         return self.conditionName
+    def __str__(self):
+        return self.conditionName
 
 class MedicalConditionData(models.Model):
     

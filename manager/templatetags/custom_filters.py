@@ -23,3 +23,8 @@ def in_group(user, group_name):
 def dict_get(dictionary, key):
     """Returns the value of a dictionary given a key, or None if the key doesn't exist."""
     return dictionary.get(key, None)
+
+@register.filter
+def dict_key(d, key):
+    """Fetch a dictionary value safely in Django templates."""
+    return d.get(key, None)  # Default to None if key is not found
