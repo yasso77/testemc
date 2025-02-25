@@ -1,10 +1,11 @@
 from datetime import  datetime, time,  timedelta
 import datetime
 import string
+
 from urllib import request
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils.timezone import now, make_aware, is_naive
+from django.utils.timezone import now, make_aware, is_naive,localtime
 from django.utils import timezone
 
 from manager.forms.CenterEditReservation import CenterEditReservationForm
@@ -72,8 +73,7 @@ class CenterView(ListView):
 
 
     @login_required
-    def addNewReservation(request):
-        
+    def addNewReservation(request):       
                 
         latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
 
@@ -86,19 +86,7 @@ class CenterView(ListView):
                 patient.fileserial = latest_fileserial  # Assign generated file serial
                 patient.createdBy = request.user  # Assign logged-in user
                 patient.reservedBy = request.user  # Assign logged-in user
-                patient.callDirection = None              
-
-                # Ensure createdDate has a value
-                if patient.createdDate is None:
-                    patient.createdDate = now()  # Assign a timezone-aware datetime
-                elif is_naive(patient.createdDate):
-                    patient.createdDate = make_aware(patient.createdDate)
-
-                if patient.attendanceDate is None:
-                    patient.attendanceDate = now()  # Assign a timezone-aware datetime
-                elif is_naive(patient.attendanceDate):
-                    patient.attendanceDate = make_aware(patient.attendanceDate)
-
+                patient.callDirection = None    
                 patient.save()
 
                 # Initialize an empty list to store the conditions and relations
@@ -175,7 +163,7 @@ class CenterView(ListView):
             patientID=OuterRef('pk'),  # OuterRef links to the Patient model
             confirmationDate=today_date
         ).values('patientID')[:1]  # Ensures the query returns at most one match per patient
-        
+        #print(confirmed_today)
         missed_past_90_days = CallTrack.objects.filter(
             patientID=OuterRef('pk'),  # OuterRef links to the Patient model
             confirmationDate__gte=past_90_days_date
@@ -348,6 +336,7 @@ class CenterView(ListView):
         recent_patients = (
             Patient.objects.active()
             .filter(
+                Q(reservationCode__icontains=strText) |
                 Q(mobile__icontains=strText) |  # Search in mobile
                 Q(fullname__icontains=strText) |  # Search in name
                 Q(birthdate__icontains=strText) |  # Search in birthdate
@@ -439,7 +428,7 @@ class CenterView(ListView):
                 for condition in MedicalConditionData.objects.active():
                     choice = request.POST.get(f"medical_conditions_{condition}")  # ✅ Works!
 
-                    print(choice)
+                   
                     if choice:  # If a selection is made (Self/Relative)
                         PatientMedicalHistory.objects.create(
                             patient=patient,

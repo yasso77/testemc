@@ -21,9 +21,12 @@ class CenterEditReservationForm(forms.ModelForm):
     widget=forms.TextInput(attrs={'id': 'id_mobile', 'class': 'form-control'})
 )
     
-    otherMobile = forms.CharField(    
+    otherMobile = forms.CharField( 
+                                  required=False,   
     widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    
+    referral=forms.CharField( required=False,widget=forms.Select(attrs={'class': 'form-control'}))
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City",
                                   widget=forms.Select(attrs={'class': 'form-select'}))    
     sufferedcaseByPatient = forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case-By patient",widget=forms.Select(attrs={'class': 'form-select'}))

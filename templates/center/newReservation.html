@@ -65,7 +65,7 @@
      
     
 <div class="form-container">
-  <form method="post" class="form-horizontal">
+  <form method="post" id="myform" class="form-horizontal">
     {% csrf_token %}
 
     <div class="form-group row">
@@ -225,8 +225,9 @@
             <label for="{{ form.rideglass.id_for_label }}" class="col-sm-5 col-form-label">
                 Willing to get rid of glass <span style="color: red;">*</span></label>
     
-            
+                
             <div class="col-sm-5">
+                <div id="rideglass-error" class="text-danger"></div>
                 <div class="form-check form-check-inline">
                     <input 
                         class="form-check-input" 
@@ -249,6 +250,10 @@
                     >
                     <label class="form-check-label" for="rideglassNo">NO</label>
                 </div>
+
+               
+
+
             </div>
         </div>
     
@@ -256,7 +261,9 @@
             <label for="{{ form.wearingconduct.id_for_label }}" class="col-sm-5 col-form-label">
                 Wearing contact lens for the last 2 weeks? <span style="color: red;">*</span>
             </label>
-            <div class="col-sm-6">
+           
+            <div class="col-sm-5">
+                <div id="wearingconduct-error" class="text-danger"></div>
                 <div class="form-check form-check-inline">
                     <input 
                         class="form-check-input" 
@@ -267,6 +274,8 @@
                         {% if form.wearingconduct.value == "Y" %}checked{% endif %}
                     >
                     <label class="form-check-label" for="wearingYes">YES</label>
+                    <div id="wearingconduct-error" class="text-danger"></div>
+
                 </div>
                 <div class="form-check form-check-inline">
                     <input 
@@ -278,13 +287,11 @@
                         {% if form.wearingconduct.value == "N" %}checked{% endif %}
                     >
                     <label class="form-check-label" for="wearingNo">NO</label>
+                   
+
                 </div>
-                <!-- 🔴 Display Validation Errors Here -->
-                {% if form.wearingconduct.errors %}
-                    <div class="text-danger">
-                        {{ form.wearingconduct.errors.as_text }}
-                    </div>
-                {% endif %}
+                
+               
             </div>
         </div>
         <!-- Medical Conditions Selection -->
@@ -391,6 +398,8 @@
 
    
     <div class="form-group row">
+        <div id="form-error" class="alert alert-danger d-none"></div>
+
         <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
             <button type="submit" class="btn btn-primary">Create Reservation</button>
             <button type="reset" class="btn btn-secondary">Reset</button>
@@ -403,6 +412,40 @@
   </section>
 
   <script>
+    document.getElementById('myform').addEventListener('submit', function(event) {
+        let wearingConductChecked = document.querySelector('input[name="wearingconduct"]:checked');
+        let rideGlassChecked = document.querySelector('input[name="rideglass"]:checked');
+    
+        let wearingConductError = document.getElementById('wearingconduct-error');
+        let rideGlassError = document.getElementById('rideglass-error');
+        let formError = document.getElementById('form-error');
+    
+        // Clear previous errors
+        wearingConductError.textContent = "";
+        rideGlassError.textContent = "";
+        formError.classList.add('d-none');
+    
+        let hasError = false;
+    
+        if (!wearingConductChecked) {
+            wearingConductError.textContent = "Required !";
+            hasError = true;
+        }
+    
+        if (!rideGlassChecked) {
+            rideGlassError.textContent = "Required !";
+            hasError = true;
+        }
+    
+        if (hasError) {
+            formError.textContent = "There are errors in the form. Please fix them before submitting.";
+            formError.classList.remove('d-none');
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+    </script>
+  <script>
+    
     document.addEventListener('DOMContentLoaded', function () {
         const mobileField = document.getElementById('id_mobile');
         const messageSpan = document.getElementById('mobile-validation-message');

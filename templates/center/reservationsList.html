@@ -46,9 +46,10 @@
             <tbody>
                 {% for patient in patients %}
                
-                    <tr {% if patient.is_confirmed_today %} style="background-color: yellow;" {% endif %}>
+                    <tr {% if patient.reservationCode %} style="background-color:#D1F8EF;font-weight: bolder;" {% endif %}>
                         {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
-                        <td>{{ patient.fileserial }} 
+                        <td>{{ patient.fileserial }} <br/>
+                            {{ patient.reservationCode }}
                         </td>
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
@@ -95,7 +96,7 @@
                                 {% if patient.has_medical_history %}
                                 <a target="_blank" href="{% url 'patientForm' patient.patientid %}" class="btn btn-sm btn-success">Print Form</a>
                                 {% else %}
-                                <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a>
+                                {% comment %} <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a> {% endcomment %}
                                 {% endif %}
                                 <a href="{% url 'centeredit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">

@@ -26,7 +26,13 @@ class CallCenterView(ListView):
         # Generate reservation code
         username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
         
-        latest_code = Patient.objects.filter(createdBy__id=request.user.id).order_by('patientid').last()
+               
+        latest_code = Patient.objects.filter(
+            createdBy__id=request.user.id,
+            reservationCode__isnull=False  # Exclude NULL values
+        ).order_by('patientid').last()
+        
+        
 
         # Get the current month as a number
         current_month = str(datetime.now().month)  # "2" for February, "3" for March, etc.

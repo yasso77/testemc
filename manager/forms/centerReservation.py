@@ -1,6 +1,7 @@
 # forms.py
 from datetime import date
 from django import forms
+from django.utils.timezone import now, is_naive, make_aware
 from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
 
 
@@ -45,7 +46,7 @@ class CEAddReservationForm(forms.ModelForm):
         model = Patient
         fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks',
                   'checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile',
-                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass']
+                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate']
         widgets = {
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             
@@ -76,6 +77,21 @@ class CEAddReservationForm(forms.ModelForm):
         self.fields['mobile'].error_messages = {'required': 'Mobile is required!'}
         self.fields['referral'].required = False
    
+    def clean_attendanceTime(self):
+        data = self.cleaned_data.get("attendanceTime")
+        if not data:
+            from django.utils import timezone
+            data = timezone.localtime().time()
+        return data
+    
+
+    def clean_attendanceDate(self):
+        data = self.cleaned_data.get("attendanceDate")
+        if data is None:
+            return now()  # Assign current time as a default
+        if is_naive(data):
+            return make_aware(data)  # Convert to timezone-aware datetime
+        return data
     # def clean_mobile(self):
     #     mobile = self.cleaned_data.get('mobile')        
     #     # Regex pattern to match 7xx1234567

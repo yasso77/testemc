@@ -50,12 +50,12 @@
     </script>
 
 <div class="pagetitle">
-    <h1>New Reservation</h1>
+    <h1>Edit Reservation</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
         <li class="breadcrumb-item">Center</li>
-        <li class="breadcrumb-item active">Add New Reservation</li>
+        <li class="breadcrumb-item active">Edit Reservation</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -142,15 +142,11 @@
    
     <div class="form-group row">
         
-        <label for="{{ form.otherMobile.id_for_label }}" class="col-sm-3 col-form-label">Other Mobilex</label>
+        <label for="{{ form.otherMobile.id_for_label }}" class="col-sm-3 col-form-label">Other Mobile</label>
        
             <div class="col-sm-8">
                 {{ form.otherMobile }}
-                {% if form.otherMobile.errors %}
-                    <div class="text-danger">
-                        {{ form.otherMobile.errors }}
-                    </div>
-                {% endif %}
+               
             </div>
        
     
@@ -325,14 +321,14 @@
                         <tr>
                     {% endif %}
             
-                    <td>{{ condition }}</td>  {# Show all conditions from CONDITIONS_LIST #}
+                    <td class="left">{{ condition }}</td>  {# Show all conditions from CONDITIONS_LIST #}
                     {% with medical_history|get_item:condition as relation %}  {# Check if the condition exists in medical_history #}
                     <td >
-                        <input type="radio" name="medical_conditions_{{ condition }}" value="self" 
+                        <input type="radio" class="custom-radio" name="medical_conditions_{{ condition }}" value="self" 
                              {% if relation == "self" %} checked {% endif %}>
                     </td>
                     <td >
-                        <input type="radio" name="medical_conditions_{{ condition }}" value="relative" 
+                        <input type="radio" class="custom-radio"  name="medical_conditions_{{ condition }}" value="relative" 
                                  {% if relation == "relative" %} checked {% endif %}>
                     </td>
                     
@@ -355,7 +351,7 @@
    
     <div class="form-group row">
         <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
-            <button type="submit" class="btn btn-primary">Create Reservation</button>
+            <button type="submit" class="btn btn-primary">Save</button>
             <button type="reset" class="btn btn-secondary">Reset</button>
         </div>
     </div>
