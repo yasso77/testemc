@@ -14,7 +14,7 @@
       action="{% if request.user.groups.all.0.name == 'Call Center' %}{% url 'callCentersearchOnPatinet' %}{% elif request.user.groups.all.0.name == 'Reception' %}{% url 'centerSearchOnPatinet' %}{% else %}{% url 'callCentersearchOnPatinet' %}{% endif %}">
      
         {%csrf_token%}
-        <input type="text" name="strText" placeholder="{{viewScope}}" title="Enter search keyword">
+        <input type="text" name="strText" placeholder="{{ viewScope|default:'search by file#,reservation Code, mobile or name' }}"> 
         <button type="submit" title="Search"><i class="bi bi-search"></i></button>
       </form>
     </div><!-- End Search Bar -->

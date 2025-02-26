@@ -1,5 +1,5 @@
 # forms.py
-from datetime import date
+from datetime import date,timedelta
 from django import forms
 from manager.model.patient import CallTrack, City, Offers, Patient, SufferedCases
 from django.contrib import messages
@@ -67,7 +67,7 @@ class insertCallTrackForm(forms.ModelForm):
         
     def clean_confirmationDate(self):
         confirmed_date = self.cleaned_data.get('confirmationDate')
-        if confirmed_date and confirmed_date < date.today():
+        if confirmed_date and confirmed_date < date.today() - timedelta(days=1):
             raise forms.ValidationError("Confirmation Date cannot be earlier than today.")
         return confirmed_date
     

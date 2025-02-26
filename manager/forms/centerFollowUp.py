@@ -1,5 +1,5 @@
 # forms.py
-from datetime import date
+from datetime import date,timedelta
 from django import forms
 from manager.model.patient import CallTrack, City, Offers, Patient, SufferedCases
 from django.contrib import messages
@@ -58,7 +58,7 @@ class centerTrackForm(forms.ModelForm):
         
     def clean_nextFollow(self):
         nextFollow_date = self.cleaned_data.get('nextFollow')
-        if nextFollow_date and nextFollow_date < date.today():
+        if nextFollow_date and nextFollow_date < date.today() - timedelta(days=1):
             raise forms.ValidationError("Next Follow_date Date cannot be earlier than today.")
         return nextFollow_date       
         
