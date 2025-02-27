@@ -238,21 +238,49 @@ class CenterView(ListView):
         elif ScopeView=='followup':
             # expected-confirmation-followup will comeafter 3 days from now
             # Query CallTrack for non-canceled outcomes with next follow-up date today or in the next 3 days
-            upcoming_followups = CallTrack.objects.filter(
-                ~Q(outcome='Canceled'),  # Exclude 'Canceled' outcomes
-                nextFollow__range=[today_date, next_3_days]  # Next follow-up is today or within 3 days
-            )
+           # Get latest confirmation date for each patient
             latest_confirmation_date = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
                 confirmationDate__range=[today_date, next_3_days]
             ).order_by('-confirmationDate').values('confirmationDate')[:1]
-            
-            recent_patients = Patient.objects.annotate(latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),).filter(
-                            Q(Exists(upcoming_followups)),   # Correct OR condition
-                            expectedDate__range=[today_date, next_3_days],
-                            isDeleted=False,                            
-                            formPrinted=False
+
+            # Check if a patient has an upcoming follow-up (excluding 'Canceled' outcomes)
+            # Subquery to check if a patient has a valid upcoming follow-up within the range
+                       
+          # Subquery to check if a patient has a valid upcoming follow-up within the range
+                        
+            # Subquery to check if a patient has a valid upcoming follow-up within the range
+            valid_upcoming_followups = CallTrack.objects.filter(
+                patientID=OuterRef('pk'),  
+                  # Exclude 'Canceled' outcomes
+                nextFollow__range=[today_date, next_3_days]  
+            )
+
+            # Correct usage of Exists() inside a filter query
+            patients_in_calltrack = Patient.objects.filter(
+                Exists(valid_upcoming_followups)  # ✅ Pass only the QuerySet inside Exists()
+            )
+
+            # Query to fetch recent patients
+            # Query to fetch recent patients
+            recent_patientsx = Patient.objects.filter(
+                Q(expectedDate__range=[today_date, next_3_days]),
+                isDeleted=False,
+                formPrinted=False
             ).distinct()
+            
+            # Merge both queries using OR condition
+            # Merge both queries
+            recent_patients = Patient.objects.filter(
+                Q(pk__in=patients_in_calltrack.values('pk')) |  
+                Q(pk__in=recent_patientsx.values('pk'))  
+            ).annotate(
+                latestConfirmation=Subquery(latest_confirmation_date, output_field=DateField())  # ✅ Apply annotation after merging
+            )
+            
+
+            
+            print(recent_patients.query)
             
         elif ScopeView=='missed':
             missed_past_90_days = CallTrack.objects.filter(
