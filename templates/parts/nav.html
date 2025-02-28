@@ -50,13 +50,13 @@
           
           
           <li>
-            <a href="{%url 'centerPatients' 'today'%}">
+            <a href="{%url 'centerPatients' 'Attendance-Today'%}">
               {% comment %} all reservation added by receiption {% endcomment %}
               <i class="bi bi-circle"></i><span>Attendance Today</span>
             </a>
           </li>
           <li>
-            <a href="{%url 'centerPatients' 'callcenter'%}">
+            <a href="{%url 'centerPatients' 'Call-Center'%}">
                 {% comment %} all reservation added by call center and expected to attend today or in future {% endcomment %}
               <i class="bi bi-circle"></i><span>CC Reservations </span>
             </a>
@@ -65,7 +65,7 @@
          
 
           <li>
-            <a href="{%url 'centerPatients' 'followup'%}">
+            <a href="{%url 'centerPatients' 'Follow-Up'%}">
               {% comment %} all patients who come to follow up re-eximnation or  added by call center and and missed the time {% endcomment %}
               <i class="bi bi-circle"></i><span>Follow Up List </span>
             </a>
@@ -73,7 +73,7 @@
 
 
           <li>
-            <a href="{%url 'centerPatients' 'missed'%}">
+            <a href="{%url 'centerPatients' 'Missed-Reservations'%}">
               {% comment %} all reservation added by call center and and missed the time {% endcomment %}
               <i class="bi bi-circle"></i><span>Missed List </span>
             </a>

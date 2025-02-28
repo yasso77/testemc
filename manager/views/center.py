@@ -159,16 +159,9 @@ class CenterView(ListView):
         past_90_days_date = today_date - timedelta(days=90)
         # Get the date 3 days from today
         next_3_days = today_date + timedelta(days=3)
-        
-        
-        
-        
-        
-        
-
             # Determine filtering condition based on scopeView
             # get all patients who should attend today (attendance today - expected date - confirmation date is =today and printform=false)
-        if ScopeView == 'today':  
+        if ScopeView == 'Attendance-Today':  
             # ✅ Ensure today_date is a proper date object
             today_date = datetime.date.today() # Ensures it matches expectedDate format
             
@@ -215,7 +208,7 @@ class CenterView(ListView):
           
             # get all patients who should attend today (expected date - confirmation date is =today and printform=false and added by call center)
         
-        elif ScopeView=='callcenter':
+        elif ScopeView=='Call-Center':
             next_week_date = today_date + timedelta(days=7)
             
             latest_confirmation_date = CallTrack.objects.filter(
@@ -235,7 +228,7 @@ class CenterView(ListView):
             ).distinct()
             
             # get all patients who should who their follow update is today or 3 days in future
-        elif ScopeView=='followup':
+        elif ScopeView=='Follow-Up':
             # expected-confirmation-followup will comeafter 3 days from now
             # Query CallTrack for non-canceled outcomes with next follow-up date today or in the next 3 days
            # Get latest confirmation date for each patient
@@ -282,7 +275,7 @@ class CenterView(ListView):
             
             print(recent_patients.query)
             
-        elif ScopeView=='missed':
+        elif ScopeView=='Missed-Reservations':
             missed_past_90_days = CallTrack.objects.filter(
             patientID=OuterRef('pk'),  # OuterRef links to the Patient model
             confirmationDate__gte=past_90_days_date
@@ -309,6 +302,7 @@ class CenterView(ListView):
         recent_patients.select_related('sufferedcase')
         .annotate(
             call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
+            nxtFollow_date=Max('call_patients__nextFollow', filter=Q(call_patients__trackType='CE')),
             last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
             last_call_outcome=Subquery(
                 CallTrack.objects.filter(
@@ -326,14 +320,14 @@ class CenterView(ListView):
             'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
             'createdDate', 'city', 'mobile', 'sufferedcase__caseName','latestConfirmation',
             'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
-            'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
+            'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','nxtFollow_date'  # Add annotated fields
         )
     )
         
             
             # Pass the data to the template      
            
-        return render(request, 'center/reservationsList.html', {'patients': recent_patients})
+        return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':ScopeView})
             
             
     def patientForm(request, patientid):

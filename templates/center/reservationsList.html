@@ -63,7 +63,8 @@
                         <td data-order="{{ patient.attendanceDate }}">
                            ATT.Date:{{ patient.attendanceDate}}<br>
                            EXP.Date:{{patient.expectedDate}}<br>
-                           CFM.Date:{{patient.latestConfirmation}}
+                           CFM.Date:{{patient.latestConfirmation}}<br>
+                           NXT.Date:{{patient.nxtFollow_date}}
                         </td>
                         
                         <td> {{ patient.checkUpprice }}</td>
@@ -73,7 +74,7 @@
                                 <strong>Call Count:</strong> {{ patient.call_count }}
                             </div>
                             <div>
-                                <strong>Last Call Date:</strong> 
+                                <strong>Date:</strong> 
                                 {% if patient.last_call_date %}
                                     {{ patient.last_call_date|date:"F d, Y" }}
                                 {% else %}
