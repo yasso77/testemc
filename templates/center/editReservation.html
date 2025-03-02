@@ -72,12 +72,10 @@
     <div class="form-group row">
         <label for="{{ form.fileserial.id_for_label }}" class="col-sm-3 col-form-label">File Serial</label>
         <div class="col-sm-8">
-            {{ form.fileserial }}
-            {% if fileserial.errors %}
-                <div class="text-danger">
-                    {{ form.fileserial.errors }}
-                </div>
-            {% endif %}
+            
+
+            <input type="text" class="form-control" value="{{ fileserial }}" readonly style="background-color: aqua;">
+            
         </div>
     </div>
 

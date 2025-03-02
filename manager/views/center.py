@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import now, make_aware, is_naive,localtime
 from django.utils import timezone
-
+from django.http import Http404
 from manager.forms.CenterEditReservation import CenterEditReservationForm
 from manager.forms.centerReservation import CEAddReservationForm
 from django.db.models.functions import Coalesce,TruncDate
@@ -146,6 +146,8 @@ class CenterView(ListView):
         # Render the new reservation form
         return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
         
+    def dashSearchOnPatient(request):
+        return render(request, 'center/SearchOnReservation.html') 
     
     def centerReservations(request, ScopeView):
         
@@ -353,6 +355,16 @@ class CenterView(ListView):
 
    
     def centerReservationByMobile(request,strmobile):
+        
+            today_date = datetime.date.today()
+        
+            past_90_days_date = today_date - timedelta(days=90)
+            
+            # Subquery to fetch the latest confirmationDate for each patient
+            latest_confirmation_date = CallTrack.objects.filter(
+                patientID=OuterRef('pk'),
+                confirmationDate__gte=past_90_days_date
+            ).order_by('-confirmationDate').values('confirmationDate')[:1]
             
             recent_patients = (
             Patient.objects.active()
@@ -366,6 +378,7 @@ class CenterView(ListView):
             .annotate(
                 call_count=Count('call_patients', filter=Q(call_patients__trackType='CE')),  
                 last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CE')),
+                latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),
                 last_call_outcome=Subquery(
                     CallTrack.objects.filter(
                         patientID=OuterRef('pk'),  # Reference the current patient
@@ -392,7 +405,16 @@ class CenterView(ListView):
     def centerSearchOnPatient(request):
          
         strText = request.GET.get('strText', '')  
-        #print(strText) 
+        
+        today_date = datetime.date.today()        
+        past_90_days_date = today_date - timedelta(days=90)
+        
+        # Subquery to fetch the latest confirmationDate for each patient
+        latest_confirmation_date = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            confirmationDate__gte=past_90_days_date
+        ).order_by('-confirmationDate').values('confirmationDate')[:1]
+    #print(strText) 
         recent_patients = (
             Patient.objects.active()
             .filter(
@@ -405,6 +427,7 @@ class CenterView(ListView):
             )
             .select_related('sufferedcase')
             .annotate(
+                latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),
                 call_count=Count('call_patients'),  # Count number of call tracks for each patient
                 last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
                 last_call_outcome=Subquery(
@@ -422,7 +445,7 @@ class CenterView(ListView):
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
-                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
             )
         )
         
@@ -474,7 +497,20 @@ class CenterView(ListView):
         return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})
 
     def edit_reservation(request, patientid):
-        patient = get_object_or_404(Patient, patientid=patientid)
+        print("Before fetching patient...")  # Check if this prints
+
+        try:
+            patient = get_object_or_404(Patient, patientid=patientid)
+            print("Patient found!")  # This should print if a patient is found
+        except Http404:
+            print("❌ Patient not found!")  # This will print if patientid is incorrect
+            raise  # Re-raise the error so Django still shows the 404 page
+        
+
+        latest_fileserial = None  # Initialize variable
+        if(patient.fileserial==None):            
+           latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code  
+           print(latest_fileserial)    
 
         if request.method == 'POST':
             form = CenterEditReservationForm(request.POST, instance=patient)
@@ -508,15 +544,12 @@ class CenterView(ListView):
         CONDITIONS_LIST=MedicalConditionData.objects.active()
         
         if not history_dict:
-            history_dict = {"": ""}
-        
-        #print(history_dict)
-        print('condition',CONDITIONS_LIST)
-
+            history_dict = {"": ""}   
 
         return render(request, 'center/editReservation.html', {
             'form': form,
-            'patient': patient,            
+            'patient': patient,
+            'fileserial': latest_fileserial,            
             'medical_history': history_dict,  # Pass history_dict to template
             'conditions_list': CONDITIONS_LIST  # Pass CONDITIONS_LIST to template
         })

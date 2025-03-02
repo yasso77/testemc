@@ -458,11 +458,25 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/centerReservationByMobile/${strmobile}" target="_blank">Click here to view</a>`;
-                            messageSpan.style.display = 'block'; // Show the message
+                            // Clear previous content
+                            messageSpan.innerHTML = "A patient with this Mobile Number already exists. ";
+    
+                            // Create and append a new link element
+                            const link = document.createElement("a");
+                            link.href = `/centerReservationByMobile/${mobile}`;
+                            link.target = "_blank";
+                            link.innerText = "Click here to view";
+    
+                            // Attach a click event to ensure the link is responsive
+                            link.addEventListener("click", (e) => {
+                                e.stopPropagation(); // Prevent interference from other event listeners
+                            });
+    
+                            messageSpan.appendChild(link);
+                            messageSpan.style.display = 'block';
                         } else {
-                            messageSpan.style.display = 'none'; // Hide the message if no error
-                            messageSpan.textContent = ''; // Clear message if mobile is valid
+                            messageSpan.style.display = 'none';
+                            messageSpan.textContent = '';
                         }
                     })
                     .catch(error => console.error('Error:', error));
