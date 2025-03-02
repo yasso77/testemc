@@ -1,0 +1,199 @@
+{%extends 'master.html'%}
+
+        {% block content %}
+                  
+       
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      
+          <div class="pagetitle">
+            <h1>Call Center Dashboard</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+                <li class="breadcrumb-item active">Call Center Dash Board</li>
+              </ol>
+            </nav>
+          </div><!-- End Page Title -->
+      
+              <div class="container-fluid">
+                  <!-- Page Header -->
+                  <div class="row bg-primary text-white p-4 rounded shadow-sm mb-4">
+                    <div class="col">
+                        <h2 class="display-6 mb-2">Call Center Dashboard</h2>
+                        <p class="lead">Analyze reservations and follow-up leads at a glance</p>
+                        <div class="date-range mt-3 p-2 bg-light text-dark rounded">
+                            <strong>From:</strong> {{ stats.date_range.start }} 
+                            <strong>To:</strong> {{ stats.date_range.end }}
+                        </div>
+                    </div>
+                </div>
+                
+          
+                  <!-- Dashboard Summary Cards -->
+                  <div class="row text-center mb-4">
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #82B7F1FF; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Total </h5>
+                                <a href="{% url 'reservationList' %}" class="card-text display-6" style="color: white;">{{ stats.reserved_by_user_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #28a745; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Confirmed </h5>
+                                <a href="{% url 'reservationListScope' 'confirmed' %}"class="card-text display-6" style="color: white;">{{ stats.confirmed_patients_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm" style="background-color: #ffc107; color: black;">
+                            <div class="card-body">
+                                <h5 class="card-title">Will Attend Today</h5>
+                                <a href="{% url 'reservationListScope' 'willattend' %}"class="card-text display-6" style="color: black;">{{ stats.expected_today_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm" style="background-color: #dc3545; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Missed Reservations </h5>
+                                <a href="{% url 'reservationListScope' 'missed' %}" class="card-text display-6" style="color: white;">{{ stats.missed_patients_count }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card shadow-sm" style="background-color: #8B5FDFFF; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Attended</h5>
+                                <a href="{% url 'reservationListScope' 'attended' %}" class="card-text display-6" style="color: white;">{{ stats.attended_patients_count  }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+          
+                  <!-- Charts Section -->
+                  <div class="row">
+                      <!-- Pie Chart: Reservations Status -->
+                      {% comment %} <div class="col-md-6 mb-4">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Reservation Status Breakdown</h5>
+                                  <canvas id="reservationPieChart"></canvas>
+                              </div>
+                          </div>
+                      </div> {% endcomment %}
+          
+                      <!-- Line Chart: Daily Reservations -->
+                      <div class="col-md-12 mb-4">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Daily Reservations in compare with previous month</h5>
+                                  <canvas id="dailyReservationsLineChart"></canvas>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+          
+                  <!-- Bar Chart: Missed Appointments -->
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div class="card shadow-sm">
+                              <div class="card-body">
+                                  <h5 class="card-title">Missed Appointments by Month</h5>
+                                  <canvas id="missedAppointmentsBarChart"></canvas>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          
+              <!-- Chart.js Scripts -->
+              <script>
+                  
+
+          
+                  // Bar Chart: Missed Appointments by Month
+                  const missedAppointmentsCtx = document.getElementById('missedAppointmentsBarChart').getContext('2d');
+                  new Chart(missedAppointmentsCtx, {
+                      type: 'bar',
+                      data: {
+                          labels: ['January', 'February', 'March'], // Replace with dynamic data
+                          datasets: [{
+                              label: 'Missed Appointments',
+                              data: [10, 15, 8], // Replace with dynamic data
+                              backgroundColor: '#dc3545'
+                          }]
+                      },
+                  });
+              </script>
+          <script>
+            // Function to generate dynamic labels and data
+fetch('/reservation-data/')
+    .then(response => response.json())
+    .then(data => {
+        const reservationsData = data.reservationsData;
+        console.log(data)
+
+    // Extract labels and datasets
+    const labels = reservationsData.map(data => data.date);
+    const currentData = reservationsData.map(data => data.currentCount);
+    const lastMonthData = reservationsData.map(data => data.lastMonthCount);
+
+    // Create the chart
+    const dailyReservationsCtx = document.getElementById('dailyReservationsLineChart').getContext('2d');
+    new Chart(dailyReservationsCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Current Month',
+                    data: currentData,
+                    borderColor: '#007bff',
+                    fill: false,
+                    tension: 0.4,
+                },
+                {
+                    label: 'Same days in last Month',
+                    data: lastMonthData,
+                    borderColor: '#28a745',
+                    fill: false,
+                    tension: 0.4,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date',
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Reservations Count',
+                    },
+                    beginAtZero: true,
+                }
+            }
+        }
+    });
+})
+.catch(error => console.error('Error fetching reservations data:', error));
+
+          </script>
+              <!-- Bootstrap JS -->
+             
+          
+       
+    {% endblock %}
+       
+    

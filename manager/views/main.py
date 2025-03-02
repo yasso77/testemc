@@ -30,7 +30,15 @@ class MainView(ListView):
     def dashboard(request):
         
         if request.user.groups.filter(name="admin").exists():
-            return render(request, 'center/dashboard.html', {'name': 'index'})
+            
+             return render(request, 'centerx/dashboard.html', {'context': context,'stats':stats})
+        
+        if request.user.groups.filter(name="Reception").exists():
+            
+            #  context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
+            #  stats=MarketingView.get_patient_statistics_past_30_days()
+             return render(request, 'center/dashboard.html', {'context':'dd'})
+           
         
         elif request.user.groups.filter(name="Marketing").exists():
              context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
