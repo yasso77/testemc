@@ -27,6 +27,7 @@ from django.db import models
 
 
 class CenterView(ListView):
+    
     def generateFileSerial():
         """Generate an incremented file serial in the format 'X-00001'."""
         # Generate a list of uppercase letters (A to Z)
@@ -208,24 +209,24 @@ class CenterView(ListView):
           
             # get all patients who should attend today (expected date - confirmation date is =today and printform=false and added by call center)
         
-        elif ScopeView=='Call-Center':
-            next_week_date = today_date + timedelta(days=7)
+        # elif ScopeView=='Call-Center':
+        #     next_week_date = today_date + timedelta(days=7)
             
-            latest_confirmation_date = CallTrack.objects.filter(
-                patientID=OuterRef('pk'),
-                confirmationDate=today_date
-            ).order_by('-confirmationDate').values('confirmationDate')[:1]
+        #     latest_confirmation_date = CallTrack.objects.filter(
+        #         patientID=OuterRef('pk'),
+        #         confirmationDate=today_date
+        #     ).order_by('-confirmationDate').values('confirmationDate')[:1]
                         
-            # Subquery to check if the patient has a confirmation within the date range
-            upcomingWithinAweek = CallTrack.objects.filter(
-                patientID=OuterRef('pk'), 
-                confirmationDate__range=(today_date, next_week_date)).values('patientID')[:1]  # Ensures the query returns at most one match per patient
-            recent_patients =Patient.objects.annotate(latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),).filter(
-                            Q(expectedDate__range=(today_date, next_week_date)) | Q(Exists(upcomingWithinAweek)),   # Correct OR condition
-                            isDeleted=False,
-                            reservationCode__isnull=False,
-                            formPrinted=False
-            ).distinct()
+        #     # Subquery to check if the patient has a confirmation within the date range
+        #     upcomingWithinAweek = CallTrack.objects.filter(
+        #         patientID=OuterRef('pk'), 
+        #         confirmationDate__range=(today_date, next_week_date)).values('patientID')[:1]  # Ensures the query returns at most one match per patient
+        #     recent_patients =Patient.objects.annotate(latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),).filter(
+        #                     Q(expectedDate__range=(today_date, next_week_date)) | Q(Exists(upcomingWithinAweek)),   # Correct OR condition
+        #                     isDeleted=False,
+        #                     reservationCode__isnull=False,
+        #                     formPrinted=False
+        #     ).distinct()
             
             # get all patients who should who their follow update is today or 3 days in future
         elif ScopeView=='Follow-Up':
@@ -273,7 +274,7 @@ class CenterView(ListView):
             
 
             
-            print(recent_patients.query)
+            
             
         elif ScopeView=='Missed-Reservations':
             missed_past_90_days = CallTrack.objects.filter(
@@ -528,4 +529,116 @@ class CenterView(ListView):
         history_dict = {entry.condition: entry.relation for entry in medical_history}
         
         return history_dict
+    
+    
+    def countMissedLeads():
+        today_date = datetime.date.today()
+       
+        past_90_days_date = today_date - timedelta(days=90)
+        
+        missed_past_90_days = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),  # OuterRef links to the Patient model
+            confirmationDate__gte=past_90_days_date
+        ).values('patientID')[:1]  # Ensures the query returns at most one match per patient
+            
+            # Subquery to fetch the latest confirmationDate for each patient
+        latest_confirmation_date = CallTrack.objects.filter(
+                patientID=OuterRef('pk'),
+                confirmationDate__gte=past_90_days_date
+            ).order_by('-confirmationDate').values('confirmationDate')[:1]
+
+            # Main query to get patients expected in the past 90 days or confirmed in the same range
+        recent_patients = Patient.objects.annotate(
+                latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField())
+            ).filter(
+                Q(expectedDate__gte=past_90_days_date) | Q(Exists(missed_past_90_days)),
+                isDeleted=False,
+                formPrinted=False
+            ).distinct()
+            
+        return recent_patients.count()
+    
+    def countFollowUp():
+        
+        today_date = datetime.date.today()
+        next_3_days = today_date + timedelta(days=3)
+        latest_confirmation_date = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            confirmationDate__range=[today_date, next_3_days]
+        ).order_by('-confirmationDate').values('confirmationDate')[:1]
+
+        
+        valid_upcoming_followups = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),  
+                # Exclude 'Canceled' outcomes
+            nextFollow__range=[today_date, next_3_days]  
+        )
+
+        # Correct usage of Exists() inside a filter query
+        patients_in_calltrack = Patient.objects.filter(
+            Exists(valid_upcoming_followups)  # ✅ Pass only the QuerySet inside Exists()
+        )
+
+        
+        recent_patientsx = Patient.objects.filter(
+            Q(expectedDate__range=[today_date, next_3_days]),
+            isDeleted=False,
+            formPrinted=False
+        ).distinct()
+        
+        
+        recent_patients = Patient.objects.filter(
+            Q(pk__in=patients_in_calltrack.values('pk')) |  
+            Q(pk__in=recent_patientsx.values('pk'))  
+        ).annotate(
+            latestConfirmation=Subquery(latest_confirmation_date, output_field=DateField())  # ✅ Apply annotation after merging
+        )
+        
+        return recent_patients.count()
+        
+    def countAttendToday():
+            
+        today_date = datetime.date.today() # Ensures it matches expectedDate format
+        
+        # Get a fallback old date
+        FALLBACK_DATE = datetime.date(1900, 1, 1)
+        
+        # Subquery to check if a patient's confirmation date in CallTrack is today
+        confirmed_today = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),  # OuterRef links to the Patient model
+            confirmationDate=today_date
+        ).values('patientID')[:1]  # Ensures the query returns at most one match per patient
+        #print(confirmed_today)
+        
+            # Subquery to fetch the latest confirmationDate for each patient
+        latest_confirmation_date = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            confirmationDate=today_date
+        ).order_by('-confirmationDate').values('confirmationDate')[:1]
+
+        recent_patients = Patient.objects.annotate(
+                    is_confirmed_today=Case(
+                        When(Exists(confirmed_today), then=Value(1)),
+                        default=Value(0),
+                        output_field=IntegerField()
+                    ),
+                    latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),
+                    has_medical_history=Exists(
+                        PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+                    ),
+                    # ✅ Ensure consistent date format for filtering
+                    safe_expectedDate=Coalesce("expectedDate", Value(FALLBACK_DATE, output_field=DateField())),  
+                    safe_attendanceDate=Coalesce("attendanceDate", Value(FALLBACK_DATE, output_field=DateField()))  
+                ).filter(
+                    # ✅ Ensures at least one date is present (excludes records where both are NULL)
+                    ~Q(safe_expectedDate=FALLBACK_DATE) | ~Q(safe_attendanceDate=FALLBACK_DATE),
+
+                    # ✅ Include cases where attendanceDate is today even if expectedDate is NULL
+                    Q(safe_attendanceDate=today_date) | Q(safe_expectedDate=today_date),
+                    isDeleted=False
+                ).distinct()
+                
+        return recent_patients.count()
+            
+            
       

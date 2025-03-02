@@ -63,7 +63,7 @@
       <div class="card shadow-lg rounded-4 border-0">
           <div class="card-body text-center p-4">
               <h5 class="text-danger">Missed Leads</h5>
-              <h2 class="fw-bold text-danger">{{ 25 }}</h2>
+              <h2 class="fw-bold text-danger">{{ missedCount }}</h2>
           </div>
       </div>
   </div>
@@ -71,7 +71,7 @@
       <div class="card shadow-lg rounded-4 border-0">
           <div class="card-body text-center p-4">
               <h5 class="text-primary">Total Appointments</h5>
-              <h2 class="fw-bold text-primary">{{ 15 }}</h2>
+              <h2 class="fw-bold text-primary">{{ attendToday }}</h2>
           </div>
       </div>
   </div>
@@ -79,7 +79,7 @@
       <div class="card shadow-lg rounded-4 border-0">
           <div class="card-body text-center p-4">
               <h5 class="text-warning">Pending Follow-ups</h5>
-              <h2 class="fw-bold text-warning">{{ 40 }}</h2>
+              <h2 class="fw-bold text-warning">{{ followupCount }}</h2>
           </div>
       </div>
   </div>
@@ -105,7 +105,7 @@ var chart = new Chart(ctx, {
       labels: ['Missed Leads', 'Total Appointments', 'Pending Follow-ups'],
       datasets: [{
           label: 'Report Data',
-          data: [{{ 25 }}, {{ 15 }}, {{ 40 }}],
+          data: [{{ missedCount }}, {{ attendToday }}, {{ followupCount }}],
           backgroundColor: ['#dc3545', '#007bff', '#ffc107'],
           borderRadius: 10
       }]

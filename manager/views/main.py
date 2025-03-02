@@ -17,6 +17,7 @@ from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from manager.views.callcenter import CallCenterView
+from manager.views.center import CenterView
 from manager.views.marketing import MarketingView
 from django.db.models import Count
 from django.db.models import Q
@@ -29,15 +30,19 @@ class MainView(ListView):
     @login_required
     def dashboard(request):
         
-        if request.user.groups.filter(name="admin").exists():
+        # if request.user.groups.filter(name="admin").exists():
             
-             return render(request, 'centerx/dashboard.html', {'context': context,'stats':stats})
+        #      return render(request, 'centerx/dashboard.html', {'context': 'cc'})
         
         if request.user.groups.filter(name="Reception").exists():
             
             #  context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
             #  stats=MarketingView.get_patient_statistics_past_30_days()
-             return render(request, 'center/dashboard.html', {'context':'dd'})
+             missedCount=CenterView.countMissedLeads()
+             followupCount=CenterView.countFollowUp()
+             attendToday=CenterView.countAttendToday()
+             
+             return render(request, 'center/dashboard.html', {'missedCount':missedCount,'followupCount':followupCount,'attendToday':attendToday})
            
         
         elif request.user.groups.filter(name="Marketing").exists():
