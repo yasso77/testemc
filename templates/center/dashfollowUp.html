@@ -1,0 +1,274 @@
+{% extends 'master.html'%}
+
+
+{% block content %}
+<style>
+  .form-group {
+      margin-bottom: 20px; /* Adjust this value as needed */
+  }
+  .text-danger {
+    color: red;
+}
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-item .timeline-marker {
+    position: absolute;
+    left: 0; /* Align it to the left */
+    width: 6px; /* Set the width of the vertical bar */
+    height: 100%; /* Make the bar span the entire height */
+    background-color: #007bff; /* Change to any color you want */
+}
+
+.timeline-item .timeline-content {
+    margin-left: 20px; /* Space between bar and content */
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.timeline-item .timeline-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.timeline-item p {
+    margin-bottom: 10px;
+}
+
+.timeline-item .text-muted {
+    color: #6c757d !important;
+}
+
+
+</style>
+<div class="pagetitle">
+    <h1>Follow Up Patient</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Center</li>
+        <li class="breadcrumb-item active">Follow Up Patient</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+   
+      
+        <div>
+
+            <form method="GET" id="followUpForm" action="{% url 'centerSearchOnPatinet' %}">
+                {% csrf_token %}
+
+                <!-- Search Field -->
+                <div class="form-group row">
+                    <label for="searchInput" class="col-sm-4 col-form-label">
+                        Search By (Name, Mobile, File Number, Reservation Number) <span style="color: red;">*</span>
+                    </label>
+                    <div class="col-sm-8">
+                        <input type="text" id="searchInput" name="strText" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group text-center mt-3">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="container">
+            <div class="row">
+                <!-- Left Column: Form Section -->
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Follow-Up Form</h5>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                            <form method="post" class="form-horizontal" id="followUpForm">
+                                {% csrf_token %}
+                            
+                               
+                            
+                                <!-- Outcome -->
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">
+                                        Outcome <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <div id="outcomeGroup">
+                                            {% for radio in form.outcome %}
+                                                <div class="form-check form-check-inline">
+                                                    {{ radio.tag }}
+                                                    <label class="form-check-label">{{ radio.choice_label }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.outcome.errors %}
+                                            <div class="text-danger">
+                                                {{ form.outcome.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                 <!-- Notes/Comment -->
+                                 <div class="form-group row">
+                                    <label for="{{ form.remarks.id_for_label }}" class="col-sm-4 col-form-label">
+                                        Notes/Comment <span style="color: red;">*</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        {{ form.remarks }}
+                                        {% if form.remarks.errors %}
+                                            <div class="text-danger">
+                                                {{ form.remarks.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                             <!-- Next Follow-up Date -->
+                             <div class="form-group row">
+                                <label for="{{ form.nextFollow.id_for_label }}" class="col-sm-4 col-form-label">
+                                    Next Follow-up <span style="color: red;">*</span>
+                                </label>
+                                <div class="col-sm-8">
+                                    {{ form.nextFollow }}
+                                    {% if form.nextFollow.errors %}
+                                        <div class="text-danger">
+                                            {{ form.nextFollow.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                           
+                               
+                            
+                                
+                            
+                                <!-- Submit Buttons -->
+                                <div class="form-group row">
+                                    <div class="col-sm-12 text-center">
+                                        <button type="submit" class="btn btn-primary">Add Follow-up</button>
+                                        <a href="{% url 'reservationList' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Right Column: Call Tracks Section -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Follow-Up Tracks</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for track in calltracks %}
+                                    <div class="timeline-item">
+                                        <!-- Apply dynamic color class based on outcome -->
+                                        <div class="timeline-marker 
+                                            {% if track.outcome == 'Re-examination' %}bg-danger
+                                            {% elif track.outcome == 'Eye surgery' %}bg-success
+                                            {% else %}bg-info
+                                            {% endif %}
+                                        "></div>
+                                        <div class="timeline-content">
+                                            <h5 class="timeline-title">{{ track.outcome }}</h5>
+                                        
+                                            <!-- Remarks First -->
+                                            <p>{{ track.remarks }}</p>
+                                        
+                                           <!-- Dates Section -->
+    <div class="d-flex justify-content-start align-items-center mt-2">
+        
+        <!-- Next Follow-Up -->
+        <div class="me-3" style="font-size: 0.9rem;"> <!-- Smaller Font -->
+            <i class="bi bi-calendar-check text-warning me-1"></i> <!-- Icon for Next Follow-Up -->
+            <strong>Next Follow-Up:</strong> {{ track.nextFollow }}
+        </div>
+    </div>
+                                        
+                                            <!-- Created Date -->
+                                            <div class="text-end mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock text-secondary me-1"></i> <!-- Icon for Created -->
+                                                    <strong>Created:</strong> {{ track.createdDate }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                {% empty %}
+                                    <div class="timeline-item text-center">
+                                        <p>No call tracks available.</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+
+
+
+
+                </div>
+            </div>
+        </div>
+        
+        
+  </section>
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileField = document.getElementById('id_mobile');
+        const messageSpan = document.getElementById('mobile-validation-message');
+        
+        mobileField.addEventListener('blur', function () {
+            const mobile = mobileField.value;
+            const strmobile=mobile;
+            if (mobile) {
+                fetch(`/validate-mobile/?mobile=${mobile}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            // Clear previous content
+                            messageSpan.innerHTML = "A patient with this Mobile Number already exists. ";
+    
+                            // Create and append a new link element
+                            const link = document.createElement("a");
+                            link.href = `/centerReservationByMobile/${mobile}`;
+                            link.target = "_blank";
+                            link.innerText = "Click here to view";
+    
+                            // Attach a click event to ensure the link is responsive
+                            link.addEventListener("click", (e) => {
+                                e.stopPropagation(); // Prevent interference from other event listeners
+                            });
+    
+                            messageSpan.appendChild(link);
+                            messageSpan.style.display = 'block';
+                        } else {
+                            messageSpan.style.display = 'none';
+                            messageSpan.textContent = '';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+</script>
+{%endblock%}

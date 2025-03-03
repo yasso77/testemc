@@ -38,6 +38,8 @@ class CenterView(ListView):
             .order_by('-patientid')
             .first()
         )
+        
+        
 
         # Determine incrementing part
         if latest_fileserial and latest_fileserial.fileserial:
@@ -344,7 +346,7 @@ class CenterView(ListView):
         history_dict = {entry.condition.conditionName: entry.relation for entry in medical_history}
 
         # Debugging:
-        print(f"Medical History: {history_dict}")  
+        #print(f"Medical History: {history_dict}")  
 
         return render(request, 'center/patientForm.html',  {
             'patientData': patientData,
@@ -447,10 +449,7 @@ class CenterView(ListView):
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
             )
-        )
-        
-       
-        # Pass the data to the template      
+        )  
         
         return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
     
@@ -496,26 +495,25 @@ class CenterView(ListView):
         # Render the edit page with the form and patient data
         return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})
 
-    def edit_reservation(request, patientid):
-        print("Before fetching patient...")  # Check if this prints
-
-        try:
-            patient = get_object_or_404(Patient, patientid=patientid)
-            print("Patient found!")  # This should print if a patient is found
-        except Http404:
-            print("❌ Patient not found!")  # This will print if patientid is incorrect
-            raise  # Re-raise the error so Django still shows the 404 page
-        
-
+    def edit_reservation(request, patientid,scope):
+               
+        patient = get_object_or_404(Patient, patientid=patientid)  
+          
         latest_fileserial = None  # Initialize variable
-        if(patient.fileserial==None):            
-           latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code  
-           print(latest_fileserial)    
+        if patient.fileserial is None or patient.fileserial == "":
+                       
+           latest_fileserial = CenterView.generateFileSerial()
+        else:
+            latest_fileserial=patient.fileserial  
+                   
 
         if request.method == 'POST':
             form = CenterEditReservationForm(request.POST, instance=patient)
             if form.is_valid():
+                patient.fileserial=latest_fileserial
                 patient = form.save()
+            else:
+                print(form.errors)
 
                 # Clear existing medical history before saving new ones
                 PatientMedicalHistory.objects.filter(patient=patient).delete()
@@ -533,7 +531,7 @@ class CenterView(ListView):
                             createdBy=request.user  # Assuming user is logged in
                         )
 
-                return redirect(reverse('centerPatients', args=['today']))
+                return redirect(reverse('centerPatients', args=[scope]))
 
         else:
             form = CenterEditReservationForm(instance=patient)
@@ -673,5 +671,41 @@ class CenterView(ListView):
                 
         return recent_patients.count()
             
-            
+    def getPatinetTrackData(request):
+        
+        strText = request.GET.get('strText', '')  
+        recent_patients = (
+            Patient.objects.active()
+            .filter(
+                Q(reservationCode__icontains=strText) |
+                Q(mobile__icontains=strText) |  # Search in mobile
+                Q(fullname__icontains=strText) |  # Search in name
+                Q(birthdate__icontains=strText) |  # Search in birthdate
+                Q(attendanceDate__icontains=strText),  # Search in attendance date
+                reservedBy=request.user  # Keep the reservedBy filter
+            )            
+            .annotate(               
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                ),
+                 has_medical_history=Exists(
+                 PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+            )  # ✅ Check if patient has a medical history
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
+            )
+        )  
+        
+        return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
+        
       

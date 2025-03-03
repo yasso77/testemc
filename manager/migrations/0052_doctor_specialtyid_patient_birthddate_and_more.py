@@ -38,11 +38,7 @@ class Migration(migrations.Migration):
             name='typeFirstVisit',
             field=models.CharField(choices=[('ًWalk-In', 'Walk-In'), ('Referred by someone', 'Referred by someone')], default='Referred by someone', max_length=150, verbose_name='First Visit Type'),
         ),
-        migrations.AlterField(
-            model_name='agentcompany',
-            name='isVisible',
-            field=models.BooleanField(blank=True, null=True, verbose_name='Visible'),
-        ),
+       
         migrations.AlterField(
             model_name='checkupprice',
             name='isVisible',

@@ -6,6 +6,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{patientData.fullname}}:Form</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap'); /* Replace with actual font */
+
+        .location-banner {
+            font-family: 'Tajawal', sans-serif; /* Use correct font */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+           
+            color: white;
+            font-size:24px;
+            font-weight: bold;
+        }
+
+        .location-icon {
+            margin-left: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .call-button {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            color: #966F38; /* Matching the image color */
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            width: fit-content;
+        }
+        
+        .call-button i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .call-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;            
+             /* Background color */
+        }
+
+      
+
+       
+
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
         @media print {
@@ -354,17 +409,49 @@
 
     <div class="footer">
 
-        <table class="no-spacing">
+        <table class="no-spacing"  >
             <tr>
-                <td style="height:30px" colspan="2"> </td>
+                <td style="height:4px" colspan="3" class="footer-imagex"> </td>
             </tr>
             <tr>
-                <td style="height:8px" colspan="2" class="footer-imagex"> </td>
-            </tr>
-            <tr>
-                <td class="footer-image top-align" style="text-align:left"> <img src="{% static 'assets/img/footer_left.png' %}" alt="EMC Logo"></td>
+                <td class="footer-image top-align" style="text-align:left;width: 40%;" > <div class="footer">
+                    <!-- Phone Numbers -->
+                    <div>
+                        <i class="fas fa-phone"></i>
+                        7733777555
+                        - 7730777555
+ 
+                    </div>
+                                   
+                    <!-- Business Name -->
+                   
+                
+                    <!-- Email and Website -->
+                    <div class="contact-info">
+                        <i class="fab fa-facebook"></i>
+                        facebook.com/EMCIRAQ2020<br>
+                        <i class="fas fa-envelope"></i>
+                        info@emc-iraq.com <br> <i class="fas fa-globe"></i>
+                        www.emc-iraq.com
+                       
+                    </div>
 
-                <td class="footer-image top-align" style="text-align:right"> <img src="{% static 'assets/img/footer_right.png' %}" alt="EMC Logo"></td>
+                    
+                   
+                </div></td>
+                <td class="footer-image" style="text-align: center;">
+
+                    
+                </td>
+
+                <td class="footer-image top-align" style="text-align:right;width: 30%;"> 
+                    <div class="location-banner">
+                        <span>بغداد - الكرادة - ساحة الواثق</span>
+                        <svg class="location-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9s-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </div>
+                </td>
             </tr>
         </table>
 

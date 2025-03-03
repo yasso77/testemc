@@ -101,7 +101,7 @@
                                 {% else %}
                                 {% comment %} <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a> {% endcomment %}
                                 {% endif %}
-                                <a href="{% url 'centeredit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
+                                <a href="{% url 'centeredit_reservation' patient.patientid viewScope %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
                                 <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
                                     {% csrf_token %}
                                    
