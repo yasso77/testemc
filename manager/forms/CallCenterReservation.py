@@ -17,12 +17,14 @@ class CCFormAddReservation(forms.ModelForm):
     offerID = forms.ModelChoiceField(queryset=Offers.objects.active(), required=False, label="Offers", widget=forms.Select(attrs={'class': 'form-select'}))
     agentID = forms.ModelChoiceField(queryset=AgentCompany.objects.active(), required=False, label="Agent/Company", widget=forms.Select(attrs={'class': 'form-select'}))
     checkUpprice = forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(), required=True, label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
+    # Exclude 'Center' choice
+    filtered_choices = [choice for choice in Patient.leadSource_Choices if choice[0] != 'Center']
     leadSource = forms.ChoiceField(
-    choices=[('', 'Select Lead Source')] + list(Patient.leadSource_Choices),
-    required=True,  # Make the field required
+    choices=[('', 'Select Lead Source')] + filtered_choices,
+    required=True,
     error_messages={'required': 'Lead Source is required!'},
     widget=forms.Select(attrs={'class': 'form-select'})
-)
+)    
 
     class Meta:
         model = Patient

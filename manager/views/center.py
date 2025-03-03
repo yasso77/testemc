@@ -91,7 +91,8 @@ class CenterView(ListView):
                 patient.fileserial = latest_fileserial  # Assign generated file serial
                 patient.createdBy = request.user  # Assign logged-in user
                 patient.reservedBy = request.user  # Assign logged-in user
-                patient.callDirection = None    
+                patient.callDirection = None
+                patient.leadSource='Center'   
                 patient.save()
 
                 # Initialize an empty list to store the conditions and relations

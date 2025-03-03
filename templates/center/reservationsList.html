@@ -95,18 +95,19 @@
                         
                         <td class="text-nowrap">
                             
-                                <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
-                                {% if patient.has_medical_history %}
-                                <a target="_blank" href="{% url 'patientForm' patient.patientid %}" class="btn btn-sm btn-success">Print Form</a>
-                                {% else %}
-                                {% comment %} <a href="{% url 'edit_patient' patient.patientid %}" class="btn btn-sm btn-info"> Medical Info</a> {% endcomment %}
-                                {% endif %}
-                                <a href="{% url 'centeredit_reservation' patient.patientid viewScope %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
-                                <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                   
-                                </form>
-                           
+                            <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow-Up">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </a>
+                            
+                            <a target="_blank" href="{% url 'patientForm' patient.patientid %}" class="btn btn-sm btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Print Form">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                            
+                            <a href="{% url 'centeredit_reservation' patient.patientid viewScope %}" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            
+                               
                         </td>
                         
                          

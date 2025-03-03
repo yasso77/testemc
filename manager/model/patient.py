@@ -110,7 +110,9 @@ class Patient(models.Model):
         ('N', 'No'),
         
     ]    
-    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call'),('Instagram','Instagram')]
+    leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call'),('Instagram','Instagram'),('Center','Center')]
+    
+    
     
     CallDirection_CHOICES=[
         ('IN','INCOMING- Patient Call'),

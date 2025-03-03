@@ -66,6 +66,7 @@
      
     
 <div class="form-container">
+    {{ patient.leadSource }}
   <form method="post" class="form-horizontal">
     {% csrf_token %}
 
@@ -74,13 +75,15 @@
         <div class="col-sm-8">
             
 
-            <input type="text" class="form-control" value="{{ fileserial }}" readonly style="background-color: aqua;">
+            <input type="text" name="fileserial" class="form-control" value="{{ fileserial }}" readonly style="background-color: aqua;">
             
         </div>
     </div>
 
-    <div class="form-group row">
-        <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">Reservation Type<span style="color: red;">*</span></label>
+    <div class="form-group row" id="reservationTypeDiv">
+        <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">
+            Reservation Type <span style="color: red;">*</span>
+        </label>
         <div class="col-sm-8">
             {{ form.reservationType }}
             {% if form.reservationType.errors %}
@@ -91,7 +94,7 @@
         </div>
     </div>
 
-    <div class="form-group row">
+    <div class="form-group row" id="referaalDiv">
         <label for="{{ form.referral.id_for_label }}" class="col-sm-3 col-form-label">Referral</label>
         <div class="col-sm-8">
             {{ form.referral }}
@@ -382,6 +385,23 @@
                     .catch(error => console.error('Error:', error));
             }
         });
+    });
+
+
+   
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var leadSource = "{{ patient.leadSource }}"; // Get lead source from Django
+        alert(leadSource)
+        var reservationDiv = document.getElementById("reservationTypeDiv");
+        var referaalDiv = document.getElementById("referaalDiv");
+
+        if (leadSource != "Center") {
+            reservationDiv.style.display = "none"; // Hide the div
+            referaalDiv.style.display = "none"; // Hide the div
+        }
     });
 </script>
 

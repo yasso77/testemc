@@ -85,18 +85,28 @@
                         
                         <td class="text-nowrap">
                             {% if patient.attendanceDate %}
-                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block">
-                                    ATT: {{ patient.attendanceDate }}
-                                </a>
-                            {% else %}
-                                <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1">Follow-Up</a>
-                                <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1">Edit</a>
-                                <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger d-inline-block mx-1" 
-                                        onclick="return confirm('Are you sure you want to delete this patient?');">Hide</button>
-                                </form>
-                            {% endif %}
+    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="Attendance Date: {{ patient.attendanceDate }}">
+        <i class="bi bi-calendar-check"></i>
+    </a>
+{% else %}
+    <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow-Up">
+        <i class="bi bi-arrow-repeat"></i>
+    </a>
+
+    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+        <i class="bi bi-pencil-square"></i>
+    </a>
+
+    <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-danger d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Hide Patient" 
+            onclick="return confirm('Are you sure you want to delete this patient?');">
+            <i class="bi bi-eye-slash"></i>
+        </button>
+    </form>
+{% endif %}
+
+                           
                         </td>
                         
                          

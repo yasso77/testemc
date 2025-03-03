@@ -106,7 +106,8 @@ class CallCenterView(ListView):
         # Filter recent patients
         recent_patients = (
             Patient.objects.active()
-            .filter(
+            .exclude(leadSource='Center')
+            .filter(                
                 Q(createdDate__gte=thirty_days_ago) &
                 (Q(reservedBy=request.user) if not is_admin_or_marketing else Q())
             )
