@@ -325,7 +325,7 @@ class CenterView(ListView):
         .values(
             'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
             'createdDate', 'city', 'mobile', 'sufferedcase__caseName','latestConfirmation',
-            'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
+            'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate','checkUpprice__checkupPriceName',
             'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','nxtFollow_date'  # Add annotated fields
         )
     )
