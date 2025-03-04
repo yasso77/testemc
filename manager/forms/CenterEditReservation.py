@@ -1,8 +1,7 @@
 # forms.py
-from datetime import date, datetime
+from django.utils.timezone import now, is_naive, make_aware
 from django import forms
-import re
-from django.core.exceptions import ValidationError
+
 from django.db.models import Q
 from manager.model.patient import AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
 
@@ -57,7 +56,7 @@ class CenterEditReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass']
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate']
         
         widgets = {            
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
@@ -75,7 +74,26 @@ class CenterEditReservationForm(forms.ModelForm):
             'wearingconduct': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'rideglass': forms.RadioSelect(attrs={'class': 'form-check-input'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
         
+    def clean_attendanceTime(self):
+        data = self.cleaned_data.get("attendanceTime")
+        if not data:
+            from django.utils import timezone
+            data = timezone.localtime().time()
+        return data
+    
+
+    def clean_attendanceDate(self):
+        data = self.cleaned_data.get("attendanceDate")
+        if data is None:
+            return now()  # Assign current time as a default
+        if is_naive(data):
+            return make_aware(data)  # Convert to timezone-aware datetime
+        return data
         
     # def clean_mobile(self):
     #     mobileNum = self.cleaned_data.get('mobile')

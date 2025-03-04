@@ -517,22 +517,22 @@ class CenterView(ListView):
                 print(form.errors)
 
                 # Clear existing medical history before saving new ones
-                PatientMedicalHistory.objects.filter(patient=patient).delete()
+            PatientMedicalHistory.objects.filter(patient=patient).delete()
 
-                # Loop through medical conditions and save the new selections
-                for condition in MedicalConditionData.objects.active():
-                    choice = request.POST.get(f"medical_conditions_{condition}")  # ✅ Works!
+            # Loop through medical conditions and save the new selections
+            for condition in MedicalConditionData.objects.active():
+                choice = request.POST.get(f"medical_conditions_{condition}")  # ✅ Works!
 
-                   
-                    if choice:  # If a selection is made (Self/Relative)
-                        PatientMedicalHistory.objects.create(
-                            patient=patient,
-                            condition=condition,
-                            relation=choice,
-                            createdBy=request.user  # Assuming user is logged in
-                        )
+                
+                if choice:  # If a selection is made (Self/Relative)
+                    PatientMedicalHistory.objects.create(
+                        patient=patient,
+                        condition=condition,
+                        relation=choice,
+                        createdBy=request.user  # Assuming user is logged in
+                    )
 
-                return redirect(reverse('centerPatients', args=[scope]))
+            return redirect(reverse('centerPatients', args=[scope]))
 
         else:
             form = CenterEditReservationForm(instance=patient)
