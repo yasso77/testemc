@@ -390,7 +390,17 @@
                     </tr>
                 </tbody>
             </table>
-             
+             <!-- Clear Selections Button -->
+<button id="clearRadioBtn" class="btn btn-danger btn-sm" type="button" style="margin-top: 10px;">Clear Selections</button>
+
+<script>
+    document.getElementById('clearRadioBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent any default action
+        document.querySelectorAll('.custom-radio:checked').forEach(radio => {
+            radio.checked = false; // Uncheck the selected radio buttons
+        });
+    });
+</script>
                 </div>
    
 

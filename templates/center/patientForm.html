@@ -227,17 +227,17 @@
 <body onload="window.print();">
     <div class="header">
         <table>
-            <tr>
-                <td colspan="3">form</td>
-            </tr>
+            
             <tr>
                 <td class="top-align" style="text-align:left">
-                    <img width="245" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
+                    <img width="245" height="120" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
                 </td>
                 <td class="bottom-align" style="height: 200px;">
 
 
-                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo">
+                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo"><br>
+
+                  <span style="font-size: 25px;font-weight: bold; color: #966F38;">File#:{{patientData.fileserial}}</span>  
 
 
                 </td>
@@ -246,16 +246,15 @@
                 <td class="bottom-align" style="margin-right:5px;"><img width="215" src="{% static 'assets/img/circleImage.png' %}" alt="EMC Logo"></td>
             </tr>
         </table>
+        <br>
     </div>
-    <div class="container">
+<div class="container">
 
       
      
         <table id="tblPaitenData" style="text-align:left;">
 
-            <tr>
-                <td style="text-align:right" colspan="6">  Date/Time : {% now "d-M-y : H:i" %}</td>
-            </tr>
+           
             <tr>
                 <th style="width:35%"><div>Name :<span style="font-weight:bold;font-size:larger">{{patientData.fullname}}</span></div></th>
 
@@ -344,54 +343,52 @@
        
                
       
-<table id="tableSpecs" style="border-collapse: collapse;">
-    <tr>
-        <th class="footer-image"></th>
-        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-        <th style="border-right: 2px solid #fff; width:7%">REL</th>
-        <th></th>
-        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-        <th style="border-right: 2px solid #fff; width:7%">REL</th>
-        <th></th>
-        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-        <th style="border-right: 2px solid #fff; width:7%">REL</th>
-        <th></th>
-        <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-        <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
-    </tr>
+            <table id="tableSpecs" style="border-collapse: collapse; font-size: smaller;">
+                <tr>
+                    <th class="footer-image"></th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                    <th></th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                    <th></th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
+                    <th></th>
+                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
+                    <th style="border-right: 2px solid #928469; border-left: 2px solid #fff; width: 7%">REL</th>
+                </tr>
 
-    {% for condition in conditions_list %}
-        {% if forloop.first or forloop.counter0|divisibleby:4 %}
-            <tr>
-        {% endif %}
+                {% for condition in conditions_list %}
+                    {% if forloop.first or forloop.counter0|divisibleby:4 %}
+                        <tr>
+                    {% endif %}
 
-        <td>{{ condition.conditionName }}</td>
+                    <td>{{ condition.conditionName }}</td>
 
-        <!-- Self column -->
-        <td style="border-left: 2px solid #928469; text-align: center;">
-            {% if medical_history|dict_key:condition.conditionName == "self" %}
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
-                </svg>
-            {% endif %}
-        </td>
+                    <!-- Self column -->
+                    <td style="border-left: 2px solid #928469; text-align: center;">
+                        {% if medical_history|dict_key:condition.conditionName == "self" %}
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+                            </svg>
+                        {% endif %}
+                    </td>
 
-        <!-- Relative column -->
-        <td style="border-right: 2px solid #928469; text-align: center;">
-            {% if medical_history|dict_key:condition.conditionName == "relative" %}
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
-                </svg>
-            {% endif %}
-        </td>
+                    <!-- Relative column -->
+                    <td style="border-right: 2px solid #928469; text-align: center;">
+                        {% if medical_history|dict_key:condition.conditionName == "relative" %}
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="darkgreen" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 21l-6-6 1.5-1.5L9 18l10.5-10.5L21 9z"/>
+                            </svg>
+                        {% endif %}
+                    </td>
 
-        {% if forloop.last or forloop.counter|divisibleby:4 %}
-            </tr>
-        {% endif %}
-    {% endfor %}
-</table>
-        
-        
+                    {% if forloop.last or forloop.counter|divisibleby:4 %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
         
         
         <br />
@@ -402,10 +399,15 @@
                     {{patientData.remarks}}
                 </td>
             </tr>
+            <tr>
+                <td style="text-align: right;" colspan="2">
+                    Date/Time : {% now "d-M-y : H:i" %}
+                </td>
+            </tr>
 
         </table>
 
-    </div>
+    
 
     <div class="footer">
 
@@ -457,5 +459,7 @@
 
 
     </div>
+
+</div>
 </body>
 </html>
