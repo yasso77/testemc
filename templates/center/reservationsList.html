@@ -12,7 +12,7 @@
     
  </style>
 <div class="pagetitle">
-    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> </h1>
+    <h1>Reservation List <span style="color:#BD501AFF;" >{{viewScope}} </span> </h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
@@ -24,7 +24,7 @@
   <section class="section">
 
  
-        <table id="patientsTable" class="display" style="font-size: smaller;">
+        <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
             <thead>
                 <tr>
                     {% comment %} <th>R.Code</th> {% endcomment %}
@@ -46,11 +46,13 @@
             <tbody>
                 {% for patient in patients %}
                
-                    <tr {% if patient.reservationCode %} style="background-color:#D1F8EF;font-weight: bolder;" {% endif %}>
+                    <tr >
                         {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
-                        <td>File#:{{ patient.fileserial }} <br/>
-                            R.Code:{{ patient.reservationCode }}
+                        <td style="font-weight: bolder; {% if patient.reservationCode %} background-color:#CAE9F0FF; {% endif %}">
+                            File#: {{ patient.fileserial }} <br/>
+                            R.Code: {{ patient.reservationCode }}
                         </td>
+                        
                         <td>{{ patient.fullname }}</td>
                         <td>{{ patient.mobile }}</td>
                         {% comment %} <td>{{ patient.birthdate }}</td> {% endcomment %}
@@ -64,7 +66,7 @@
                            ATT.Date:{{ patient.attendanceDate}}<br>
                            EXP.Date:{{patient.expectedDate}}<br>
                            CFM.Date:{{patient.latestConfirmation}}<br>
-                           NXT.Date:{{patient.nxtFollow_date}}
+                           NXT.Date:{{patient.reschadule_data}}
                         </td>
                         
                         <td> {{ patient.checkUpprice__checkupPriceName }}</td>
@@ -99,10 +101,23 @@
                                 <i class="bi bi-arrow-repeat"></i>
                             </a>
                             
-                            <a target="_blank" href="{% url 'patientForm' patient.patientid %}" class="btn btn-sm btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Print Form">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                            
+                       
+  
+  <!-- Print Form Button -->
+  <a target="_blank" 
+     href="{% url 'patientForm' patient.patientid %}" 
+     class="btn btn-sm btn-success" 
+     data-bs-toggle="tooltip" 
+     data-bs-placement="top" 
+     title="Print Form"
+     onclick="return checkMedicalRecords('{{ patient.fileserial }}')">
+      <i class="bi bi-printer"></i>
+  </a>
+  
+
+  
+  
+
                             <a href="{% url 'centeredit_reservation' patient.patientid viewScope %}" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
@@ -120,7 +135,35 @@
             </tbody>
         </table>
 
+ <!-- Bootstrap Modal -->
+ <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-warning" id="warningModalLabel"><i class="bi bi-exclamation-triangle"></i> Warning</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="font-weight: bold;">
+          This patient does not have medical records.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+    <!-- JavaScript to Handle Modal -->
+    <script>
+        function checkMedicalRecords(fileserial) {
+            if (!fileserial || fileserial === "None") {
+                var warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+                warningModal.show(); // Show Bootstrap modal
+                return false; // Prevent navigation
+            }
+            return true; // Allow navigation
+        }
+        </script>
 </section>
 
 <!-- Include jQuery (required for DataTables) -->

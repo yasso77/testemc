@@ -1,4 +1,6 @@
 # forms.py
+import datetime
+from django.utils.timezone import localtime
 from django.utils.timezone import now, is_naive, make_aware
 from django import forms
 
@@ -65,8 +67,7 @@ class CenterEditReservationForm(forms.ModelForm):
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
                                                       'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control',
-                                                 'style': 'background-color: yellow;font-weight:bold'}),
+            'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
            
             'reservationType': forms.Select(attrs={'class': 'form-select'}),
             'referral': forms.Select(attrs={'class': 'form-select'}),
@@ -82,18 +83,24 @@ class CenterEditReservationForm(forms.ModelForm):
     def clean_attendanceTime(self):
         data = self.cleaned_data.get("attendanceTime")
         if not data:
-            from django.utils import timezone
-            data = timezone.localtime().time()
+            data = localtime().time()  # Uses timezone-aware local time
         return data
     
 
     def clean_attendanceDate(self):
         data = self.cleaned_data.get("attendanceDate")
+
         if data is None:
-            return now()  # Assign current time as a default
-        if is_naive(data):
-            return make_aware(data)  # Convert to timezone-aware datetime
-        return data
+            return now().date()  # Return only the date part
+
+        if isinstance(data, datetime):  # Ensure it's a datetime object
+            if is_naive(data):
+                return make_aware(data)  # Convert to timezone-aware
+            return data
+        else:
+            # Convert `date` to `datetime` before making it timezone-aware
+            naive_datetime = datetime.combine(data, datetime.min.time())
+            return make_aware(naive_datetime)
         
     # def clean_mobile(self):
     #     mobileNum = self.cleaned_data.get('mobile')

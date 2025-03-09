@@ -81,6 +81,20 @@
             #tblPaitenData {
                 margin: 0;
             }
+
+            .footer-image {
+                background-image: url("{% static 'assets/img/bgBack.png' %}"); /* Specify the path to your image */
+                background-size: cover; /* Adjusts the size of the background image */
+                background-position: center; /* Centers the background image */
+                background-repeat: repeat; /* Prevents the background image from repeating */
+                padding: 20px; /* Add padding as needed */
+                text-align: center; /* Align text content in the cell */
+                color: white; /* Text color */
+            }
+    
+            .footer-imagex {
+                background-image: url("{% static 'assets/assets/img/bg.png' %}"); /* Specify the path to your image */
+            }
         }
 
         body {
@@ -232,12 +246,15 @@
                 <td class="top-align" style="text-align:left">
                     <img width="245" height="120" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
                 </td>
-                <td class="bottom-align" style="height: 200px;">
+                <td style="height: 200px;margin-top: 100px;">
+                   
 
+                    <span style="font-size: 25px;font-weight: bold; color: #966F38;margin-top: 100px;margin-bottom: 100px">File#:{{patientData.fileserial}}</span>  
 
-                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo"><br>
-
-                  <span style="font-size: 25px;font-weight: bold; color: #966F38;">File#:{{patientData.fileserial}}</span>  
+<p style="padding-top: 100px;">
+                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo">
+</p>
+                 
 
 
                 </td>
@@ -400,7 +417,7 @@
                 </td>
             </tr>
             <tr>
-                <td style="text-align: right;" colspan="2">
+                <td style="text-align: right;font-weight: bolder;" colspan="2">
                     Date/Time : {% now "d-M-y : H:i" %}
                 </td>
             </tr>

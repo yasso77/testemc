@@ -268,7 +268,7 @@ class CallCenterView(ListView):
             )
         return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':viewScope})
     
-    
+    @login_required
     def reservationsListviewMobile(request,strmobile):
             
             recent_patients = (
@@ -318,6 +318,7 @@ class CallCenterView(ListView):
 
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
+    @login_required
     def edit_reservation(request, patientid):
         # Fetch the patient instance or return 404 if not found
         patient = get_object_or_404(Patient, patientid=patientid)
@@ -347,7 +348,7 @@ class CallCenterView(ListView):
             return redirect('reservationList')  # Redirect to the list view
         #return render(request, 'patients/confirm_delete.html', {'patient': patient})
     
-
+    @login_required
     def follow_reservation(request, patientid):
         # Fetch the patient instance or return 404 if not found
         patient = get_object_or_404(Patient, patientid=patientid)

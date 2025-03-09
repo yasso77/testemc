@@ -66,7 +66,7 @@
      
     
 <div class="form-container">
-    {{ patient.leadSource }}
+   
   <form method="post" class="form-horizontal">
     {% csrf_token %}
 
@@ -75,7 +75,7 @@
         <div class="col-sm-8">
             
 
-            <input type="text" name="fileserial" class="form-control" value="{{ fileserial }}" readonly style="background-color: aqua;">
+            <input type="text" name="fileserial" class="form-control" value="{{ fileserial }}" readonly style="background-color: #d0e2f3;font-weight:bold; font-size:larger">
             
         </div>
     </div>
