@@ -105,16 +105,15 @@ class CenterView(ListView):
                         condition_key = condition_name.split('[')[1].split(']')[0]  # Extract condition name
 
                         if relation in ['self', 'relative']:
-                            print(f"Searching for condition: {condition_key}")
+                           #print(f"Searching for condition: {condition_key}")
 
                             # Ensure we fetch a single instance, not a QuerySet
                             condition_obj = MedicalConditionData.objects.filter(conditionName=condition_key).first()
 
                             if condition_obj:
-                                print(f"Found condition: {condition_obj} (ID: {condition_obj.conditionID})")
+                               # print(f"Found condition: {condition_obj} (ID: {condition_obj.conditionID})")
                                 medical_conditions.append((condition_obj, relation))
-                            else:
-                                print(f"Condition '{condition_key}' not found in MedicalCondition table.")
+                           
 
                 # Ensure we are passing an **instance**, not a string
                 for condition_obj, relation in medical_conditions:

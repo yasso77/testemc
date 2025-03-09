@@ -1,4 +1,5 @@
 # forms.py
+import datetime
 from django import forms
 from django.utils.timezone import now, is_naive, make_aware
 from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
@@ -86,11 +87,18 @@ class CEAddReservationForm(forms.ModelForm):
 
     def clean_attendanceDate(self):
         data = self.cleaned_data.get("attendanceDate")
+
         if data is None:
-            return now()  # Assign current time as a default
-        if is_naive(data):
-            return make_aware(data)  # Convert to timezone-aware datetime
-        return data
+            return now().date()  # Return only the date part
+
+        if isinstance(data, datetime):  # Ensure it's a datetime object
+            if is_naive(data):
+                return make_aware(data)  # Convert to timezone-aware
+            return data
+        else:
+            # Convert `date` to `datetime` before making it timezone-aware
+            naive_datetime = datetime.combine(data, datetime.min.time())
+            return make_aware(naive_datetime)
     
     
     # def clean_mobile(self):
