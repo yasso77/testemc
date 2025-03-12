@@ -1,8 +1,8 @@
 {% extends 'master.html'%}
 
 {% block content %}
- <!-- Include DataTables CSS -->
- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+  <!-- Include DataTables CSS -->
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"> 
 
  <style>
 
@@ -109,9 +109,10 @@
      class="btn btn-sm btn-success" 
      data-bs-toggle="tooltip" 
      data-bs-placement="top" 
-     title="Print Form"
-     onclick="return checkMedicalRecords('{{ patient.fileserial }}')">
+     title="Print Form" onclick="return checkMedicalRecords('{{ patient.fileserial }}')">
       <i class="bi bi-printer"></i>
+
+      {% comment %}  {% endcomment %}
   </a>
   
 
@@ -170,7 +171,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Include DataTables JS -->
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script> 
 
 <!-- Initialize DataTables -->
 <script>
