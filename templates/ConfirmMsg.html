@@ -27,11 +27,25 @@
             
               </div>
 
-                <div class="d-grid gap-2 mt-3">
-                  <a href="{{returnUrl }}" target="{{target}}"  class="btn btn-success">{{btnText}}</a>
+              <div class="d-flex gap-2 mt-3 justify-content-center">
+
+
+                  <a href="{{returnUrl }}" target="{{target}}"  class="btn btn-primary">{{btnText}}</a>
+
+                  {% if returnUrl == 'centerNewreservation' or returnUrl == '/centerPatients/Attendance-Today/' %}
+
+
+                      <a target="_blank" href="{% url 'patientForm' patientid %}" class="btn btn-success" >
+                     Print Form
+                      </a>
+
+                     
+                  {% endif %}
 
 
               </div>
+              <br>
+              <br>
               </div>
         
           </section>

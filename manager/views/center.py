@@ -133,8 +133,9 @@ class CenterView(ListView):
                     "ConfirmMsg.html",
                     {
                         'message': 'The Reservation is Added Successfully.',
-                        'returnUrl': 'newreservation',
+                        'returnUrl': 'centerNewreservation',
                         'btnText': 'Add New Reservation',
+                        'patientid':patient.patientid
                     },
                     status=200,
                 )
@@ -534,7 +535,19 @@ class CenterView(ListView):
                         createdBy=request.user  # Assuming user is logged in
                     )
 
-            return redirect(reverse('centerPatients', args=[scope]))
+            #return redirect(reverse('centerPatients', args=[scope]))
+            returnUrl = reverse('centerPatients', args=['Attendance-Today'])  # Generate URL dynamically
+            return render(
+                    request,
+                    "ConfirmMsg.html",
+                    {
+                        'message': 'The Reservation is updated Successfully.',
+                        'returnUrl': returnUrl,
+                        'btnText': 'Return to List',
+                        'patientid':patient.patientid
+                    },
+                    status=200,
+                )
 
         else:
             form = CenterEditReservationForm(instance=patient)
