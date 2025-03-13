@@ -58,12 +58,13 @@ class CenterEditReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate']
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address']
         
         widgets = {            
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             'otherMobile': forms.TextInput(attrs={'class': 'form-control'}),            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
                                                       'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),

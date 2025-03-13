@@ -1,4 +1,4 @@
-from datetime import  datetime, time,  timedelta
+from datetime import  date, datetime, time,  timedelta
 import datetime
 import string
 
@@ -85,14 +85,23 @@ class CenterView(ListView):
         if request.method == 'POST':
             # Pass request to the form and specify required fields
             centerform = CEAddReservationForm(request=request, data=request.POST)
-
+            
+           
             if centerform.is_valid():
                 patient = centerform.save(commit=False)
+                # Extract birthdate from form data
+                birthdate = centerform.cleaned_data.get('birthdate')
+
+                if birthdate:
+                    today = date.today()
+                    patient.age = today.year - birthdate.year - (
+                        (today.month, today.day) < (birthdate.month, birthdate.day)
+                    )
                 patient.fileserial = latest_fileserial  # Assign generated file serial
                 patient.createdBy = request.user  # Assign logged-in user
                 patient.reservedBy = request.user  # Assign logged-in user
                 patient.callDirection = None
-                patient.leadSource='Center'   
+                patient.leadSource='Center'               
                 patient.save()
 
                 # Initialize an empty list to store the conditions and relations
@@ -513,7 +522,15 @@ class CenterView(ListView):
 
         if request.method == 'POST':
             form = CenterEditReservationForm(request.POST, instance=patient)
+            # Extract birthdate from form data
+            
             if form.is_valid():
+                birthdate = form.cleaned_data.get('birthdate')
+                if birthdate:
+                    today = date.today()
+                    patient.age = today.year - birthdate.year - (
+                        (today.month, today.day) < (birthdate.month, birthdate.day)
+                    )
                 patient.fileserial=latest_fileserial
                 patient = form.save()
             else:

@@ -130,6 +130,7 @@ class Patient(models.Model):
     referral_CHOICES=[
         ('W','Walk-In'),
         ('R','Referred by someone'),
+        ('F','Facebook')
      ]       
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.

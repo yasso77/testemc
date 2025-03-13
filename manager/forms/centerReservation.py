@@ -4,6 +4,8 @@ from django.utils.timezone import localtime
 from django import forms
 from django.utils.timezone import now, is_naive, make_aware
 from manager.model.patient import  AgentCompany, CheckUpPrice, City, MedicalConditionData, Offers, Patient, SufferedCases
+from datetime import date
+from django.core.exceptions import ValidationError
 
 
 class CEAddReservationForm(forms.ModelForm):
@@ -45,13 +47,14 @@ class CEAddReservationForm(forms.ModelForm):
 
     class Meta:
         model = Patient
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks',
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks','age',
                   'checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile',
-                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate']
+                  'sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address']
         widgets = {
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
                                                       'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
