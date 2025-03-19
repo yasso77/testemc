@@ -11,14 +11,15 @@ from manager.models import ClassficationsOptions
 from django.shortcuts import get_object_or_404
 from manager.orm import ORMPatientsHandling
 from django.views.generic import ListView
-
+from django.contrib.auth.decorators import login_required
 
 ormObj=ORMPatientsHandling()
 
 
 class DoctorView(ListView):
     
-    @permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
+    #@permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
+    @login_required   
     def doctorPatientvisit(request): 
         classifiedOptions = ClassficationsOptions.objects.filter(isActive=True).values(
             'classifiedID', 'classifiedCategory', 'optionClassified', 'isActive'
@@ -28,7 +29,7 @@ class DoctorView(ListView):
 
         if request.method == 'POST':
             txtpatientid = request.POST.get('hdfpatientid')
-            doctorid = 1  # Static doctor ID for now; replace with actual data.
+            doctorid = request.user  # Static doctor ID for now; replace with actual data.
             txtdiagnosis = request.POST.get('Diagnosis')
             EvaulDegree = request.POST.get('gridRadios')
             txtRemarks = request.POST.get('txtRemarks')
@@ -82,7 +83,8 @@ class DoctorView(ListView):
         
 
 
-    @permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
+   # @permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
+    @login_required   
     def auditPatientvisit(request): 
         classifiedOptions = ClassficationsOptions.objects.filter(isActive=True).values(
             'classifiedID', 'classifiedCategory', 'optionClassified', 'isActive'
@@ -92,12 +94,11 @@ class DoctorView(ListView):
 
         if request.method == 'POST':
             txtpatientid = request.POST.get('hdfpatientid')
-            doctorid = 1  # Static doctor ID for now; replace with actual data.
+            doctorid = request.user  # Static doctor ID for now; replace with actual data.
             txtdiagnosis = request.POST.get('Diagnosis')
             EvaulDegree = request.POST.get('gridRadios')
             txtRemarks = request.POST.get('txtRemarks')
-            hdfclassifiedID = request.POST.get('selectedOption')
-        
+            hdfclassifiedID = request.POST.get('selectedOption')       
 
             patient = Patient.objects.get(pk=txtpatientid)
             doctor = Doctor.objects.get(pk=doctorid)
@@ -124,8 +125,8 @@ class DoctorView(ListView):
                 "ConfirmMsg.html",
                 {
                     'message': "Patient's Visit is added successfully",
-                    'returnUrl': 'DoctorEvaluation',
-                    'btnText': 'New Patient'
+                    'returnUrl': 'AuditEvaluation',
+                    'btnText': 'Take New Patient'
                 },
                 status=200,
             )

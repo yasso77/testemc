@@ -95,30 +95,32 @@
 
       {%endif%}
 
-      {% if request.user|in_group:"Audit" or request.user|in_group:"Admin" %}
+     
 
       <li class="nav-item">
         <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Audit/Doctor</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="components-nav" class="nav-content  " data-bs-parent="#sidebar-nav">
-                  
+           
+          {% if request.user|in_group:"Doctor" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'DoctorEvaluation'%}">
               <i class="bi bi-circle"></i><span>Doctor Examination</span>
             </a>
           </li>
-         
+          {%endif%} 
 
-         
+          {% if request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
           <li>
             <a href="{%url 'AuditEvaluation'%}">
               <i class="bi bi-circle"></i><span>Audit Examination </span>
             </a>
-          </li>    
+          </li>  
+          {%endif%}   
         </ul>
       </li>
-      {%endif%} 
+     
 
 
       
