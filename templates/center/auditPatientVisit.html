@@ -29,7 +29,7 @@
   border-radius: 50%;
   margin-right: 10px;
   border: 3px solid transparent;
-  color: white;
+
   font-weight: bold;
   font-size: 20px;
   transition: all 0.3s ease-in-out;
@@ -261,7 +261,7 @@ div.divSelectedPatient[name="divPatientName"] {
                     <input type="hidden"  name="hdfpatientid">
 
             <div class="divSelectedPatient" name="divPatientName">Selected Patient:</div>
-                    <div class="mb-3">
+                    {% comment %} <div class="mb-3">
                         <label for="inputNumber" class="form-label">Diagnosis</label>
                         <textarea type="text" name="Diagnosis" class="form-control" required></textarea>
                         <div class="invalid-feedback">Please enter your Diagnosis.</div>
@@ -271,13 +271,12 @@ div.divSelectedPatient[name="divPatientName"] {
                         <label for="inputNumber" class="form-label">Remarks</label>
                         <textarea type="text" name="txtRemarks" class="form-control" required></textarea>
                         <div class="invalid-feedback">Please enter your Remarks.</div>
-                    </div>
+                    </div> {% endcomment %}
             
                    
                   
                     <div class="mb-4">
-                      <label class="form-label d-block mb-2">Degree</label>
-                      <br>
+                     
                       <div class="d-flex flex-wrap gap-3 align-items-center">
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios1" value="A">
@@ -288,7 +287,7 @@ div.divSelectedPatient[name="divPatientName"] {
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios2" value="B">
                               <label for="gridRadios2">
-                                  <span class="circle bg-danger">B</span>
+                                  <span class="circle bg-danger" style="color:rgb(219 51 67) !important;">B</span>
                               </label>
                           </div>
                           <div class="form-check custom-radio">

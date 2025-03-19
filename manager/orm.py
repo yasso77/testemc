@@ -1,7 +1,7 @@
 from manager import models
 from datetime import datetime
 from django.db.models import Q,OuterRef,Subquery,F
-
+from datetime import datetime, date
 from manager.model.patient import Patient
 from manager.model.visit import PatientVisits
 
@@ -27,10 +27,13 @@ class ORMPatientsHandling():
     
     def getPatientsAttendedToday(self):
         # Get today's date
-        today = datetime.now().date()
+                
+        today = datetime.now().date()  # Get today's date
+        FALLBACK_DATE = date(1900, 1, 1)  # Ensure using 'date' and not 'datetime.date'
 
-                # Step 1: Get patients who attended today
-        patients_attended_today = Patient.objects.filter(attendanceDate=today)
+        patients_attended_today = Patient.objects.filter(
+           Q(expectedDate=today) |Q(attendanceDate=today)
+        )
 
         # Step 2: Get patients who do not have a visit date today
         patients_no_visit_today = patients_attended_today.exclude(
