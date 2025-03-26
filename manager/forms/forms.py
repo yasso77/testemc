@@ -1,5 +1,5 @@
 from django import forms
-from manager.models import ClassficationsOptions
+
 
 class LoginForm(forms.Form):
     username = forms.CharField(

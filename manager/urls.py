@@ -1,4 +1,5 @@
 from django.urls import include, path
+from manager.views.barcode import generate_barcode
 from manager.views.center import CenterView
 from manager.views.doctor import DoctorView
 from manager.views.patient import PatientView
@@ -68,6 +69,7 @@ urlpatterns = [
     # DoctorView
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
     path('AuditEvaluation', DoctorView.auditPatientvisit, name='AuditEvaluation'),
+    path('AuditList', DoctorView.getPatientVisits, name='AuditList'),
 
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),

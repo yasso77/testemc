@@ -66,16 +66,23 @@
         @media print {
             body {
                 margin: 0;
-                padding: 0;
-            }
-
-            .footer {
-                position: static; /* Ensure footer is at the end of the page */
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh; /* Ensure the body takes the full height of the page */
             }
 
             .container {
+                flex: 1; /* Allow the container to grow and take up available space */
                 width: 100%;
-                /* No specific margin rule for container, it will retain its default center alignment */
+            }
+
+            .footer {
+                position: relative; /* Ensure the footer is positioned relative to the body */
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                margin-top: auto; /* Push the footer to the bottom if content is short */
             }
 
             #tblPaitenData {
@@ -200,6 +207,32 @@
             }
     </style>
 
+    <style>
+        @media print {
+            html, body {
+                height: 100%; /* Ensure the html and body take the full height of the page */
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .container {
+                flex: 1; /* Allow the container to grow and take up available space */
+                display: flex;
+                flex-direction: column;
+            }
+
+            .footer {
+                position: relative; /* Ensure the footer is positioned relative to the body */
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                margin-top: auto; /* Push the footer to the bottom if content is short */
+            }
+        }
+    </style>
+
     <script>
         function setGenderValue(selectedValue) {
             $('input[name="gridRadios"]').each(function() {         
@@ -237,32 +270,63 @@
             });
         }  
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Include CSRF token in AJAX requests
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
+                }
+            }
+        });
+
+        // Example AJAX POST request
+        function searchPatient(data) {
+            $.ajax({
+                url: "https://sys.emc-lasik.com/searchPatient",
+                type: "POST",
+                data: data,
+                success: function(response) {
+                    console.log("Success:", response);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+    </script>
 </head>
 <body onload="window.print();">
     <div class="header">
-        <table>
-            
+        <table style="width: 100%; table-layout: fixed;">
             <tr>
-                <td class="top-align" style="text-align:left">
-                    <img width="245" height="120" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
+                <!-- Left Logo -->
+                <td style="text-align: left; vertical-align: middle; width: 25%;">
+                    <img width="225" height="120" src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo">
                 </td>
-                <td style="height: 200px;margin-top: 100px;">
-                   
-
-                    <span style="font-size: 25px;font-weight: bold; color: #966F38;margin-top: 100px;margin-bottom: 100px">File#:{{patientData.fileserial}}</span>  
-
-<p style="padding-top: 100px;">
-                    <img width="208" src="{% static 'assets/img/form.png' %}" alt="EMC Logo">
-</p>
-                 
-
-
+        
+                <!-- Barcode & Form Image -->
+                <td style="text-align: center; vertical-align: middle; width: 50%;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <img src="data:image/png;base64,{{ barcode_data }}" alt="Patient Barcode" width="250" height="100">
+                        <img width="210" src="{% static 'assets/img/form.png' %}" alt="Form">
+                    </div>
                 </td>
-                <td class="bottom-align">
+        
+                <!-- Right Circle Image -->
+                <td style="text-align: left; vertical-align: middle;">
+                    <img width="200" src="{% static 'assets/img/circleImage.png' %}" 
+                         alt="Circle Image" 
+                         style="max-width: 100%; height: auto;">
                 </td>
-                <td class="bottom-align" style="margin-right:5px;"><img width="215" src="{% static 'assets/img/circleImage.png' %}" alt="EMC Logo"></td>
-            </tr>
         </table>
+        
+        <br>
         <br>
     </div>
 <div class="container">

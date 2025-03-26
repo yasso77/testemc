@@ -33,7 +33,7 @@ class ORMPatientsHandling():
 
         patients_attended_today = Patient.objects.filter(
            Q(expectedDate=today) |Q(attendanceDate=today)
-        )
+        ).exclude(fileserial__isnull=True)
 
         # Step 2: Get patients who do not have a visit date today
         patients_no_visit_today = patients_attended_today.exclude(

@@ -1,7 +1,8 @@
 from django.contrib import admin
 from manager.model.doctor import Doctor, Specialties
 from manager.model.patient import AgentCompany, CheckUpPrice, MedicalConditionData, Offers, Patient,City, SufferedCases
-from manager.models import ClassficationsOptions
+from manager.model.visit import ClassficationsOptions
+
 
 # Register your models here.
 

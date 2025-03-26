@@ -1,0 +1,145 @@
+{% extends 'master.html'%}
+
+{% block content %}
+  <!-- Include DataTables CSS -->
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"> 
+
+ <style>
+
+    td {
+        white-space: nowrap;
+    }
+    
+ </style>
+<div class="pagetitle">
+    <h1>Audit Patients List </h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+        <li class="breadcrumb-item">Center</li>
+        <li class="breadcrumb-item active">Audit Patients List</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section">
+
+ 
+        <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
+            <thead>
+                <tr>
+                    
+                    <th>File #</th>
+                    <th>Full Name</th> 
+                    <th>Classified Reason</th> 
+                    <th>Mobile</th>                                     
+                    <th>Case-Patient</th>   
+                    <th>Visit Type</th>     
+                    <th>Visit Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+               
+                    <tr >
+                       
+                        <td style="font-weight: bolder; {% if patient.evaluationeegree == A %} background-color:#74c476;{% elif evaluationeegree == B %} background-color:#FFC0CB; 
+                        {% elif evaluationeegree == C %} background-color:yellow; 
+                        {% elif evaluationeegree == D %} background-color:#ff8100; 
+                        {% elif evaluationeegree == E %} background-color:#FFFFFFFF;
+                        {% endif %}">
+                            File#: {{ patient.patientid.fileserial }} 
+                                                   </td>
+                        <td>{{ patient.patientid.fullname }}</td>
+                       
+                       
+                         <td>{{patient.classifiedID.optionClassified}}</td> 
+                        
+                        <td>{{ patient.patientid.mobile }}</td>                        
+                      
+                        <td>{{ patient.patientid.sufferedcaseByPatient }}</td>
+
+                        <td>{{ patient.visittype }}</td>
+                        
+                        <td data-order="{{ patient.visitdate|date:'Ymd' }}">
+                            {{ patient.visitdate|date:'d-M-Y' }}
+                           
+                          
+                        
+                        </td>
+                        
+                      
+                       
+                        
+                        <td class="text-nowrap">
+                            
+                            
+
+                            <a href="#" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            
+                               
+                        </td>
+                        
+                         
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="alert alert-danger" colspan="7">No Patients Visit Found .</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+ <!-- Bootstrap Modal -->
+ <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-warning" id="warningModalLabel"><i class="bi bi-exclamation-triangle"></i> Warning</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="font-weight: bold;">
+          This patient does not have medical records.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- JavaScript to Handle Modal -->
+    <script>
+        function checkMedicalRecords(fileserial) {
+            if (!fileserial || fileserial === "None") {
+                var warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+                warningModal.show(); // Show Bootstrap modal
+                return false; // Prevent navigation
+            }
+            return true; // Allow navigation
+        }
+        </script>
+</section>
+
+<!-- Include jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script> 
+
+<!-- Initialize DataTables -->
+<script>
+    $(document).ready(function() {
+        $('#patientsTable').DataTable({
+            "order": [],  // Sort by 'createdDate' column (index 3) in descending order by default
+            "searching": true,      // Enable search
+            "paging": true,         // Enable pagination
+            "lengthChange": false,  // Disable length change dropdown
+            "info": false,
+            "pageLength": 25           // Disable info display
+        });
+    });
+</script>
+{%endblock%}

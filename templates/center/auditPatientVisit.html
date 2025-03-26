@@ -19,6 +19,15 @@
   pointer-events: none;
 }
 
+.custom-radio label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 /* Custom circle styling */
 .circle {
   display: flex;
@@ -301,32 +310,37 @@ div.divSelectedPatient[name="divPatientName"] {
                       <div class="d-flex flex-wrap gap-3 align-items-center">
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios1" value="A">
-                              <label for="gridRadios1" title="This is Option A">
+                              <label for="gridRadios1" >
                                   <span class="circle bg-green"></span>
+                                 OK
                               </label>
                           </div>
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios2" value="B">
                               <label for="gridRadios2">
-                                  <span class="circle bg-orange" style="color:rgb(219 51 67) !important;"></span>
+                                  <span class="circle bg-orange" ></span>
+                                <span style="font-size: 24px;">++</span> 
                               </label>
                           </div>
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios3" value="C">
                               <label for="gridRadios3">
                                   <span class="circle bg-pink"></span>
+                                  Surgery
                               </label>
                           </div>
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios4" value="D">
                               <label for="gridRadios4">
                                   <span class="circle bg-white"></span>
+                                  <span style="font-size: 18px;">6/6</span> 
                               </label>
                           </div>
                           <div class="form-check custom-radio">
                               <input type="radio" name="gridRadios" id="gridRadios5" value="E">
                               <label for="gridRadios5">
                                   <span class="circle bg-yellow"></span>
+                                  Bad
                               </label>
                           </div>
                       </div>
@@ -514,62 +528,40 @@ window.onload = function() {
     }
 
 
-    function bindPatientData(element,namepatient, filenumber) {
-      // Access the ID of the clicked element and print it
-      //console.log("Clicked link ID:", element.id);
-     // table = document.getElementById("myTable");
-    //  table.style.display = "none";
-      var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
-      
-      $('div.divSelectedPatient[name="divPatientName"]').text('Selected Patient: '+filenumber+'-'+namepatient);
-    if (hiddenInput) {
-        hiddenInput.value = element;
-    } else {
-        console.error('Hidden input with name "' + hiddenInputName + '" not found.');
-    }
-      var csrftoken = getCookie('csrftoken');
-      //alert(element)
-      $.ajax({
-        url: 'searchPatient',
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': csrftoken
-        },
-        data: {
-          'myData': element
-        },
-        success: function (response) {
-         
-          $('#patientdataDiv').text(response[0].fullname);
-          //$('#patientImage').attr('src', '/media/' + response[0].image);         
-        
-
-          showForm();
-        },
-        error: function (xhr, errmsg, err) {
-          console.log(xhr.status + ": " + xhr.responseText);
+    function bindPatientData(element, namepatient, filenumber) {
+        var hiddenInput = document.querySelector('input[type="hidden"][name="hdfpatientid"]');
+        $('div.divSelectedPatient[name="divPatientName"]').text('Selected Patient: ' + filenumber + '-' + namepatient);
+        if (hiddenInput) {
+            hiddenInput.value = element;
+        } else {
+            console.error('Hidden input with name "hdfpatientid" not found.');
         }
-      });
+
+        // Get CSRF token from the hidden input or cookie
+        var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        $.ajax({
+            url: 'searchPatient',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken // Include CSRF token in the request header
+            },
+            data: {
+                'myData': element
+            },
+            success: function (response) {
+                $('#patientdataDiv').text(response[0].fullname);
+                showForm();
+            },
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
     }
 
     function showForm() {
-      const formContainer = document.querySelector(".form-container");
-      formContainer.classList.add("show");
+        const formContainer = document.querySelector(".form-container");
+        formContainer.classList.add("show");
     }
-    function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-          var cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
   </script>
   {% endblock %}

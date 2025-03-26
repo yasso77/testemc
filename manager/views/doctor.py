@@ -1,18 +1,18 @@
+import datetime  # Use fully qualified import for datetime
 from django.shortcuts import  render
 import json
 from django.core.serializers.json import DjangoJSONEncoder
-from datetime import datetime
+
   # Import from the package, not the specific file
 from manager.decorators import permission_required_with_redirect
 from manager.model.doctor import Doctor
 from manager.model.patient import Patient
-from manager.model.visit import PatientVisits
-from manager.models import ClassficationsOptions
+from manager.model.visit import ClassficationsOptions, PatientVisits
 from django.shortcuts import get_object_or_404
 from manager.orm import ORMPatientsHandling
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
-
+from datetime import date, timedelta
 ormObj=ORMPatientsHandling()
 
 
@@ -38,7 +38,7 @@ class DoctorView(ListView):
 
             patient = Patient.objects.get(pk=txtpatientid)
             doctor = Doctor.objects.get(pk=doctorid)
-            visit_date = datetime.now().date()
+            visit_date = datetime.datetime.now().date()  # Use fully qualified datetime
             objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
             
 
@@ -94,15 +94,15 @@ class DoctorView(ListView):
 
         if request.method == 'POST':
             txtpatientid = request.POST.get('hdfpatientid')
-            doctorid = request.user  # Static doctor ID for now; replace with actual data.
+            userID = request.user  # Static doctor ID for now; replace with actual data.
             txtdiagnosis = request.POST.get('Diagnosis')
             EvaulDegree = request.POST.get('gridRadios')
             txtRemarks = request.POST.get('txtRemarks')
             hdfclassifiedID = request.POST.get('selectedOption')       
 
             patient = Patient.objects.get(pk=txtpatientid)
-            doctor = Doctor.objects.get(pk=doctorid)
-            visit_date = datetime.now().date()
+            
+            visit_date = datetime.datetime.now().date()  # Use fully qualified datetime
             objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
             
 
@@ -114,7 +114,7 @@ class DoctorView(ListView):
                 evaluationeegree=EvaulDegree,
                 classifiedID=objclassifiedID,
                 visitdate=visit_date,
-                doctorid=doctor,
+                doctorid=userID,
                 reasonforvisit=txtRemarks,
                 createdate=visit_date,
             )
@@ -145,3 +145,20 @@ class DoctorView(ListView):
             }
         )
 
+    def getPatientVisits(request):
+        today_date = date.today()  # Get today's date
+        past_10_days_date = today_date - timedelta(days=10)  
+        
+        patientList = PatientVisits.objects.filter(createdate__gte=past_10_days_date).exclude(patientid__fileserial__isnull=False).select_related('patientid','classifiedID') 
+        
+        for p in patientList:
+            print(p.patientid.fileserial)       
+       
+
+        return render(
+            request,
+            'center/auditPatientsList.html',
+            {
+                'patients': patientList,
+            }
+        )

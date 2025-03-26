@@ -1,5 +1,6 @@
 from datetime import  date, datetime, time,  timedelta
 import datetime
+from io import BytesIO
 import string
 
 from urllib import request
@@ -23,6 +24,14 @@ from manager.forms.centerFollowUp import centerTrackForm
 from manager.model import patient
 from manager.model.patient import CallTrack,MedicalConditionData, Patient, PatientMedicalHistory
 from django.db import models
+
+from manager.views import barcode
+
+import barcode
+from barcode.writer import ImageWriter
+from io import BytesIO
+import base64
+from django.shortcuts import render
 
 
 
@@ -343,7 +352,24 @@ class CenterView(ListView):
             # Pass the data to the template      
        
         return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':ScopeView})
-            
+       
+    def generate_barcode(code):
+        # Get the barcode class (Code128 is a widely used barcode format)
+        barcode_format = barcode.get_barcode_class('code128')
+        
+        # Generate barcode
+        barcode_instance = barcode_format(code, writer=ImageWriter())
+
+        # Save the barcode image to an in-memory buffer
+        buffer = BytesIO()
+        barcode_instance.write(buffer)
+
+        # Convert the image buffer to a base64 string
+        barcode_data = base64.b64encode(buffer.getvalue()).decode()
+
+        # Pass barcode data to the template
+        return  barcode_data
+     
     @login_required       
     def patientForm(request, patientid):
         CONDITIONS_LIST = MedicalConditionData.objects.active()
@@ -357,11 +383,14 @@ class CenterView(ListView):
 
         # Debugging:
         #print(f"Medical History: {history_dict}")  
+         # Generate barcode based on patient's file serial number
+        barcode_data = CenterView.generate_barcode(patientData.fileserial)
 
         return render(request, 'center/patientForm.html',  {
             'patientData': patientData,
             'medical_history': history_dict,  # Dictionary now uses condition names as keys
-            'conditions_list': CONDITIONS_LIST  # Pass list from view
+            'conditions_list': CONDITIONS_LIST,  # Pass list from view
+            'barcode_data': barcode_data  # Pass barcode data to template
         })
 
 
