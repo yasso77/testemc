@@ -13,6 +13,7 @@ from manager.orm import ORMPatientsHandling
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
+from django.utils import timezone
 ormObj=ORMPatientsHandling()
 
 
@@ -38,7 +39,7 @@ class DoctorView(ListView):
 
             patient = Patient.objects.get(pk=txtpatientid)
             doctor = Doctor.objects.get(pk=doctorid)
-            visit_date = datetime.datetime.now().date()  # Use fully qualified datetime
+            visit_date = timezone.now().date()  # Use fully qualified datetime
             objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
             
 
@@ -52,7 +53,7 @@ class DoctorView(ListView):
                 visitdate=visit_date,
                 doctorid=doctor,
                 reasonforvisit=txtRemarks,
-                createdate=visit_date,
+                createdate=timezone.now().date(),
             )
             data.save()
 
@@ -149,11 +150,14 @@ class DoctorView(ListView):
         today_date = date.today()  # Get today's date
         past_10_days_date = today_date - timedelta(days=10)  
         
-        patientList = PatientVisits.objects.filter(createdate__gte=past_10_days_date).exclude(patientid__fileserial__isnull=False).select_related('patientid','classifiedID') 
+        patientList = PatientVisits.objects.filter(
+    createdate__gte=past_10_days_date, 
+    patientid__fileserial__isnull=False  # Only include records where fileserial is NOT NULL
+).select_related('patientid', 'classifiedID')
+
+
         
-        for p in patientList:
-            print(p.patientid.fileserial)       
-       
+              
 
         return render(
             request,

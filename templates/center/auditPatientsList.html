@@ -23,7 +23,38 @@
   </div><!-- End Page Title -->
   <section class="section">
 
- 
+ <!-- Bootstrap Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Visit Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="mb-3">
+                        
+                        <span id="editFileSerial" name="fileSerial"></span> --
+                        <span id="editFullName" name="fileSerial"></span>
+                    </div>
+
+                                      
+
+                    <div class="mb-3">
+                        <label for="editClassified" class="form-label">Classified Reason</label>
+                        <input type="text" class="form-control" id="editClassified" name="classified">
+                    </div>
+
+                    <input type="hidden" id="editPatientId">
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
         <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
             <thead>
                 <tr>
@@ -43,10 +74,10 @@
                
                     <tr >
                        
-                        <td style="font-weight: bolder; {% if patient.evaluationeegree == A %} background-color:#74c476;{% elif evaluationeegree == B %} background-color:#FFC0CB; 
-                        {% elif evaluationeegree == C %} background-color:yellow; 
-                        {% elif evaluationeegree == D %} background-color:#ff8100; 
-                        {% elif evaluationeegree == E %} background-color:#FFFFFFFF;
+                        <td style="font-weight: bolder; {% if patient.evaluationeegree == OK %} background-color:#74c476;{% elif evaluationeegree == Surgery %} background-color:#FFC0CB; 
+                        {% elif evaluationeegree == Bad %} background-color:yellow; 
+                        {% elif evaluationeegree == ++ %} background-color:#ff8100; 
+                        {% elif evaluationeegree == 6/6 %} background-color:#FFFFFFFF;
                         {% endif %}">
                             File#: {{ patient.patientid.fileserial }} 
                                                    </td>
@@ -72,14 +103,15 @@
                        
                         
                         <td class="text-nowrap">
-                            
-                            
-
-                            <a href="#" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                            <a href="#" class="btn btn-sm btn-primary d-inline-block mx-1 edit-btn"
+                               data-id="{{ patient.patientid.id }}"
+                               data-fileserial="{{ patient.patientid.fileserial }}"
+                               data-fullname="{{ patient.patientid.fullname }}"                              
+                               data-classified="{{ patient.classifiedID.optionClassified }}"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top" title="Edit">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            
-                               
                         </td>
                         
                          
@@ -142,4 +174,33 @@
         });
     });
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function(event) {
+                event.preventDefault(); // Prevent default anchor action
+    
+                // Get data attributes
+                let patientId = this.getAttribute("data-id");
+                let fileSerial = this.getAttribute("data-fileserial");
+                let fullName = this.getAttribute("data-fullname");
+               
+                let classified = this.getAttribute("data-classified");
+    
+                // Populate modal fields
+                document.getElementById("editPatientId").value = patientId;
+                document.getElementById("editFileSerial").textContent = fileSerial;
+                document.getElementById("editFullName").textContent = fullName;
+               
+                document.getElementById("editClassified").value = classified;
+    
+                // Show the modal
+                let modal = new bootstrap.Modal(document.getElementById("editModal"));
+                modal.show();
+            });
+        });
+    });
+    </script>
+    
 {%endblock%}
