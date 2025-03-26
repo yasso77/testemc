@@ -24,7 +24,7 @@
   <section class="section">
 
  <!-- Bootstrap Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+ <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -33,17 +33,47 @@
             </div>
             <div class="modal-body">
                 <form id="editForm">
+                   
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="bg-light text-primary text-end" width="30%">File Serial:</th>
+                                        <td id="editFileSerial" class="fw-bold text-dark"></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light text-primary text-end">Full Name:</th>
+                                        <td id="editFullName" class="fw-bold text-dark"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="editVisitId" id="editVisitId">
+                  
+                    
+
+                    <!-- Classification Category -->
                     <div class="mb-3">
-                        
-                        <span id="editFileSerial" name="fileSerial"></span> --
-                        <span id="editFullName" name="fileSerial"></span>
+                        <label for="editevaluationeegree" class="form-label">Classification Category</label>
+                        <select class="form-control" id="editevaluationeegree" name="editevaluationeegree"  onchange="updateSelectColor(this)">
+                           {% for category in classfications_options %}
+        <option value="{{ category.classifiedCategory }}">
+            {% if category.classifiedCategory == 'OK' %} 🟢 
+            {% elif category.classifiedCategory == 'Surgery' %} 🔴 
+            {% elif category.classifiedCategory == 'Bad' %} 🟡 
+            {% elif category.classifiedCategory == '++' %} 🟠 
+            {% elif category.classifiedCategory == '6/6' %} ⚪ 
+            {% endif %}
+            {{ category.classifiedCategory }}
+        </option>
+    {% endfor %}
+                        </select>
                     </div>
-
-                                      
-
+                    
+                    <!-- Classified Reason (Dynamically Updated) -->
                     <div class="mb-3">
                         <label for="editClassified" class="form-label">Classified Reason</label>
-                        <input type="text" class="form-control" id="editClassified" name="classified">
+                        <select class="form-control" id="editClassified" name="classified">
+                            <option value="">Select Reason</option>
+                        </select>
                     </div>
 
                     <input type="hidden" id="editPatientId">
@@ -55,12 +85,14 @@
     </div>
 </div>
 
+
         <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
             <thead>
                 <tr>
                     
                     <th>File #</th>
                     <th>Full Name</th> 
+                    <th>Classified Category</th> 
                     <th>Classified Reason</th> 
                     <th>Mobile</th>                                     
                     <th>Case-Patient</th>   
@@ -81,11 +113,11 @@
     {% elif patient.evaluationeegree == '++' %} background-color:#ff8100;
     {% elif patient.evaluationeegree == '6/6' %} background-color:#FFFFFFFF;
     {% endif %}">
-    {{ patient.evaluationeegree }}
+    {{ patient.patientid.fileserial }}
 </td>
                         <td>{{ patient.patientid.fullname }}</td>
                        
-                       
+                        <td>{{patient.classifiedID.classifiedCategory}}</td> 
                          <td>{{patient.classifiedID.optionClassified}}</td> 
                         
                         <td>{{ patient.patientid.mobile }}</td>                        
@@ -106,9 +138,12 @@
                         
                         <td class="text-nowrap">
                             <a href="#" class="btn btn-sm btn-primary d-inline-block mx-1 edit-btn"
-                               data-id="{{ patient.patientid.id }}"
+                               data-id="{{ patient.visitid }}"
                                data-fileserial="{{ patient.patientid.fileserial }}"
-                               data-fullname="{{ patient.patientid.fullname }}"                              
+                               data-fullname="{{ patient.patientid.fullname }}" 
+                               
+                               data-evluationDegree="{{ patient.evaluationeegree }}"
+
                                data-classified="{{ patient.classifiedID.optionClassified }}"
                                data-bs-toggle="tooltip"
                                data-bs-placement="top" title="Edit">
@@ -178,31 +213,154 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".edit-btn").forEach(button => {
-            button.addEventListener("click", function(event) {
-                event.preventDefault(); // Prevent default anchor action
+            button.addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default action
+    
+                // Get modal element
+                let modalElement = document.getElementById("editModal");
+                let modal = new bootstrap.Modal(modalElement);
+    
+                // Remove any incorrect aria-hidden attributes (if present)
+                modalElement.removeAttribute("aria-hidden");
     
                 // Get data attributes
-                let patientId = this.getAttribute("data-id");
+                let visitID = this.getAttribute("data-id");
                 let fileSerial = this.getAttribute("data-fileserial");
                 let fullName = this.getAttribute("data-fullname");
-               
-                let classified = this.getAttribute("data-classified");
+                let classified = this.getAttribute("data-classified")?.trim(); // Trim spaces/tabs
+                let evaluationDegree = this.getAttribute("data-evluationDegree")?.trim(); // Trim spaces/tabs
     
-                // Populate modal fields
-                document.getElementById("editPatientId").value = patientId;
+                // Select dropdown elements
+                let categorySelect = document.getElementById("editevaluationeegree");
+                let reasonSelect = document.getElementById("editClassified");
+    
+                // Populate static modal fields
+                document.getElementById("editVisitId").value = visitID;
                 document.getElementById("editFileSerial").textContent = fileSerial;
                 document.getElementById("editFullName").textContent = fullName;
-               
-                document.getElementById("editClassified").value = classified;
+    
+                // Set selected value for Classification Category
+                categorySelect.value = evaluationDegree;
+    
+                // Reset and update "Classified Reason" dropdown
+                function updateClassifiedOptions(category) {
+                    if (category) {
+                        fetch(`/get_classified_options/?category=${encodeURIComponent(category)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Clear old options
+                                reasonSelect.innerHTML = '<option value="">Select Reason</option>';
+    
+                                // Add new options
+                                data.options.forEach(option => {
+                                    let newOption = new Option(option, option);
+                                    reasonSelect.add(newOption);
+                                });
+    
+                                // Set selected value if available
+                                if (classified) {
+                                    reasonSelect.value = classified;
+                                }
+                            })
+                            .catch(error => console.error("Error fetching classified options:", error));
+                    } else {
+                        // Reset the classified reason dropdown if no category is selected
+                        reasonSelect.innerHTML = '<option value="">Select Reason</option>';
+                    }
+                }
+    
+                // Fetch options on category selection change
+                categorySelect.addEventListener("change", function () {
+                    updateClassifiedOptions(this.value);
+                });
+    
+                // Initial fetch for selected category
+                updateClassifiedOptions(evaluationDegree);
     
                 // Show the modal
-                let modal = new bootstrap.Modal(document.getElementById("editModal"));
                 modal.show();
             });
         });
     });
-    </script>
+    
+    function updateSelectColor(selectElement) {
+        let selectedOption = selectElement.options[selectElement.selectedIndex];
+    
+        // Set background color of the select box to match selected option
+        selectElement.style.backgroundColor = selectedOption.style.backgroundColor;
+        selectElement.style.color = selectedOption.style.color;
+    }
+    
+    // Run this on page load to apply color to the pre-selected option
+    document.addEventListener("DOMContentLoaded", function () {
+        let categorySelect = document.getElementById("editevaluationeegree");
+        updateSelectColor(categorySelect);
+    
+        // Reset the dropdown background color when modal is closed
+        let editModal = document.getElementById("editModal");
+        editModal.addEventListener("hidden.bs.modal", function () {
+            categorySelect.style.backgroundColor = ""; // Reset to default
+            categorySelect.style.color = ""; // Reset text color
+            categorySelect.selectedIndex = 0; // Reset selection to first option (optional)
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let editForm = document.getElementById("editForm");
+    
+        editForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default submission
+    
+            let visitId = document.getElementById("editVisitId").value;
+            let evaluationDegree = document.getElementById("editevaluationeegree").value;
+            let classifiedReason = document.getElementById("editClassified").value;
+    
+            fetch("/update_patient_visit/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCookie("csrftoken") // CSRF protection
+                },
+                body: new URLSearchParams({
+                    visit_id: visitId,
+                    evaluation_degree: evaluationDegree,
+                    classified_id: classifiedReason
+                })
+            })
+            .then(response => response.json()) // Ensure response is JSON
+            .then(data => {
+                if (data.success) {
+                    let modal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
+                    modal.hide(); // Close modal
+                    window.location.reload(); // Refresh page
+                } else {
+                    alert("Error: " + data.error);
+                    console.error("Server Error:", data.error);
+                }
+            })
+            .catch(error => console.error("Error updating visit:", error));
+        });
+    
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                let cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+    
+    
+</script>
     
 {%endblock%}

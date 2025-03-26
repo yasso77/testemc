@@ -2,7 +2,7 @@ import datetime  # Use fully qualified import for datetime
 from django.shortcuts import  render
 import json
 from django.core.serializers.json import DjangoJSONEncoder
-
+from django.http import JsonResponse
   # Import from the package, not the specific file
 from manager.decorators import permission_required_with_redirect
 from manager.model.doctor import Doctor
@@ -154,6 +154,8 @@ class DoctorView(ListView):
     createdate__gte=past_10_days_date, 
     patientid__fileserial__isnull=False  # Only include records where fileserial is NOT NULL
 ).select_related('patientid', 'classifiedID')
+        
+        classfications_options = ClassficationsOptions.objects.values('classifiedCategory').distinct()
 
 
         
@@ -164,5 +166,46 @@ class DoctorView(ListView):
             'center/auditPatientsList.html',
             {
                 'patients': patientList,
+                'classfications_options': classfications_options,
             }
         )
+        
+    def get_classified_options(request):
+        category = request.GET.get('category', None)  # Get selected category from request
+        if category:
+            options = ClassficationsOptions.objects.filter(classifiedCategory=category, isActive=True).values_list('optionClassified', flat=True)
+            return JsonResponse({'options': list(options)})
+        return JsonResponse({'options': []})
+    
+    def update_patient_visit(request):
+        if request.method == "POST":
+            try:
+                visit_id = request.POST.get("visit_id")
+                evaluation_degree = request.POST.get("evaluation_degree")
+                classified_id = request.POST.get("classified_id")
+
+                # Ensure visit_id exists
+                if not visit_id:
+                    return JsonResponse({"success": False, "error": "Missing visit_id"}, status=400)
+
+                visit = get_object_or_404(PatientVisits, visitid=visit_id)
+
+                # Set values
+                visit.evaluationeegree = evaluation_degree if evaluation_degree else None
+
+                # Ensure classified_id is valid
+                if classified_id:
+                    classified_option = get_object_or_404(ClassficationsOptions, optionClassified=classified_id,classifiedCategory=visit.evaluationeegree)
+                    visit.classifiedID = classified_option
+                else:
+                    visit.classifiedID = None  # Allow unsetting
+
+                visit.updatedDate = date.today()
+                visit.save()
+
+                return JsonResponse({"success": True})
+
+            except Exception as e:
+                return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+        return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)

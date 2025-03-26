@@ -70,6 +70,8 @@ urlpatterns = [
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
     path('AuditEvaluation', DoctorView.auditPatientvisit, name='AuditEvaluation'),
     path('AuditList', DoctorView.getPatientVisits, name='AuditList'),
+    path('get_classified_options/', DoctorView.get_classified_options, name='get_classified_options'),
+    path("update_patient_visit/", DoctorView.update_patient_visit, name="update_patient_visit"),
 
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),

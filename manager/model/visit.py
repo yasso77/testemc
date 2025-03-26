@@ -28,6 +28,7 @@ class PatientVisits(models.Model):
     evaluationeegree = models.CharField(db_column='EvaluationDegree',max_length=20, blank=True, null=True)  # Field name made lowercase.
     classifiedID=models.ForeignKey(ClassficationsOptions,blank=True, null=True, verbose_name='Classified Option',on_delete=models.DO_NOTHING)
     createdate = models.DateField(db_column='CreateDate', blank=True, null=True)  # Field name made 
+    updatedDate= models.DateField(db_column='updatedDate', blank=True, null=True)  # Field name made 
     
 
 
