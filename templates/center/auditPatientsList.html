@@ -74,13 +74,15 @@
                
                     <tr >
                        
-                        <td style="font-weight: bolder; {% if patient.evaluationeegree == OK %} background-color:#74c476;{% elif evaluationeegree == Surgery %} background-color:#FFC0CB; 
-                        {% elif evaluationeegree == Bad %} background-color:yellow; 
-                        {% elif evaluationeegree == ++ %} background-color:#ff8100; 
-                        {% elif evaluationeegree == 6/6 %} background-color:#FFFFFFFF;
-                        {% endif %}">
-                            File#: {{ patient.patientid.fileserial }} 
-                                                   </td>
+                        <td style="font-weight: bolder; 
+    {% if patient.evaluationeegree == 'OK' %} background-color:#74c476;
+    {% elif patient.evaluationeegree == 'Surgery' %} background-color:#FFC0CB;
+    {% elif patient.evaluationeegree == 'Bad' %} background-color:yellow;
+    {% elif patient.evaluationeegree == '++' %} background-color:#ff8100;
+    {% elif patient.evaluationeegree == '6/6' %} background-color:#FFFFFFFF;
+    {% endif %}">
+    {{ patient.evaluationeegree }}
+</td>
                         <td>{{ patient.patientid.fullname }}</td>
                        
                        
