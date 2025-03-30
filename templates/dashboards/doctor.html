@@ -1,0 +1,131 @@
+{%extends 'master.html'%}
+<html>
+    <head>
+   
+    </head>
+    <body>
+        {% block content %}
+        <style>
+            .frame {
+                border: 2px solid #007bff; /* Frame color (Bootstrap primary color) */
+                background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+                display: inline-block; /* Shrinks to fit content */
+                padding: 2px; /* Spacing inside the frame */
+                border-radius: 1px; /* Optional rounded corners */
+            }
+        </style> 
+          <div class="pagetitle">
+            <h1>Doctor Dashboard</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active">Doctor Dash Board</li>
+              </ol>
+            </nav>
+          </div><!-- End Page Title -->
+          <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="row bg-info text-black p-4 rounded shadow-sm mb-4">
+              <div class="col">
+                  <h2 class="display-6 mb-2">EMC Doctor Dashboard</h2>
+                 
+                  
+              </div>
+          </div>
+          
+    
+          
+          
+          
+    
+            
+    
+           
+        </div>
+      <!-- dashboard.html -->
+ <!-- Main Functions -->
+
+ <div class="row text-center mt-4">
+  <div class="col-md-4">
+      <a href="{%url 'DoctorEvaluation'%}" class="d-block text-decoration-none shadow-lg p-4 bg-white rounded-4">
+          <i class="bi bi-clock display-2 text-primary"></i>
+          <p class="fw-bold fs-5 mt-2">Waiting Patients</p>
+      </a>
+  </div>
+  <div class="col-md-4">
+      <a href="{%url 'VisitstList' 'D' 'None' %}" class="d-block text-decoration-none shadow-lg p-4 bg-white rounded-4">
+          <i class="bi bi-arrow-repeat display-2 text-success"></i>
+          <p class="fw-bold fs-5 mt-2">Patients Visits</p>
+      </a>
+  </div>
+  <div class="col-md-4">
+      <a href="{% url 'dashSearchOnPatient' %}" class="d-block text-decoration-none shadow-lg p-4 bg-white rounded-4">
+          <i class="bi bi-search display-2 text-warning"></i>
+          <p class="fw-bold fs-5 mt-2">Search a Patient</p>
+      </a>
+  </div>
+</div>
+
+<!-- Reports Section -->
+<br>
+<br>
+<div style="font-size: larger; font-weight: bolder;">States on last 30 days ago</div>
+
+<div class="row mt-5 justify-content-center text-center">
+  <div class="col-md-2">
+      <div class="card shadow-lg rounded-4 border-0" style="background-color: #74c476; ">
+          <div class="card-body text-center p-4">
+              
+              <a href="{%url 'VisitstList' 'D' 'OK' %}" ><h5>OK/{{ stats.ok_count }}</h5>
+              </a>
+          </div>
+      </div>
+  </div>
+  <div class="col-md-2">
+      <div class="card shadow-lg rounded-4 border-0" style="background-color: #ff8100; ">
+          <div class="card-body text-center p-4">
+           
+              <h5 >++ / {{ stats.plus_plus_count }}</h5>
+             
+          
+          </div>
+      </div>
+  </div>
+  <div class="col-md-2">
+      <div class="card shadow-lg rounded-4 border-0" style="background-color: #FFC0CB; ">
+          <div class="card-body text-center p-4">
+              <h5 >Surgery - {{ stats.surgery_count }}</h5>
+              
+          </div>
+      </div>
+  </div>
+
+  <div class="col-md-2">
+    <div class="card shadow-lg rounded-4 border-0" style="background-color: white; ">
+        <div class="card-body text-center p-4">
+            <h5 >6/6 - {{ stats.six_six_count }}</h5>
+            
+        </div>
+    </div>
+</div>
+
+<div class="col-md-2">
+    <div class="card shadow-lg rounded-4 border-0" style="background-color: yellow; ">
+        <div class="card-body text-center p-4">
+            <h5 >Bad - {{ stats.bad_count }}</h5>
+           
+        </div>
+    </div>
+</div>
+</div>
+
+</div>
+
+{% endblock %}
+
+          
+      
+       
+  
+    </body>
+</html>

@@ -1,0 +1,229 @@
+/* Hide the default radio button */
+
+ /* Highlight class styling */
+ .highlight {
+    background-color: #E3CCAFFF; /* Light blue background */
+    font-weight: bold;     /* Bold font */
+    color: black;   
+}
+.custom-radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-radio label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Custom circle styling */
+.circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 3px solid #D1C8C8FF;
+
+  font-weight: bold;
+  font-size: 20px;
+  transition: all 0.3s ease-in-out;
+  text-align: center;
+  box-shadow: none;
+  margin: 20px;
+}
+.bg-green{
+  background-color: #74c476 !important;
+}
+
+.bg-pink{
+  background-color: #FFC0CB !important;
+}
+
+.bg-yellow{
+  background-color: yellow !important;
+}
+
+.bg-orange{
+  background-color: #ff8100 !important;
+}
+
+.bg-white{
+  background-color: #FFFFFFFF !important;
+}
+
+
+
+/* Active state styles */
+.custom-radio.active .circle {
+  transform: scale(1.3);
+  border-color: black;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .circle {
+    width: 100px;
+    height: 100px;
+    font-size: 16px;
+    margin: 10px;
+  }
+  .custom-radio.active .circle {
+    transform: scale(1.2);
+  }
+  #myTable th, #myTable td {
+    font-size: 14px;
+    padding: 6px;
+  }
+  #myInput {
+    font-size: 16px;
+    padding: 10px 18px 10px 36px;
+  }
+  .form-container {
+    padding: 15px;
+  }
+  .btn, .modal-body, .modal-footer .btn-primary {
+    font-size: 14px;
+  }
+  .modal-dialog {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 576px) {
+  .circle {
+    width: 80px;
+    height: 80px;
+    font-size: 14px;
+    margin: 8px;
+  }
+  .custom-radio.active .circle {
+    transform: scale(1.1);
+  }
+  #myTable th, #myTable td {
+    font-size: 12px;
+    padding: 4px;
+  }
+  #myInput {
+    font-size: 14px;
+    padding: 8px 16px 8px 32px;
+  }
+  .form-container {
+    padding: 10px;
+  }
+  .btn, .modal-body, .modal-footer .btn-primary {
+    font-size: 12px;
+  }
+  .modal-dialog {
+    max-width: 95%;
+  }
+}
+
+/* Alert styling */
+div.divSelectedPatient[name="divPatientName"] {
+  font-family: 'Arial', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3327D4FF;
+  border: #0056b3 1px dotted;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Custom close button */
+.custom-close-btn {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #ff0000;
+  
+}
+.custom-close-btn:hover {
+  color: #cc0000;
+}
+
+/* Modal styling */
+#selectControl {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+.modal-footer .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+.modal-footer .btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Search input styling */
+#myInput {
+  background-image: url("../img/searchicon.png");
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 18px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+/* Table styling */
+#myTable {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ddd;
+  font-size: 12px;
+}
+#myTable th, #myTable td {
+  text-align: left;
+  padding: 8px;
+}
+#myTable tr {
+  border-bottom: 1px solid #ddd;
+}
+#myTable tr.header, #myTable tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Form container */
+.form-container {
+  display: none;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+.form-container.show {
+  display: block;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.form-container.show form {
+  animation: slideIn 0.5s ease-in-out forwards;
+}
+

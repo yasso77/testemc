@@ -12,12 +12,12 @@
     
  </style>
 <div class="pagetitle">
-    <h1>Audit Patients List </h1>
+    <h1> Patient Examinations List </h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
         <li class="breadcrumb-item">Center</li>
-        <li class="breadcrumb-item active">Audit Patients List</li>
+        <li class="breadcrumb-item active">Patient Examinations List</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -57,7 +57,7 @@
                            {% for category in classfications_options %}
         <option value="{{ category.classifiedCategory }}">
             {% if category.classifiedCategory == 'OK' %} 🟢 
-            {% elif category.classifiedCategory == 'Surgery' %} 🔴 
+            {% elif category.classifiedCategory == 'Surgery' %} 🟣
             {% elif category.classifiedCategory == 'Bad' %} 🟡 
             {% elif category.classifiedCategory == '++' %} 🟠 
             {% elif category.classifiedCategory == '6/6' %} ⚪ 

@@ -101,14 +101,21 @@
         <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Audit/Doctor</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="components-nav" class="nav-content  " data-bs-parent="#sidebar-nav">
-           
-          {% if request.user|in_group:"Doctor" or request.user|in_group:"Admin" %}
+        <ul id="components-nav" class="nav-content" data-bs-parent="#sidebar-nav">
+          
+          {% if request.user|in_group:"Doctors" or request.user|in_group:"Admin" %}
           <li>
+           
             <a href="{%url 'DoctorEvaluation'%}">
               <i class="bi bi-circle"></i><span>Doctor Examination</span>
             </a>
           </li>
+
+          <li>
+            <a href="{%url 'VisitstList' 'D' 'None' %}">
+              <i class="bi bi-circle"></i><span>Doctors List </span>
+            </a>
+          </li>  
           {%endif%} 
 
           {% if request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
@@ -119,7 +126,7 @@
           </li>  
 
           <li>
-            <a href="{%url 'AuditList'%}">
+            <a href="{%url 'VisitstList' 'A' 'None' %}">
               <i class="bi bi-circle"></i><span>Audit List </span>
             </a>
           </li>  

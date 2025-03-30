@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from manager.views.callcenter import CallCenterView
 from manager.views.center import CenterView
+from manager.views.doctor import DoctorView
 from manager.views.marketing import MarketingView
 from django.db.models import Count
 from django.db.models import Q
@@ -36,25 +37,28 @@ class MainView(ListView):
         
         if request.user.groups.filter(name="Reception").exists():
             
-            #  context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
-            #  stats=MarketingView.get_patient_statistics_past_30_days()
+            
              missedCount=CenterView.countMissedLeads()
              followupCount=CenterView.countFollowUp()
              attendToday=CenterView.countAttendToday()
              
-             return render(request, 'center/dashboard.html', {'missedCount':missedCount,'followupCount':followupCount,'attendToday':attendToday})
+             return render(request, 'dashboards/center.html', {'missedCount':missedCount,'followupCount':followupCount,'attendToday':attendToday})
            
         
         elif request.user.groups.filter(name="Marketing").exists():
              context = MarketingView.marketing_dashboard(request)  # ✅ Pass request, not request.user
              stats=MarketingView.get_patient_statistics_past_30_days()
-             return render(request, 'marketing/dashboard.html', {'context': context,'stats':stats})
+             return render(request, 'dashboards/center.html', {'context': context,'stats':stats})
 
         elif request.user.groups.filter(name="Call center").exists():
             stats = CallCenterView.get_patient_statistics_past_30_days(request)  # ✅ Pass request, not request.user
-            return render(request, 'callcenter/dashboard.html', {'stats': stats})        
+            return render(request, 'dashboards/callCenter.html', {'stats': stats})       
         
-         
+       
+        elif request.user.groups.filter(name="Doctors").exists() or request.user.groups.filter(name="DoctorAudit").exists():
+
+            stats = DoctorView.get_evaluation_degree_count(request.user.id)  # ✅ Pass request, not request.user
+            return render(request, 'dashboards/doctor.html', {'stats': stats})            
         else:
             return render(request,'index.html',{'name':'index'})
         

@@ -40,7 +40,21 @@ class ORMPatientsHandling():
             Q(patientvisits__visitdate=today)
         ) 
         
-        return patients_no_visit_today      
+        return patients_no_visit_today   
+    
+    def getPatientsForDoctorExam(self):
+        # Get today's date
+                
+        today = datetime.now().date()  # Get today's date
+        FALLBACK_DATE = date(1900, 1, 1)  # Ensure using 'date' and not 'datetime.date'
+
+        # Get Patients who have a visit today with visittype='D'
+        patients_with_d_visit_today = Patient.objects.filter(
+            patientvisits__visitdate=today,
+            patientvisits__visittype='A'
+        ).distinct()
+        print(patients_with_d_visit_today.query)
+        return patients_with_d_visit_today         
     
     def getPatientsTodayWithVisitStatus(self):
         # Get today's date

@@ -15,12 +15,12 @@
   <div class="pagetitle">
      <!-- Store JSON Safely -->
 
-    <h1>Audit Examination </h1>
+    <h1>Doctor Examination </h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Audit</li>
-        <li class="breadcrumb-item active">Audit Examination</li>
+        <li class="breadcrumb-item">Doctor</li>
+        <li class="breadcrumb-item active">Doctor Examination</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -62,7 +62,7 @@
               <p></p>
 <hr>
               <div class="form-container">
-                <form method="post" name="vsitForm" action="AuditEvaluation" validate>
+                <form method="post" name="vsitForm" action="DoctorEvaluation" validate>
                     {% csrf_token %}
             
                     <input type="hidden"  name="hdfpatientid">
