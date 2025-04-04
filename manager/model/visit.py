@@ -20,7 +20,7 @@ class PatientVisits(models.Model):
     patientid = models.ForeignKey(Patient, on_delete=models.CASCADE, db_column='PatientID', blank=True, null=True, related_name='patientvisits')  # Note the related_name db_column='PatientID', blank=True, null=True)
     visittype=models.CharField(max_length=2,blank=True,null=True)
     doctorid = models.ForeignKey(User,on_delete=models.DO_NOTHING,  db_column='DoctorID', blank=True, null=True)  # Field name made lowercase.
-    visitdate = models.DateTimeField(db_column='VisitDate', blank=True, null=True)  # Field name made lowercase.
+    visitdate = models.DateField(db_column='VisitDate', blank=True, null=True)  # Field name made lowercase.
     reasonforvisit = models.TextField(db_column='ReasonForVisit', blank=True, null=True)  # Field name made lowercase.
     diagnosis = models.TextField(db_column='Diagnosis', blank=True, null=True)  # Field name made lowercase.
     treatment = models.TextField(db_column='Treatment', blank=True, null=True)  # Field name made lowercase.

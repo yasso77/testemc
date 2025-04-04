@@ -55,6 +55,14 @@
               <i class="bi bi-circle"></i><span>Attendance Today</span>
             </a>
           </li>
+         
+
+          <li>
+            <a href="{%url 'centerPatients' 'All-List'%}">
+              {% comment %} all reservation added by receiption {% endcomment %}
+              <i class="bi bi-circle"></i><span>Reservations List</span>
+            </a>
+          </li>
           {% comment %} <li>
             <a href="{%url 'centerPatients' 'Call-Center'%}">
                 all reservation added by call center and expected to attend today or in future 
@@ -146,22 +154,18 @@
           
         
           <li>
-            <a href="{%url 'reportview'%}">
+            <a href="{%url 'liveReportDegree'%}">
               <i class="bi bi-circle"></i><span>Live Report</span>
             </a>
           </li>
 
           <li>
-            <a href="{%url 'PatientsList'%}">
-              <i class="bi bi-circle"></i><span>All Patients - Status</span>
+            <a href="{%url 'compare_visits'%}">
+              <i class="bi bi-circle"></i><span>Audit-vs-Doctor</span>
             </a>
           </li>
 
-          <li>
-            <a href="{%url 'getattendedpatient'%}">
-              <i class="bi bi-circle"></i><span>Attended Patients</span>
-            </a>
-          </li>
+         
        
          
         

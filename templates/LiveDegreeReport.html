@@ -3,7 +3,38 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js" integrity="sha512-d6nObkPJgV791iTGuBoVC9Aa2iecqzJRE0Jiqvk85BhLHAPhWqkuBiQb1xz2jvuHNqHLYoN3ymPfpiB1o+Zgpw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+  .dashboard .green-card .card-icon {
+      color: #171717FF !important;
+      background: #40D2B0FF !important;
+      border: 1px solid #000000 !important;
 
+  }
+  
+  .dashboard .orange-card .card-icon {
+    color: #171717FF !important;
+    background: #ff8100 !important;
+    border: 1px solid #000000 !important;
+  }
+  
+  .dashboard .pink-card .card-icon {
+    color: #171717FF !important;
+    background: #FFC0CB !important;
+    border: 1px solid #000000 !important;
+  }
+  
+  .dashboard .white-card .card-icon {
+    color: #171717FF !important;
+    background: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
+  
+  .dashboard .yellow-card .card-icon {
+    color: #171717FF !important;
+    background: yellow !important;
+    border: 1px solid #000000 !important;
+  }
+  </style>
 <div class="pagetitle">
   <h1>Live Evaluation Report</h1>
   <nav>
@@ -16,85 +47,16 @@
 </div><!-- End Page Title -->
 <section class="section dashboard">
     {% csrf_token %}
-   <div class="row mb-3" >
-   
+  
  
 
-      <div class="row">
-
-        <!-- Sales Card -->
-        <div class="col-xxl-4 col-md-4">
-          <div class="card info-card revenue-card">           
-
-            <div class="card-body">
-              <h5 class="card-title">A -Qualifed</h5>
-
-              <div class="d-flex align-items-center">
-                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i>A</i>
-                </div>
-                <div class="ps-3">
-                  <h6>264</h6>
-                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase <span>| Month</span></span>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div><!-- End Revenue Card -->
-
-
-        <!-- Revenue Card -->
-        <div class="col-xxl-4 col-md-4">
-          <div class="card info-card revenue-card">           
-
-            <div class="card-body">
-              <h5 class="card-title">B -Not Qualifed</h5>
-
-              <div class="d-flex align-items-center">
-                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i>B</i>
-                </div>
-                <div class="ps-3">
-                  <h6>995</h6>
-                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase <span>| Month</span></span>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div><!-- End Revenue Card -->
-
-        <!-- Customers Card -->
-        <div class="col-xxl-4 col-md-4">
-
-          <div class="card info-card customers-card">           
-
-            <div class="card-body">
-              <h5 class="card-title">C -Follow Up < 2 weeks </h5>
-
-              <div class="d-flex align-items-center">
-                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i>C</i>
-                </div>
-                <div class="ps-3">
-                  <h6>124</h6>
-                  <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease <span>| Month</span></span>
-
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div><!-- End Customers Card -->
-
-        
-
-     
-</div>    
+    <div class="row d-flex justify-content-center align-items-center">
+      <div class="col-12 d-flex flex-wrap justify-content-center gap-3" id="cardContainer">
+          <!-- Cards will be added here dynamically -->
+      </div>
+  </div>
+  
+   
 
     <div class="col-lg-12">
       <div class="card">
@@ -119,113 +81,147 @@
     </div>
 
     
-</div>
+
 
 </section>
-
 <script>
-  var arrydata=['A', 'B', 'C', 'D', 'E'];
+  var arrydata = ['OK', '++', 'Surgery', '6/6', 'Bad'];
   var csrftoken = getCookie('csrftoken');
-        //alert(element)
-        function fetchData() {
-        $.ajax({
-          url: 'report',
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': csrftoken
-          },
-          data: {
-            'inputDate': '214'
-          },
-          success: function (response) {              
-           const degrees=response.map(function(index){
-            return index.evaluationeegree
-           })
-           //console.log(degrees)
 
-           arrydata=degrees;          
-
-          },
-          error: function (xhr, errmsg, err) {
-            //console.log(xhr.status + ": " + xhr.responseText);
-          }
+  // Function to fetch data via AJAX
+  function fetchData() {
+    $.ajax({
+      url: 'LiveEvulationReport',
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      data: {
+        'inputDate': '214'
+      },
+      success: function (response) {
+        const degrees = response.map(function(index) {
+          return index.evaluationeegree;
         });
+        arrydata = degrees;
+        updateChartData(); // Update the chart with the new data
+        updateCards(); // Update the cards with the new data
+      },
+      error: function (xhr, errmsg, err) {
+        console.log("Error: " + xhr.status + ": " + xhr.responseText);
       }
-// Function to generate the chart
+    });
+  }
 
-  var months = ['A', 'B', 'C', 'D', 'E'];
-  var datas_array =[count(arrydata,'A'), count(arrydata,'B'), count(arrydata,'C'), count(arrydata,'D'), count(arrydata,'E')];;
-  
-  /* create our chart */
+  // Function to generate the chart
+  var months = ['OK', '++', 'Surgery', '6/6', 'Bad'];
+  var datas_array = months.map(item => count(arrydata, item));
+
   const myChart = new Chart('myChart', {
     type: 'bar',
     data: {
       labels: months,
       datasets: [{
-        label: 'Evalution Degree Chart',       
+        label: 'Evaluation Degree Chart',
         data: datas_array,
-        backgroundColor: [
-        '#E21757','#ff771d','#91179C', '#2eca6a','#2165CB'],     
-      borderWidth: 1
-    }]
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
+        backgroundColor: ['#74c476', '#ff8100', '#FFC0CB', '#FFFFFFFF', 'yellow'],
+        borderWidth: 4
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
       }
     }
-  }
-});
-  
+  });
 
-updateChartData = () => {    
-    myChart.config.data.datasets[0].data = [count(arrydata,'A'), count(arrydata,'B'), count(arrydata,'C'), count(arrydata,'D'), count(arrydata,'E')];
-    
+  // Function to update the chart data
+  function updateChartData() {
+    const newData = months.map(item => count(arrydata, item));
+    myChart.config.data.datasets[0].data = newData;
     myChart.update();
+  }
+
+  // Define a mapping for colors based on evaluation types
+const colorClassMap = {
+  'OK': 'green-card',
+  '++': 'orange-card',
+  'Surgery': 'pink-card',
+  '6/6': 'white-card',
+  'Bad': 'yellow-card'
+};
+
+  // Function to update the cards dynamically
+  function updateCards() {
+    const cardContainer = document.getElementById('cardContainer');
+    cardContainer.innerHTML = ''; // Clear existing cards
   
-}
-
-
-
-
-function count(arr, element) {
-  return arr.filter(
-      (ele) => ele == element).length;
-}; 
-
-function getCookie(name) {
-  var cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    var cookies = document.cookie.split(';');
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
+    for (let i = 0; i < months.length; i++) {
+      let colorClass = colorClassMap[months[i]] || 'default-card'; // Assign default if not in map
+  
+      var cardHTML = `
+      <div class="col-xxl-2 col-md-2">
+          <div class="card info-card ${colorClass}">           
+              <div class="card-body">
+                  <h5 class="card-title">${months[i]}</h5>
+                  <div class="d-flex align-items-center">
+                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                          <i></i>
+                      </div>
+                      <div class="ps-3">
+                          <h6>${count(arrydata, months[i])}</h6>
+                          <span class="text-success small pt-1 fw-bold">${calculatePercentage(count(arrydata, months[i]), arrydata)}</span> 
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>`;
+  
+      // Append the card to the card container
+      cardContainer.innerHTML += cardHTML;
     }
   }
-  return cookieValue;
-}
 
-function IntervalData() { 
-  fetchData();
-  var dateTime= new Date();
+  // Function to calculate percentage
+  function calculatePercentage(value, totalArray) {
+    const total = totalArray.length;  // Total number of elements
+    return ((value / total) * 100).toFixed(2) + '%';  // Calculate and return percentage
+  }
 
-  // return the time
-  var time = dateTime.toLocaleTimeString();
+  // Function to count occurrences of an element in an array
+  function count(arr, element) {
+    return arr.filter(ele => ele == element).length;
+  }
 
-  document.getElementById("hTime").innerHTML = time;
+  // Function to get CSRF token from cookies
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 
-  
-  updateChartData();
+  // Function to run the fetchData and update the chart and cards at intervals
+  function IntervalData() {
+    fetchData();
+    var dateTime = new Date();
+    var time = dateTime.toLocaleTimeString();
+    document.getElementById("hTime").innerHTML = time;
+  }
 
+  // Set interval to fetch data every 2 seconds
+  var display = setInterval(IntervalData, 2000);
 
- }
-
-var display = setInterval(IntervalData, 2000);
 </script>
-
 
 {% endblock %}

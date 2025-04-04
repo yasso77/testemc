@@ -1,0 +1,56 @@
+{% extends 'master.html'%}
+{% block content %}
+
+<div class="pagetitle">
+    <h1>Audit-vs-Doctor</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">Managers</li>
+        <li class="breadcrumb-item active">Audit-vs-Doctor</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section dashboard">
+<div class="container mt-4">
+  <h2>Comparison of A and D Visits</h2>
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>File Serial</th>
+    <th>Patient Name</th>
+   
+        <th style="background-color:#78ADDEFF;">A Evaluation</th>
+        <th style="background-color: #78ADDEFF;">A Classification</th>
+        <th style="background-color:#738CA6;">D Evaluation</th>
+        
+        <th style="background-color:#738CA6;">D Classification</th>
+        <th>Match</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in comparison_data %}
+      <tr>
+        <td>{{ item.fileserial }}</td>
+        <td>{{ item.patient_name }}</td>
+       
+        <td>{{ item.a_evaluation }}</td>
+        <td>{{ item.a_classification }}</td>
+        <td>{{ item.d_evaluation }}</td>
+       
+        <td>{{ item.d_classification }}</td>
+        <td>
+          {% if item.match == '✅ Match' %}
+            <span class="badge bg-success">{{ item.match }}</span>
+          {% else %}
+            <span class="badge bg-danger">{{ item.match }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+  </section>
+{% endblock %}

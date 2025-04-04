@@ -230,7 +230,23 @@ class CenterView(ListView):
             
            
 
+        elif ScopeView == 'All-List':
+             # ✅ Ensure today_date is a proper date object
+                       
+            past_90_days_dateXX = today_date - timedelta(days=90)    
           
+
+            recent_patients = Patient.objects.annotate(
+                is_confirmed_today=Value('--'),
+                reschadule_data=Value('oo'),
+                # Ensure consistent date format for filtering
+                safe_expectedDate=Coalesce("expectedDate", Value(FALLBACK_DATE, output_field=DateField())),  
+                safe_attendanceDate=Coalesce("attendanceDate", Value(FALLBACK_DATE, output_field=DateField()))  
+            ).filter(
+                createdDate__gte=past_90_days_dateXX,
+                isDeleted=False
+            ).distinct()
+              
             # get all patients who should who their follow update is today or 3 days in future
         elif ScopeView=='Follow-Up':
             # expected-confirmation-followup will comeafter 3 days from now
