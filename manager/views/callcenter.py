@@ -24,7 +24,11 @@ class CallCenterView(ListView):
     @login_required
     def addNewPatient(request):        
         # Generate reservation code
-        username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
+        #username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
+        
+        username_parts = request.user.username.split('_')
+        username_prefix = ''.join([part[0].upper() for part in username_parts if part])
+
         
                
         latest_code = Patient.objects.filter(

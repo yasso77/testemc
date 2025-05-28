@@ -53,7 +53,7 @@ class ORMPatientsHandling():
             patientvisits__visitdate=today,
             patientvisits__visittype='A'
         ).distinct()
-        print(patients_with_d_visit_today.query)
+        #print(patients_with_d_visit_today.query)
         return patients_with_d_visit_today         
     
     def getPatientsTodayWithVisitStatus(self):

@@ -98,9 +98,9 @@ class DoctorView(ListView):
         if request.method == 'POST':
             txtpatientid = request.POST.get('hdfpatientid')
             userID = request.user  # Static doctor ID for now; replace with actual data.
-            txtdiagnosis = request.POST.get('Diagnosis')
+            #txtdiagnosis = request.POST.get('Diagnosis')
             EvaulDegree = request.POST.get('gridRadios')
-            txtRemarks = request.POST.get('txtRemarks')
+            #txtRemarks = request.POST.get('txtRemarks')
             hdfclassifiedID = request.POST.get('selectedOption')       
 
             patient = Patient.objects.get(pk=txtpatientid)
@@ -113,12 +113,12 @@ class DoctorView(ListView):
             data = PatientVisits(
                 patientid=patient,
                 visittype='A',
-                diagnosis=txtdiagnosis,
+                #diagnosis=txtdiagnosis,
                 evaluationeegree=EvaulDegree,
                 classifiedID=objclassifiedID,
                 visitdate=visit_date,
                 doctorid=userID,
-                reasonforvisit=txtRemarks,
+                #reasonforvisit=txtRemarks,
                 createdate=visit_date,
             )
             data.save()
