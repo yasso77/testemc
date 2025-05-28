@@ -29,6 +29,7 @@ urlpatterns = [
     path('liveReportDegree', ReportView.LiveDegreeReport, name='liveReportDegree'),
     path('LiveEvulationReport', ReportView.ajaxReportChartEvlDegree, name='LiveEvulationReport'),
     path('compare-visits/', ReportView.compare_visits, name='compare_visits'),
+    path('patient-report/', ReportView.patient_report_view, name='patient_report'),
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),

@@ -1,0 +1,129 @@
+{% extends 'master.html'%}
+{% block content %}
+
+<div class="pagetitle">
+    <h1>Patient Report</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">ٌReports</li>
+        <li class="breadcrumb-item active">Patient Report</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+  <section class="section dashboard">
+
+
+<form method="get" class="container my-4 p-3 border rounded bg-light">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label for="date_from" class="form-label">From:</label>
+      <input type="date" name="date_from" id="date_from" value="{{ date_from }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <label for="date_to" class="form-label">To:</label>
+      <input type="date" name="date_to" id="date_to" value="{{ date_to }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <label for="date_field" class="form-label">Filter by:</label>
+      <select name="date_field" id="date_field" class="form-select">
+        <option value="createdDate" {% if date_field == "createdDate" %}selected{% endif %}>Created Date</option>
+        <option value="attendanceDate" {% if date_field == "attendanceDate" %}selected{% endif %}>Attendance Date</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="city" class="form-label">City:</label>
+      <select name="city" id="city" class="form-select">
+        <option value="">All</option>
+        {% for city in cities %}
+          <option value="{{ city.id }}" {% if city_id|add:'' == city.id|stringformat:"s" %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="agent" class="form-label">Agent:</label>
+      <select name="agentID" id="agent" class="form-select">
+        <option value="">All</option>
+        {% for agent in agents %}
+          <option value="{{ agent.id }}" {% if agent_id|add:'' == agent.id|stringformat:"s" %}selected{% endif %}>{{ agent }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="lead_source" class="form-label">Lead Source:</label>
+     <select name="leadSource" id="lead_source" class="form-select">
+  <option value="">All</option>
+  {% for key, label in lead_sources.items %}
+    <option value="{{ key }}" {% if lead_source == key %}selected{% endif %}>{{ label }}</option>
+  {% endfor %}
+</select>
+
+    </div>
+
+    <div class="col-md-6 d-flex justify-content-between mt-3">
+      <button type="submit" class="btn btn-primary">Filter</button>
+      <button type="submit" name="export" value="excel" class="btn btn-success">Export Excel</button>
+    </div>
+  </div>
+</form>
+
+<hr>
+
+<table class="table table-striped" style="font-size: smaller;">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Patient Name</th>
+            <th>Mobile</th>
+            <th>Lead Source</th>
+            <th>Suffered Case</th>
+            <th>City</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            
+            <th>Attendance Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for patient in page_obj %}
+        <tr>
+            <td>{{ patient.reservationCode }}</td>
+            <td>{{ patient.fullname }}</td>
+            <td>{{ patient.mobile }}</td>
+            <td>{{ patient.leadSource }}</td>
+             <td>{{ patient.sufferedcase }}</td>
+            <td>{{ patient.city }}</td>
+            <td>{{ patient.createdBy }}</td>
+            <td>{{ patient.createdDate|date:"Y-m-d H:i" }}</td>
+            <td>{{ patient.attendanceDate|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No patients found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+  <span class="step-links">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">&laquo; first</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">previous</a>
+    {% endif %}
+
+    <span class="current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% comment %} {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">last &raquo;</a>
+    {% endif %} {% endcomment %}
+  </span>
+</div>
+
+  </section>
+{% endblock %}

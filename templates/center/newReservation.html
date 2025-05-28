@@ -418,7 +418,7 @@
         <div id="form-error" class="alert alert-danger d-none"></div>
 
         <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
-            <button type="submit" class="btn btn-primary">Create Reservation</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary">Create Reservation</button>
             <button type="reset" class="btn btn-secondary">Reset</button>
         </div>
     </div>
@@ -436,6 +436,7 @@
         let wearingConductError = document.getElementById('wearingconduct-error');
         let rideGlassError = document.getElementById('rideglass-error');
         let formError = document.getElementById('form-error');
+        let submitBtn = document.getElementById('submitBtn');
     
         // Clear previous errors
         wearingConductError.textContent = "";
@@ -458,6 +459,12 @@
             formError.textContent = "There are errors in the form. Please fix them before submitting.";
             formError.classList.remove('d-none');
             event.preventDefault(); // Prevent form submission
+        }
+
+        else {
+            // Disable the button to prevent double click
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting...'; // Optional: Change button text
         }
     });
     </script>
