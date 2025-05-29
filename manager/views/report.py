@@ -178,18 +178,22 @@ class ReportView(ListView):
             ws.title = "Patients Report"
 
             # English column headers
-            headers = ['Code', 'Name', 'Mobile','Suffered Case' 'City', 'Agent', 'Lead Source', 'Created Date', 'Attendance Date']
+            headers = ['Code','File Serial', 'Name', 'Mobile','Lead Source','Suffered Case', 'City','Created By','Created Date', 'Attendance Date']
             ws.append(headers)
 
             for p in patients:
                 ws.append([
                     p.reservationCode,
+                    p.fileserial,
                     p.fullname,
                     p.mobile,
-                    p.sufferedcase,
-                    p.city.cityName if p.city else '',
-                    p.agentID.AgentCompany if p.agentID else '',
                     p.leadSource,
+                    str(p.sufferedcase),
+                    
+                    p.city.cityName if p.city else '',
+                    str(p.createdBy),
+                    #p.agentID.AgentCompany if p.agentID else '',
+                    
                     localtime(p.createdDate).strftime('%Y-%m-%d %H:%M') if p.createdDate else '',
                     p.attendanceDate.strftime('%Y-%m-%d') if p.attendanceDate else '',
                 ])
@@ -212,6 +216,12 @@ class ReportView(ListView):
         page_obj = paginator.get_page(page_number)
         
         leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call'),('Instagram','Instagram'),('Center','Center')]
+        
+        # Clean query string without 'page'
+        get_params = request.GET.copy()
+        if 'page' in get_params:
+            get_params.pop('page')
+        query_string = get_params.urlencode()
 
         context = {
             'page_obj': page_obj,
@@ -220,10 +230,11 @@ class ReportView(ListView):
             'date_field': date_field,
             'date_from': date_from,
             'date_to': date_to,
-            'city_id': city_id,
-            'agent_id': agent_id,
-            'lead_source': lead_source,
+            'city_id': str(city_id) if city_id else '',
+            'agent_id': str(agent_id) if agent_id else '',
+            'lead_source': lead_source or '',
             'lead_sources': dict(leadSource_Choices),  # This is important
+            'query_string': query_string,
         }
 
         return render(request, 'reports/export_patients_xl.html', context)

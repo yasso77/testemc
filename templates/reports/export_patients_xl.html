@@ -37,7 +37,9 @@
       <select name="city" id="city" class="form-select">
         <option value="">All</option>
         {% for city in cities %}
-          <option value="{{ city.id }}" {% if city_id|add:'' == city.id|stringformat:"s" %}selected{% endif %}>{{ city }}</option>
+         <option value="{{ city.id }}" {% if city_id == city.id|stringformat:"s" %}selected{% endif %}>
+
+
         {% endfor %}
       </select>
     </div>
@@ -76,6 +78,7 @@
     <thead>
         <tr>
             <th>Code</th>
+            <th>File Serial</th>
             <th>Patient Name</th>
             <th>Mobile</th>
             <th>Lead Source</th>
@@ -91,6 +94,7 @@
         {% for patient in page_obj %}
         <tr>
             <td>{{ patient.reservationCode }}</td>
+            <td>{{ patient.fileserial }}</td>
             <td>{{ patient.fullname }}</td>
             <td>{{ patient.mobile }}</td>
             <td>{{ patient.leadSource }}</td>
@@ -108,21 +112,50 @@
     </tbody>
 </table>
 <div class="pagination">
-  <span class="step-links">
+  {% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+
     {% if page_obj.has_previous %}
-      <a href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">&laquo; first</a>
-      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">previous</a>
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}&page=1">&laquo; First</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
     {% endif %}
 
-    <span class="current">
-      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    </span>
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+        {% if num == page_obj.number %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
 
-    {% comment %} {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">next</a>
-      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode|safe|cut:'page='|cut:page_obj.number|stringformat:'s' }}{% endif %}">last &raquo;</a>
-    {% endif %} {% endcomment %}
-  </span>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+      <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
+
 </div>
 
   </section>
