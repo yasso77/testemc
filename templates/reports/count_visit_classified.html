@@ -1,0 +1,97 @@
+{% extends 'master.html'%}{% load static%}
+{% load custom_filters %}
+
+   {% block header %}
+ 
+    
+  <link rel="stylesheet" href="{% static 'assets/css/doctorExam.css' %}">
+
+
+  {% endblock %}
+{% block content %}
+
+
+<style>
+  .circle-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    color: white;
+    font-weight: 900;
+    font-size: 1.25rem;
+  }
+</style>
+<div class="pagetitle">
+    <h1>Patient Visits Report</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">ٌReports</li>
+        <li class="breadcrumb-item active">Patients Visit Report</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+
+<section class="section dashboard">
+
+  <form method="get" class="container my-4 p-3 border rounded bg-light">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label for="date_from" class="form-label">From:</label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label for="date_to" class="form-label">To:</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </div>
+  </form>
+
+  <hr>
+
+<h2>Total Visits: 
+  <span class="rectangle-badge bg-primary px-3 py-1 text-white fw-bold">
+    {{ total_visits }}
+  </span>
+</h2>
+
+
+
+<table class="table table-striped mt-4" style="width: 50%;">
+  <thead>
+    <tr>
+      <th>Classified Option</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in classified_counts %}
+      {% with category_name=row.classifiedID__classifiedCategory|default_if_none:"" %}
+        {% with category_class=category_colors|get_item:category_name|default:"bg-secondary" %}
+          <tr>
+            <td  style="font-weight: bold; width: 75%;">{{ category_name }}</td>
+            <td>
+              <span class="circle-badge {{ category_class }}">
+                {{ row.count }}
+              </span>
+            </td>
+          </tr>
+        {% endwith %}
+      {% endwith %}
+    {% empty %}
+      <tr><td colspan="2">No data found for selected range.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
+
+</section>
+{% endblock %}

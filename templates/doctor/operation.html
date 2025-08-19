@@ -1,0 +1,234 @@
+{% extends 'master.html'%}
+
+{% block content %}
+<style>
+  .container {
+    width: 90%;
+    max-width: 1000px;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 15px;
+    direction: rtl;
+  }
+
+  /* Search Bar Container */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 25px 0;
+}
+
+/* Input Field */
+.search-bar input {
+  width: 300px;
+  padding: 12px 16px;
+  font-size: 18px;
+  border: 1px solid #CBD5E1;  /* Light gray border */
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar input:focus {
+  border-color: #2563EB; /* Corporate Blue */
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+/* Search Button */
+.search-bar button {
+  padding: 12px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  background: #2563EB;   /* Corporate Blue */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.search-bar button:hover {
+  background: #1E40AF;   /* Darker Blue */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+  /* Loader */
+  .loader {
+    display: none;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #195a7a;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+/* General Page Background */
+body {
+  background: #F1F5F9;  /* Light gray */
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Top bar */
+.top-bar {
+  background: #1E293B;  /* Dark navy */
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-radius: 10px;
+}
+.top-bar .percent {
+  color: #D97706; /* Gold */
+  font-size: 42px;
+}
+
+/* Middle section (Patient Info) */
+.middle-bar {
+  background: #334155;  /* Slate gray */
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.patient-info {
+  background: #475569;  /* Subtle gray-blue */
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin: 5px;
+  color: white;
+}
+
+/* Bottom section (buttons centered) */
+.bottom {
+  display: flex;
+  justify-content: center;   /* Center horizontally */
+  gap: 40px;                 /* Space between buttons */
+  margin-top: 40px;
+}
+
+.bottom button {
+  border: none;
+  border-radius: 10px;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  padding: 30px 60px;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.bottom button.green {
+  background: #10B981;  /* Emerald */
+}
+
+.bottom button.red {
+  background: #DC2626;  /* Business Red */
+}
+
+.bottom button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+
+</style>
+
+<div class="pagetitle">
+  <h1>Doctor Classification</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      <li class="breadcrumb-item">Doctor</li>
+      <li class="breadcrumb-item active">Doctor Classification</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="container">
+
+  <!-- 🔍 Modern Search Bar -->
+<div class="search-bar">
+  <input type="text" id="fileNumber" placeholder="اكتب رقم الملف أو امسحه">
+  <button onclick="searchPatient()">
+    بحث
+  </button>
+</div>
+
+
+    <!-- Loader -->
+    <div id="loader" class="loader"></div>
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div id="ratio">60/12</div>
+      <div class="percent" id="percent">20%</div>
+    </div>
+
+    <!-- Middle bar (Patient Info) -->
+    <div class="middle-bar" id="patient-info">
+      <div class="patient-info">اسم المريض: -</div>
+      <div class="patient-info">رقم الملف: -</div>
+      <div class="patient-info">العمر: -</div>
+    </div>
+
+    <!-- Bottom section (Buttons) -->
+    <div class="bottom">
+      <button class="green">عملية</button>
+      <button class="red">خسارة المريض</button>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function searchPatient() {
+    let fileNumber = document.getElementById("fileNumber").value.trim();
+    if (!fileNumber) {
+      alert("الرجاء إدخال رقم الملف");
+      return;
+    }
+
+    // Show loader
+    document.getElementById("loader").style.display = "block";
+
+    fetch(`/get_patient_info/${fileNumber}/`) // 🔹 Django endpoint
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("loader").style.display = "none";
+
+        // Update patient info
+        document.getElementById("patient-info").innerHTML = `
+          <div class="patient-info">اسم المريض: ${data.name}</div>
+          <div class="patient-info">رقم الملف: ${data.file_number}</div>
+          <div class="patient-info">العمر: ${data.age}</div>
+        `;
+
+        // Update ratio & percent if returned
+        if (data.ratio) document.getElementById("ratio").innerText = data.ratio;
+        if (data.percent) document.getElementById("percent").innerText = data.percent + "%";
+      })
+      .catch(error => {
+        document.getElementById("loader").style.display = "none";
+        alert("خطأ أثناء جلب البيانات");
+        console.error(error);
+      });
+  }
+</script>
+{% endblock %}

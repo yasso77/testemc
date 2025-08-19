@@ -159,10 +159,10 @@ class DoctorView(ListView):
 
         # Create the base filter dictionary
         filter_criteria = {
-            "createdate__gte": past_10_days_date,
+            #"createdate__gte": past_10_days_date,
             "patientid__fileserial__isnull": False,
             "visittype": visittype,
-            "doctorid": doctorUser,
+            #"doctorid": doctorUser,
         }
 
         # Conditionally add 'evaluationdegree' filter if scopeview is not None
@@ -237,3 +237,22 @@ class DoctorView(ListView):
                 six_six_count=Count(Case(When(evaluationeegree="6/6", then=1), output_field=IntegerField()))
             )
         )
+        
+        
+    def doctorOperation(request):
+        return render(
+            request,
+            'doctor/operation.html',           
+        )
+    @staticmethod
+    def get_patient_info(request, file_number):
+        # Example fake data - replace with your DB lookup
+        data = {
+            "name": "أحمد علي",
+            "file_number": file_number,
+            "age": 35,
+            "ratio": "60/12",
+            "percent": 20,
+        }
+        return JsonResponse(data)
+   

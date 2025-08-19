@@ -1,4 +1,5 @@
 from django.urls import include, path
+from manager.api.api import ReservePatientAPIView
 from manager.views.barcode import generate_barcode
 from manager.views.center import CenterView
 from manager.views.doctor import DoctorView
@@ -30,6 +31,10 @@ urlpatterns = [
     path('LiveEvulationReport', ReportView.ajaxReportChartEvlDegree, name='LiveEvulationReport'),
     path('compare-visits/', ReportView.compare_visits, name='compare_visits'),
     path('patient-report/', ReportView.patient_report_view, name='patient_report'),
+    path('visit-report/', ReportView.visit_report_view, name='visit_report'),
+    
+    path('api/reserve/', ReservePatientAPIView.as_view(), name='reserve-patient'),
+
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),
@@ -72,10 +77,15 @@ urlpatterns = [
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
     path('AuditEvaluation', DoctorView.auditPatientvisit, name='AuditEvaluation'),
     path('VisitstList/<str:visittype>/<str:scopeview>', DoctorView.getPatientVisits, name='VisitstList'),
+    path('DoctorOp', DoctorView.doctorOperation, name='DoctorOp'),
     
         
     path('get_classified_options/', DoctorView.get_classified_options, name='get_classified_options'),
     path("update_patient_visit/", DoctorView.update_patient_visit, name="update_patient_visit"),
+    path("get_patient_info/<str:file_number>/", DoctorView.get_patient_info, name="get_patient_info"),
+
+
+
 
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),

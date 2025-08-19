@@ -15,7 +15,7 @@ from django.http import HttpResponse
 from django.utils.timezone import localtime
 from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta
-
+from django.db.models import Count
 ormObj=ORMPatientsHandling()
 
 class ReportView(ListView):
@@ -227,6 +227,42 @@ class ReportView(ListView):
         }
 
         return render(request, 'reports/export_patients_xl.html', context)
+    
+   
+    def visit_report_view(request):
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        visits = PatientVisits.objects.all()
+
+        if start_date and end_date:
+            visits = visits.filter(visitdate__range=[start_date, end_date])
+
+        total_visits = visits.count()
+
+        classified_counts = (
+            visits.values('classifiedID__classifiedCategory')  # adjust field name as needed
+            .annotate(count=Count('classifiedID'))
+            .order_by('-count')
+        )
+        category_colors = {
+            'ok': 'bg-green text-dark',
+            'bad': 'bg-warning text-dark',
+            '++': 'bg-orange text-dark',
+            '6/6': 'bg-white text-dark',
+            'Surgery': 'bg-pink text-dark',
+            }
+
+        context = {
+            'total_visits': total_visits,
+            'classified_counts': classified_counts,
+            'start_date': start_date,
+            'end_date': end_date,
+            'category_colors': category_colors,
+            
+        }
+        return render(request, 'reports/count_visit_classified.html', context)
+
 
 
     

@@ -28,3 +28,8 @@ def dict_get(dictionary, key):
 def dict_key(d, key):
     """Fetch a dictionary value safely in Django templates."""
     return d.get(key, None)  # Default to None if key is not found
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key.lower())  # case-insensitive match
+
