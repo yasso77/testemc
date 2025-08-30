@@ -18,6 +18,7 @@
   align-items: center;
   gap: 10px;
   margin: 25px 0;
+  width: 100%;
 }
 
 /* Input Field */
@@ -90,7 +91,7 @@ body {
   border-radius: 10px;
 }
 .top-bar .percent {
-  color: #D97706; /* Gold */
+  color: #22BD44FF; /* Gold */
   font-size: 42px;
 }
 
@@ -114,6 +115,15 @@ body {
   color: white;
 }
 
+.btn-same {
+    width: 350px;       /* set the same width */
+    height: 80px;       /* set the same height */
+    font-size: 16px;    /* keep text size consistent */
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
 /* Bottom section (buttons centered) */
 .bottom {
   display: flex;
@@ -128,7 +138,7 @@ body {
   font-size: 32px;
   font-weight: bold;
   color: white;
-  padding: 30px 60px;
+
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -145,6 +155,13 @@ body {
   transform: scale(1.05);
   opacity: 0.9;
 }
+
+/* Disabled state (make gray) */
+  .btn-same:disabled {
+    background-color: gray !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
 
 
 </style>
@@ -165,7 +182,7 @@ body {
 
   <!-- 🔍 Modern Search Bar -->
 <div class="search-bar">
-  <input type="text" id="fileNumber" placeholder="اكتب رقم الملف أو امسحه">
+  <input type="text" style="width: 70%;" id="fileNumber" placeholder="اكتب رقم الملف أو   امسحه الباركود">
   <button onclick="searchPatient()">
     بحث
   </button>
@@ -176,13 +193,19 @@ body {
     <div id="loader" class="loader"></div>
 
     <!-- Top bar -->
+    <form method="post" action="{% url 'doctorPatientvisit' %}">
+  {% csrf_token %}
     <div class="top-bar">
-      <div id="ratio">60/12</div>
-      <div class="percent" id="percent">20%</div>
+      <div id="ratio">{{ratio}}</div>
+      <div class="percent" id="percent">{{precent}}%</div>
     </div>
+<br>
+    <input type="hidden" id="hdfpatientid" name="hdfpatientid" />
 
     <!-- Middle bar (Patient Info) -->
     <div class="middle-bar" id="patient-info">
+      
+
       <div class="patient-info">اسم المريض: -</div>
       <div class="patient-info">رقم الملف: -</div>
       <div class="patient-info">العمر: -</div>
@@ -190,45 +213,66 @@ body {
 
     <!-- Bottom section (Buttons) -->
     <div class="bottom">
-      <button class="green">عملية</button>
-      <button class="red">خسارة المريض</button>
+      <button name="btnOperation" disabled id="btnOperation" class="green btn-same">عملية</button>
+      <button name="btnBad" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
     </div>
-
+</form>
   </div>
-</section>
+</section><script>
+  async function searchPatient() {
+    const fileNumber = document.getElementById("fileNumber").value.trim();
+    const loader = document.getElementById("loader");
+    const patientInfoBox = document.getElementById("patient-info");
+    const btnOperation = document.getElementById("btnOperation");
+    const btnBad = document.getElementById("btnBad");
 
-<script>
-  function searchPatient() {
-    let fileNumber = document.getElementById("fileNumber").value.trim();
+    // disable buttons until data is confirmed
+    btnOperation.disabled = true;
+    btnBad.disabled = true;
+
     if (!fileNumber) {
-      alert("الرجاء إدخال رقم الملف");
+      alert("⚠️ الرجاء إدخال رقم الملف");
       return;
     }
 
-    // Show loader
-    document.getElementById("loader").style.display = "block";
+    try {
+      // Show loader
+      loader.style.display = "block";
+      patientInfoBox.innerHTML = ""; // Clear old info
 
-    fetch(`/get_patient_info/${fileNumber}/`) // 🔹 Django endpoint
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById("loader").style.display = "none";
+      // Fetch from Django endpoint
+      const response = await fetch(`/get_patient_info/${encodeURIComponent(fileNumber)}/`);
 
+      if (!response.ok) {
+        throw new Error("لم يتم العثور على المريض");
+      }
+
+      const data = await response.json();
+
+      if (data && Object.keys(data).length > 0) {
         // Update patient info
-        document.getElementById("patient-info").innerHTML = `
-          <div class="patient-info">اسم المريض: ${data.name}</div>
-          <div class="patient-info">رقم الملف: ${data.file_number}</div>
-          <div class="patient-info">العمر: ${data.age}</div>
+        patientInfoBox.innerHTML = `
+          <div class="patient-info"><strong>اسم المريض:</strong> ${data.name || "-"}</div>
+          <div class="patient-info"><strong>رقم الملف:</strong> ${data.fileserial || "-"}</div>
+          <div class="patient-info"><strong>العمر:</strong> ${data.age || "-"}</div>
         `;
 
-        // Update ratio & percent if returned
-        if (data.ratio) document.getElementById("ratio").innerText = data.ratio;
-        if (data.percent) document.getElementById("percent").innerText = data.percent + "%";
-      })
-      .catch(error => {
-        document.getElementById("loader").style.display = "none";
-        alert("خطأ أثناء جلب البيانات");
-        console.error(error);
-      });
+        // Fill hidden field
+        document.getElementById("hdfpatientid").value = data.patientID || "";
+
+        // Enable buttons since data exists
+        btnOperation.disabled = false;
+        btnBad.disabled = false;
+      } else {
+        throw new Error("⚠️ لا توجد بيانات لهذا المريض");
+      }
+    } catch (error) {
+      alert(error.message || "حدث خطأ أثناء جلب البيانات");
+      console.error(error);
+    } finally {
+      loader.style.display = "none";
+    }
   }
 </script>
+
 {% endblock %}

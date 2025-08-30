@@ -34,6 +34,8 @@ urlpatterns = [
     path('visit-report/', ReportView.visit_report_view, name='visit_report'),
     
     path('api/reserve/', ReservePatientAPIView.as_view(), name='reserve-patient'),
+    
+    path('doctorStats', ReportView.doctors_stats, name='doctorStats'),
 
 
     # PatientView
@@ -76,8 +78,11 @@ urlpatterns = [
     # DoctorView
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
     path('AuditEvaluation', DoctorView.auditPatientvisit, name='AuditEvaluation'),
+    path('doctorPatientvisit', DoctorView.doctorPatientvisit, name='doctorPatientvisit'),
     path('VisitstList/<str:visittype>/<str:scopeview>', DoctorView.getPatientVisits, name='VisitstList'),
+    path('AuditEvaluation', DoctorView.doctorPatientvisit, name='AuditEvaluation'),
     path('DoctorOp', DoctorView.doctorOperation, name='DoctorOp'),
+    
     
         
     path('get_classified_options/', DoctorView.get_classified_options, name='get_classified_options'),

@@ -114,14 +114,14 @@
           {% if request.user|in_group:"Doctors" or request.user|in_group:"Admin" %}
           <li>
            
-            <a href="{%url 'DoctorEvaluation'%}">
+            <a href="{%url 'DoctorOp'%}">
               <i class="bi bi-circle"></i><span>Doctor Examination</span>
             </a>
           </li>
 
           <li>
             <a href="{%url 'VisitstList' 'D' 'None' %}">
-              <i class="bi bi-circle"></i><span>Doctors List </span>
+              <i class="bi bi-circle"></i><span>D/Patients List </span>
             </a>
           </li>  
           {%endif%} 
@@ -135,7 +135,7 @@
 
           <li>
             <a href="{%url 'VisitstList' 'A' 'None' %}">
-              <i class="bi bi-circle"></i><span>Audit List </span>
+              <i class="bi bi-circle"></i><span>A/Patients List </span>
             </a>
           </li>  
           {%endif%}   
@@ -163,6 +163,13 @@
               <i class="bi bi-circle"></i><span>Patients Visits</span>
             </a>
           </li>
+
+          <li>
+            <a href="{%url 'doctorStats'%}">
+              <i class="bi bi-circle"></i><span>Doctors Stats</span>
+            </a>
+          </li>
+
           <li>
             <a href="{%url 'liveReportDegree'%}">
               <i class="bi bi-circle"></i><span>Live Report</span>

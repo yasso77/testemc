@@ -1,0 +1,98 @@
+{% extends 'master.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <form method="POST" action="{% url 'search_by_file' %}" style="margin-bottom:20px;">
+  {% csrf_token %}
+  <label for="fileSerial">Search by File Serial:</label>
+  <input type="text" name="fileSerial" id="fileSerial" placeholder="Enter file serial...">
+  <button type="submit">Search</button>
+</form>
+  <!-- Patient Header -->
+  <div class="card shadow-lg mb-4">
+    <div class="card-body d-flex align-items-center">
+      <img src="{{ patient.image.url }}" class="rounded-circle me-3" width="100" height="100" alt="Patient Photo">
+      <div>
+        <h3>{{ patient.fullname }}</h3>
+        <p class="mb-1"><strong>File Number:</strong> {{ patient.fileserial }}</p>
+        <p class="mb-1"><strong>Gender:</strong> {{ patient.get_gender_display }}</p>
+        <p class="mb-1"><strong>Mobile:</strong> {{ patient.mobile }}</p>
+        <p class="mb-1"><strong>Email:</strong> {{ patient.email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="visits-tab" data-bs-toggle="tab" href="#visits" role="tab">Visits</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="calls-tab" data-bs-toggle="tab" href="#calls" role="tab">Calls</a>
+    </li>
+  </ul>
+
+  <!-- Tab Content -->
+  <div class="tab-content mt-3">
+    <!-- Visits Tab -->
+    <div class="tab-pane fade show active" id="visits" role="tabpanel">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Doctor</th>
+            <th>Reason</th>
+            <th>Diagnosis</th>
+            <th>Treatment</th>
+            <th>Evaluation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in visits %}
+          <tr>
+            <td>{{ v.visitdate }}</td>
+            <td>{{ v.doctorid.get_full_name }}</td>
+            <td>{{ v.reasonforvisit }}</td>
+            <td>{{ v.diagnosis }}</td>
+            <td>{{ v.treatment }}</td>
+            <td>{{ v.evaluationeegree }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center">No visits found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Calls Tab -->
+    <div class="tab-pane fade" id="calls" role="tabpanel">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Track Type</th>
+            <th>Outcome</th>
+            <th>Remarks</th>
+            <th>Next Follow-up</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in calls %}
+          <tr>
+            <td>{{ c.createdDate }}</td>
+            <td>{{ c.trackType }}</td>
+            <td>{{ c.outcome }}</td>
+            <td>{{ c.remarks }}</td>
+            <td>{{ c.nextFollow }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center">No call records found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

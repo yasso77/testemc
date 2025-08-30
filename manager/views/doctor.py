@@ -140,7 +140,7 @@ class DoctorView(ListView):
 
         return render(
             request,
-            'center/auditPatientVisit.html',
+            'center/auditPatientVisit_SEC.html',
             {
                 'patients': patientList,
                 'Total': patientcount,
@@ -162,7 +162,7 @@ class DoctorView(ListView):
             #"createdate__gte": past_10_days_date,
             "patientid__fileserial__isnull": False,
             "visittype": visittype,
-            #"doctorid": doctorUser,
+            "doctorid": doctorUser,
         }
 
         # Conditionally add 'evaluationdegree' filter if scopeview is not None
@@ -172,7 +172,27 @@ class DoctorView(ListView):
         # Apply the filters to the queryset
         patientList = PatientVisits.objects.filter(**filter_criteria).select_related('patientid', 'classifiedID')
         
-        classfications_options = ClassficationsOptions.objects.values('classifiedCategory').distinct()        
+        
+                # Example categories you want to exclude
+        excluded_categories = ["OK", "6/6", "++"]
+        classfications_options = []
+        
+        
+
+        if visittype == "D":
+            classfications_options = (
+                ClassficationsOptions.objects
+                .exclude(classifiedCategory__in=excluded_categories)
+                .values("classifiedCategory")
+                .distinct()
+            )
+        else:
+            classfications_options = (
+                ClassficationsOptions.objects
+                .values("classifiedCategory")
+                .distinct()
+            )        
+             
               
 
         return render(
@@ -240,19 +260,126 @@ class DoctorView(ListView):
         
         
     def doctorOperation(request):
+        
+        ratio, percent = DoctorView.get_doctor_stats(doctor_id= request.user)
+        context = {
+            'ratio': ratio,
+            'precent': percent,
+        }
+        
         return render(
             request,
-            'doctor/operation.html',           
+            'doctor/operation.html', context          
         )
+        
     @staticmethod
     def get_patient_info(request, file_number):
-        # Example fake data - replace with your DB lookup
+        # Try to fetch patient by file serial
+        patient = Patient.objects.filter(fileserial=file_number).first()
+        if not patient:
+            return JsonResponse({"error": "Patient not found"}, status=404)
+        
+        
+
         data = {
-            "name": "أحمد علي",
-            "file_number": file_number,
-            "age": 35,
-            "ratio": "60/12",
-            "percent": 20,
-        }
+            "name": patient.fullname,
+            "fileserial": patient.fileserial,
+            "age": patient.age, 
+            "gender": patient.get_gender_display() if patient.gender else None,
+            "patientID": patient.patientid,            
+            "reservation_code": patient.reservationCode,
+           
+            
+        }       
+
         return JsonResponse(data)
-   
+
+    
+       
+    @staticmethod
+    def get_doctor_stats(doctor_id):
+        today = datetime.datetime.now().date()  # current date with timezone support
+
+        # Total patients for this doctor today
+        total_patients = PatientVisits.objects.filter(
+            doctorid=doctor_id,
+            visitdate=today
+        ).count()
+
+        # Patients with evaluationDegree today
+        with_evaluation = PatientVisits.objects.filter(
+            doctorid=doctor_id,
+            visitdate=today
+        ).exclude(evaluationeegree__isnull=True).exclude(evaluationeegree="Bad").count()
+
+        ratio = f"{with_evaluation}/{total_patients}" if total_patients else "0/0"
+        percent = int(round((with_evaluation / total_patients) * 100, 0)) if total_patients else 0
+
+        return ratio, percent
+    
+    
+    
+    def doctorPatientvisit(request): 
+        classifiedOptions = ClassficationsOptions.objects.filter(isActive=True).values(
+            'classifiedID', 'classifiedCategory', 'optionClassified', 'isActive'
+        )
+        
+        classifiedOptionsJSON = json.dumps(list(classifiedOptions), cls=DjangoJSONEncoder)
+
+        if request.method == 'POST':
+            txtpatientid = request.POST.get('hdfpatientid')
+            userID = request.user  # Static doctor ID for now; replace with actual data.
+            #txtdiagnosis = request.POST.get('Diagnosis')
+            #check which button is pressed to specify the doctor chocen
+            if 'btnOperation' in request.POST:
+                EvaulDegree = 'Surgery'
+            else:
+                EvaulDegree = 'Bad'
+            
+            #txtRemarks = request.POST.get('txtRemarks')
+            #hdfclassifiedID = request.POST.get('selectedOption')       
+
+            patient = Patient.objects.get(pk=txtpatientid)
+            
+            visit_date = datetime.datetime.now().date()  # Use fully qualified datetime
+            #objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
+            
+
+            # Save the patient visit
+            data = PatientVisits(
+                patientid=patient,
+                visittype='D',
+                #diagnosis=txtdiagnosis,
+                evaluationeegree=EvaulDegree,
+                #classifiedID=objclassifiedID,
+                visitdate=visit_date,
+                doctorid=userID,
+                #reasonforvisit=txtRemarks,
+                createdate=visit_date,
+            )
+            data.save()
+
+            return render(
+                request,
+                "ConfirmMsg.html",
+                {
+                    'message': "Patient's Visit is added successfully",
+                    'returnUrl': 'DoctorOp',
+                    'btnText': 'Take New Patient'
+                },
+                status=200,
+            )
+
+        
+        patientList = ormObj.getPatientsAttendedToday()
+        patientcount = patientList.count()
+
+        return render(
+            request,
+            'center/auditPatientVisit.html',
+            {
+                'patients': patientList,
+                'Total': patientcount,
+                'classifiedOptionsJSON': classifiedOptionsJSON,
+            }
+        )

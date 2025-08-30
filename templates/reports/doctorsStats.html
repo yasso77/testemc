@@ -1,0 +1,120 @@
+{% extends 'master.html'%}
+{% block content %}
+
+<div class="pagetitle">
+    <h2>Doctors Performance Report</h2>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+      <li class="breadcrumb-item">Managers</li>
+      <li class="breadcrumb-item active">Doctors Stats</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+    <div class="container mt-4">
+
+      
+        <br>
+
+        <!-- Filter Form -->
+        <form method="get" class="row g-3 mb-4 ">
+            <div class="col-md-4">
+                <label for="from_date" class="form-label">From Date</label>
+                <input type="date" id="from_date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="to_date" class="form-label">To Date</label>
+                <input type="date" id="to_date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end justify-content-center">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+
+        <!-- Report Dates -->
+        <br>
+        <div class=" mb-3">
+            <strong>Report From:</strong> {{ from_date }} &nbsp; 
+            <strong>To:</strong> {{ to_date }}
+        </div>
+
+        <!-- Doctors Statistics Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-start">Doctor Name</th>
+                        <th>Total Visits</th>
+                        <th>Surgery</th>
+                        <th>Patient Loss</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in comparison_data %}
+                    <tr>
+                       <td class="text-start">{{ item.doctor_name }}</td>
+
+                        <td>{{ item.total_visits }}</td>
+                        <td>{{ item.surgery }}</td>
+                        <td>{{ item.patients_lose }}</td>
+                        <td>
+                            {% if item.stats == 'Good' %}
+                                <span class="badge bg-success">{{ item.stats }}</span>
+                            {% elif item.stats == 'Average' %}
+                                <span class="badge bg-warning text-dark">{{ item.stats }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ item.stats }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No data available for the selected period.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    <!-- Chart -->
+   <canvas id="doctorChart"></canvas>
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<script>
+  const data = {
+    labels: [{% for item in comparison_data %}"{{ item.doctor_name }}",{% endfor %}],
+    datasets: [
+      {
+        label: "Surgeries",
+        data: [{% for item in comparison_data %}{{ item.surgery }},{% endfor %}],
+        backgroundColor: "rgba(75, 192, 75, 0.7)"
+      },
+      {
+        label: "Bad Patients",
+        data: [{% for item in comparison_data %}{{ item.patients_lose }},{% endfor %}],
+        backgroundColor: "rgba(255, 99, 132, 0.7)",
+      }
+    ]
+  };
+
+  new Chart(document.getElementById("doctorChart"), {
+    type: "bar",
+    data: data,
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "top" } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
