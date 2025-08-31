@@ -275,15 +275,36 @@ class DoctorView(ListView):
     @staticmethod
     def get_patient_info(request, file_number):
         # Try to fetch patient by file serial
+        visits = []
         patient = Patient.objects.filter(fileserial=file_number).first()
         if not patient:
             return JsonResponse({"error": "Patient not found"}, status=404)
+        
+        
+        # Convert visits queryset to list of dicts
+        visits_qs = PatientVisits.objects.filter(patientid=patient).order_by("-visitdate")
+         # Debug: print the actual SQL query being executed
+        visits = [
+            {
+                "visit_id": v.visitid,
+                "visit_type": v.visittype,
+                "doctor": v.doctorid.get_full_name() if v.doctorid else None,
+                "visit_date": v.visitdate.strftime("%Y-%m-%d") if v.visitdate else None,
+                "evaluation_degree": v.evaluationeegree,
+                "evaluation_classified": v.classifiedID.optionClassified if v.classifiedID else None,
+
+                "visit_type":v.visittype,
+                
+            }
+            for v in visits_qs
+        ]
         
         
 
         data = {
             "name": patient.fullname,
             "fileserial": patient.fileserial,
+            "visits": visits,
             "age": patient.age, 
             "gender": patient.get_gender_display() if patient.gender else None,
             "patientID": patient.patientid,            

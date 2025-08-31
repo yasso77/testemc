@@ -478,6 +478,7 @@ class CenterView(ListView):
             .filter(
                 Q(reservationCode__icontains=strText) |
                 Q(mobile__icontains=strText) |  # Search in mobile
+                Q(fileserial__icontains=strText) |  # Search in file serial
                 Q(fullname__icontains=strText) |  # Search in name
                 Q(birthdate__icontains=strText) |  # Search in birthdate
                 Q(attendanceDate__icontains=strText),  # Search in attendance date

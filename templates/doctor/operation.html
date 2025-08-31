@@ -210,8 +210,24 @@ body {
       <div class="patient-info">رقم الملف: -</div>
       <div class="patient-info">العمر: -</div>
     </div>
+    <br>
+    <hr>
+<h4>الزيارات السابقة للمريض</h4>
+  <table dir="rtl" id="visits-table" class="table table-striped" style="width:100%; margin-top: 10px;">
+  <thead>
+    <tr>
+      <th>تاريخ الزيارة</th>
+      <th>دكتور</th>
+      <th>التقيم</th>
+      <th>تشخيص</th>
+      <th>نوع الكشف</th>
 
-    <!-- Bottom section (Buttons) -->
+    </tr>
+  </thead>
+  <tbody id="visits-body">
+    <tr><td colspan="5">Loading...</td></tr>
+  </tbody>
+</table>  <!-- Bottom section (Buttons) -->
     <div class="bottom">
       <button name="btnOperation" disabled id="btnOperation" class="green btn-same">عملية</button>
       <button name="btnBad" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
@@ -256,6 +272,23 @@ body {
           <div class="patient-info"><strong>رقم الملف:</strong> ${data.fileserial || "-"}</div>
           <div class="patient-info"><strong>العمر:</strong> ${data.age || "-"}</div>
         `;
+        let tbody = document.getElementById("visits-body");
+        tbody.innerHTML = "";
+
+        if (data.visits && data.visits.length > 0) {
+          data.visits.forEach(v => {
+            let row = `<tr>
+                          <td>${v.visit_date}</td>
+                          <td>${v.doctor || ""}</td>
+                          <td>${v.evaluation_degree || ""}</td>
+                           <td>${v.evaluation_classified || ""}</td>
+                            <td>${v.visit_type || ""}</td>
+                      </tr>`;
+            tbody.innerHTML += row;
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5">No visits found for this patient.</td></tr>`;
+        }
 
         // Fill hidden field
         document.getElementById("hdfpatientid").value = data.patientID || "";
