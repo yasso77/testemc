@@ -80,8 +80,8 @@ body {
 
 /* Top bar */
 .top-bar {
-  background: #1E293B;  /* Dark navy */
-  color: white;
+  background: #fffffF;  /* Dark navy */
+  color: black;
   font-size: 48px;
   font-weight: bold;
   display: flex;
@@ -91,14 +91,14 @@ body {
   border-radius: 10px;
 }
 .top-bar .percent {
-  color: #22BD44FF; /* Gold */
-  font-size: 42px;
+  font-weight: bold;
+  font-size: 60px;
 }
 
 /* Middle section (Patient Info) */
 .middle-bar {
-  background: #334155;  /* Slate gray */
-  color: white;
+  background: #fffffF;  /* Slate gray */
+  color: black;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -108,16 +108,25 @@ body {
   font-weight: bold;
 }
 .patient-info {
-  background: #475569;  /* Subtle gray-blue */
+  background: #F1F3F6FF;  /* Subtle gray-blue */
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   margin: 5px;
-  color: white;
+  color: black;
 }
 
 .btn-same {
-    width: 350px;       /* set the same width */
-    height: 80px;       /* set the same height */
+    width: 300px;       /* set the same width */
+    height: 70px;       /* set the same height */
+    font-size: 14px;    /* keep text size consistent */
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .btn-operation {
+    width: 400px;       /* set the same width */
+    height: 100px;       /* set the same height */
     font-size: 16px;    /* keep text size consistent */
     border: none;
     border-radius: 3px;
@@ -157,15 +166,14 @@ body {
 }
 
 /* Disabled state (make gray) */
-  .btn-same:disabled {
-    background-color: gray !important;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
+.btn-same:disabled,
+.btn-operation:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 
 </style>
-
+<!--
 <div class="pagetitle">
   <h1>Doctor Classification</h1>
   <nav>
@@ -175,14 +183,14 @@ body {
       <li class="breadcrumb-item active">Doctor Classification</li>
     </ol>
   </nav>
-</div><!-- End Page Title -->
+</div> End Page Title -->
 
 <section class="section">
   <div class="container">
 
   <!-- 🔍 Modern Search Bar -->
 <div class="search-bar">
-  <input type="text" style="width: 70%;" id="fileNumber" placeholder="اكتب رقم الملف أو   امسحه الباركود">
+  <input type="text" style="width: 70%;" id="fileNumber" placeholder="اكتب رقم الملف أو امسحه الباركود">
   <button onclick="searchPatient()">
     بحث
   </button>
@@ -208,33 +216,20 @@ body {
 
       <div class="patient-info">اسم المريض: -</div>
       <div class="patient-info">رقم الملف: -</div>
-      <div class="patient-info">العمر: -</div>
+      
     </div>
     <br>
     <hr>
-<h4>الزيارات السابقة للمريض</h4>
-  <table dir="rtl" id="visits-table" class="table table-striped" style="width:100%; margin-top: 10px;">
-  <thead>
-    <tr>
-      <th>تاريخ الزيارة</th>
-      <th>دكتور</th>
-      <th>التقيم</th>
-      <th>تشخيص</th>
-      <th>نوع الكشف</th>
 
-    </tr>
-  </thead>
-  <tbody id="visits-body">
-    <tr><td colspan="5">Loading...</td></tr>
-  </tbody>
-</table>  <!-- Bottom section (Buttons) -->
     <div class="bottom">
-      <button name="btnOperation" disabled id="btnOperation" class="green btn-same">عملية</button>
+      <button name="btnOperation" disabled id="btnOperation" class="green btn-operation">عملية</button>
       <button name="btnBad" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
     </div>
 </form>
   </div>
 </section><script>
+
+
   async function searchPatient() {
     const fileNumber = document.getElementById("fileNumber").value.trim();
     const loader = document.getElementById("loader");
@@ -270,25 +265,9 @@ body {
         patientInfoBox.innerHTML = `
           <div class="patient-info"><strong>اسم المريض:</strong> ${data.name || "-"}</div>
           <div class="patient-info"><strong>رقم الملف:</strong> ${data.fileserial || "-"}</div>
-          <div class="patient-info"><strong>العمر:</strong> ${data.age || "-"}</div>
+          
         `;
-        let tbody = document.getElementById("visits-body");
-        tbody.innerHTML = "";
-
-        if (data.visits && data.visits.length > 0) {
-          data.visits.forEach(v => {
-            let row = `<tr>
-                          <td>${v.visit_date}</td>
-                          <td>${v.doctor || ""}</td>
-                          <td>${v.evaluation_degree || ""}</td>
-                           <td>${v.evaluation_classified || ""}</td>
-                            <td>${v.visit_type || ""}</td>
-                      </tr>`;
-            tbody.innerHTML += row;
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="5">No visits found for this patient.</td></tr>`;
-        }
+        
 
         // Fill hidden field
         document.getElementById("hdfpatientid").value = data.patientID || "";
@@ -306,6 +285,20 @@ body {
       loader.style.display = "none";
     }
   }
+
+
+  document.querySelectorAll(".percent").forEach(el => {
+  let value = parseFloat(el.textContent);
+
+  if (value < 50) {
+    el.style.color = "red";      // 0–49
+  } else if (value < 80) {
+    el.style.color = "orange";   // 50–79
+  } else {
+    el.style.color = "green";    // 80–100
+  }
+});
+
 </script>
 
 {% endblock %}
