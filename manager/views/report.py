@@ -18,6 +18,15 @@ from datetime import datetime, timedelta
 from django.db.models import Count
 from django.shortcuts import render
 from django.db.models import Count, Q
+from django.contrib.auth.models import User
+
+context = {
+    'users': User.objects.filter(
+        is_active=True,
+        groups__name__iexact="call center"
+    ).distinct()
+}
+
 
 ormObj=ORMPatientsHandling()
 
@@ -143,6 +152,7 @@ class ReportView(ListView):
         city_id = request.GET.get('city')
         agent_id = request.GET.get('agentID')
         lead_source = request.GET.get('leadSource')
+        user_id = request.GET.get('users')
         export = request.GET.get('export')
 
         # Date filtering with proper range logic
@@ -173,6 +183,8 @@ class ReportView(ListView):
             patients = patients.filter(agentID_id=agent_id)
         if lead_source:
             patients = patients.filter(leadSource=lead_source)
+        if user_id:
+            patients = patients.filter(createdBy_id=user_id)
 
         # Excel export
         if export == 'excel':
@@ -214,7 +226,7 @@ class ReportView(ListView):
             return response
 
         # Pagination
-        paginator = Paginator(patients.order_by('-createdDate'), 25)
+        paginator = Paginator(patients.order_by('-createdDate'), 50)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -225,10 +237,16 @@ class ReportView(ListView):
         if 'page' in get_params:
             get_params.pop('page')
         query_string = get_params.urlencode()
+        
+       
 
         context = {
             'page_obj': page_obj,
+            'total_count': paginator.count,
             'cities': City.objects.all(),
+            'users': User.objects.filter(Q(groups__name__iexact="Call Center") | Q(groups__name__iexact="Reception")             
+                ).distinct().order_by('username'),
+
             'agents': AgentCompany.objects.all(),
             'date_field': date_field,
             'date_from': date_from,

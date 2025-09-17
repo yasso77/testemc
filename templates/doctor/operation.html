@@ -2,60 +2,58 @@
 
 {% block content %}
 <style>
+  body {
+    background: #F1F5F9;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+  }
+
   .container {
-    width: 90%;
-    max-width: 1000px;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    gap: 15px;
+    width: 95%;
+    max-width: 800px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     direction: rtl;
   }
 
-  /* Search Bar Container */
-.search-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 25px 0;
-  width: 100%;
-}
+  /* Search Bar */
+  .search-bar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
 
-/* Input Field */
-.search-bar input {
-  width: 300px;
-  padding: 12px 16px;
-  font-size: 18px;
-  border: 1px solid #CBD5E1;  /* Light gray border */
-  border-radius: 12px;
-  outline: none;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
+  .search-bar input {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 18px;
+    border: 1px solid #CBD5E1;
+    border-radius: 12px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
 
-.search-bar input:focus {
-  border-color: #2563EB; /* Corporate Blue */
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-}
+  .search-bar input:focus {
+    border-color: #2563EB;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
 
-/* Search Button */
-.search-bar button {
-  padding: 12px 30px;
-  font-size: 18px;
-  font-weight: bold;
-  background: #2563EB;   /* Corporate Blue */
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
+  .search-bar button {
+    margin-right: 10px;
+    padding: 14px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
 
-.search-bar button:hover {
-  background: #1E40AF;   /* Darker Blue */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-}
+  .search-bar button:hover {
+    background: #1E40AF;
+  }
 
   /* Loader */
   .loader {
@@ -68,173 +66,122 @@
     animation: spin 1s linear infinite;
     margin: auto;
   }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  @keyframes spin { 0%{transform:rotate(0)}100%{transform:rotate(360deg)} }
+
+  /* Patient Info Card */
+  .middle-bar {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
-/* General Page Background */
-body {
-  background: #F1F5F9;  /* Light gray */
-  font-family: "Segoe UI", Tahoma, sans-serif;
-}
+  .patient-info {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 8px 0;
+  }
 
-/* Top bar */
-.top-bar {
-  background: #1E293B;  /* Dark navy */
-  color: white;
-  font-size: 48px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-radius: 10px;
-}
-.top-bar .percent {
-  color: #22BD44FF; /* Gold */
-  font-size: 42px;
-}
+  /* Progress Circle */
+  .progress-circle {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 20px auto;
+  }
 
-/* Middle section (Patient Info) */
-.middle-bar {
-  background: #334155;  /* Slate gray */
-  color: white;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 20px;
-  font-weight: bold;
-}
-.patient-info {
-  background: #475569;  /* Subtle gray-blue */
-  padding: 10px 20px;
-  border-radius: 8px;
-  margin: 5px;
-  color: white;
-}
+  .progress-circle svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .progress-bg { fill: none; stroke: #E5E7EB; stroke-width: 12; }
+  .progress-value { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease; }
 
-.btn-same {
-    width: 350px;       /* set the same width */
-    height: 80px;       /* set the same height */
-    font-size: 16px;    /* keep text size consistent */
+  .progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .ratio {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 8px;
+  }
+
+  /* Action Buttons */
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    align-items: center; 
+  }
+
+  .bottom button {
+    width: 100%;
+    padding: 20px;
     border: none;
-    border-radius: 3px;
+    border-radius: 12px;
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
     cursor: pointer;
+    transition: 0.2s;
   }
+  .bottom button.green { background: #10B981; }
+  .bottom button.red { background: #DC2626; }
+  .bottom button:hover { opacity: 0.9; }
 
-/* Bottom section (buttons centered) */
-.bottom {
-  display: flex;
-  justify-content: center;   /* Center horizontally */
-  gap: 40px;                 /* Space between buttons */
-  margin-top: 40px;
-}
-
-.bottom button {
-  border: none;
-  border-radius: 10px;
-  font-size: 32px;
-  font-weight: bold;
-  color: white;
-
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.bottom button.green {
-  background: #10B981;  /* Emerald */
-}
-
-.bottom button.red {
-  background: #DC2626;  /* Business Red */
-}
-
-.bottom button:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-/* Disabled state (make gray) */
-  .btn-same:disabled {
-    background-color: gray !important;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-
+  /* Disabled */
+  .btn-same:disabled,
+  .btn-operation:disabled { cursor: not-allowed; opacity: 0.7; }
 </style>
 
-<div class="pagetitle">
-  <h1>Doctor Classification</h1>
-  <nav>
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-      <li class="breadcrumb-item">Doctor</li>
-      <li class="breadcrumb-item active">Doctor Classification</li>
-    </ol>
-  </nav>
-</div><!-- End Page Title -->
 
 <section class="section">
   <div class="container">
 
-  <!-- 🔍 Modern Search Bar -->
-<div class="search-bar">
-  <input type="text" style="width: 70%;" id="fileNumber" placeholder="اكتب رقم الملف أو   امسحه الباركود">
-  <button onclick="searchPatient()">
-    بحث
-  </button>
-</div>
-
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="fileNumber" placeholder="اكتب رقم الملف أو امسحه الباركود">
+      <button onclick="searchPatient()">بحث</button>
+    </div>
 
     <!-- Loader -->
     <div id="loader" class="loader"></div>
 
-    <!-- Top bar -->
+    <!-- Patient Info -->
     <form method="post" action="{% url 'doctorPatientvisit' %}">
-  {% csrf_token %}
-    <div class="top-bar">
-      <div id="ratio">{{ratio}}</div>
-      <div class="percent" id="percent">{{precent}}%</div>
-    </div>
-<br>
-    <input type="hidden" id="hdfpatientid" name="hdfpatientid" />
+      {% csrf_token %}
+      <div class="middle-bar" id="patient-info">
+        <div class="patient-info">اسم المريض: -</div>
+        <div class="patient-info">رقم الملف: -</div>
 
-    <!-- Middle bar (Patient Info) -->
-    <div class="middle-bar" id="patient-info">
-      
+        <!-- Circle Progress -->
+        <div class="progress-circle">
+          <svg>
+            <circle class="progress-bg" cx="70" cy="70" r="60"></circle>
+            <circle class="progress-value" cx="70" cy="70" r="60"></circle>
+          </svg>
+          <div class="progress-text" id="percent">{{precent}}%</div>
+        </div>
+        <div class="ratio" id="ratio">{{ratio}}</div>
+      </div>
 
-      <div class="patient-info">اسم المريض: -</div>
-      <div class="patient-info">رقم الملف: -</div>
-      <div class="patient-info">العمر: -</div>
-    </div>
-    <br>
-    <hr>
-<h4>الزيارات السابقة للمريض</h4>
-  <table dir="rtl" id="visits-table" class="table table-striped" style="width:100%; margin-top: 10px;">
-  <thead>
-    <tr>
-      <th>تاريخ الزيارة</th>
-      <th>دكتور</th>
-      <th>التقيم</th>
-      <th>تشخيص</th>
-      <th>نوع الكشف</th>
+      <input type="hidden" id="hdfpatientid" name="hdfpatientid" />
 
-    </tr>
-  </thead>
-  <tbody id="visits-body">
-    <tr><td colspan="5">Loading...</td></tr>
-  </tbody>
-</table>  <!-- Bottom section (Buttons) -->
-    <div class="bottom">
-      <button name="btnOperation" disabled id="btnOperation" class="green btn-same">عملية</button>
-      <button name="btnBad" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
-    </div>
-</form>
+      <!-- Buttons -->
+      <div class="bottom" >
+        <button name="btnOperation" disabled id="btnOperation" class="green btn-operation">عملية</button>
+        <button name="btnBad" style="width: 200px !important;" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
+      </div>
+    </form>
   </div>
-</section><script>
+</section>
+
+
+<script>
   async function searchPatient() {
     const fileNumber = document.getElementById("fileNumber").value.trim();
     const loader = document.getElementById("loader");
@@ -242,70 +189,91 @@ body {
     const btnOperation = document.getElementById("btnOperation");
     const btnBad = document.getElementById("btnBad");
 
-    // disable buttons until data is confirmed
     btnOperation.disabled = true;
     btnBad.disabled = true;
 
-    if (!fileNumber) {
-      alert("⚠️ الرجاء إدخال رقم الملف");
-      return;
-    }
+    if (!fileNumber) { alert("⚠️ الرجاء إدخال رقم الملف"); return; }
 
     try {
-      // Show loader
       loader.style.display = "block";
-      patientInfoBox.innerHTML = ""; // Clear old info
+      patientInfoBox.innerHTML = "";
 
-      // Fetch from Django endpoint
       const response = await fetch(`/get_patient_info/${encodeURIComponent(fileNumber)}/`);
-
-      if (!response.ok) {
-        throw new Error("لم يتم العثور على المريض");
-      }
-
+      if (!response.ok) throw new Error("لم يتم العثور على المريض");
       const data = await response.json();
 
       if (data && Object.keys(data).length > 0) {
-        // Update patient info
         patientInfoBox.innerHTML = `
           <div class="patient-info"><strong>اسم المريض:</strong> ${data.name || "-"}</div>
           <div class="patient-info"><strong>رقم الملف:</strong> ${data.fileserial || "-"}</div>
-          <div class="patient-info"><strong>العمر:</strong> ${data.age || "-"}</div>
+
+          <div class="progress-circle">
+            <svg>
+              <circle class="progress-bg" cx="70" cy="70" r="60"></circle>
+              <circle class="progress-value" cx="70" cy="70" r="60"></circle>
+            </svg>
+            <div class="progress-text" id="percent">{{precent}}%</div>
+          </div>
+          <div class="ratio" id="ratio">{{ratio}}</div>
         `;
-        let tbody = document.getElementById("visits-body");
-        tbody.innerHTML = "";
-
-        if (data.visits && data.visits.length > 0) {
-          data.visits.forEach(v => {
-            let row = `<tr>
-                          <td>${v.visit_date}</td>
-                          <td>${v.doctor || ""}</td>
-                          <td>${v.evaluation_degree || ""}</td>
-                           <td>${v.evaluation_classified || ""}</td>
-                            <td>${v.visit_type || ""}</td>
-                      </tr>`;
-            tbody.innerHTML += row;
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="5">No visits found for this patient.</td></tr>`;
-        }
-
-        // Fill hidden field
         document.getElementById("hdfpatientid").value = data.patientID || "";
-
-        // Enable buttons since data exists
         btnOperation.disabled = false;
         btnBad.disabled = false;
-      } else {
-        throw new Error("⚠️ لا توجد بيانات لهذا المريض");
-      }
+
+        // Update circle after loading
+        updateCircle(parseFloat("{{precent}}") || 0);
+      } else { throw new Error("⚠️ لا توجد بيانات لهذا المريض"); }
     } catch (error) {
       alert(error.message || "حدث خطأ أثناء جلب البيانات");
       console.error(error);
-    } finally {
-      loader.style.display = "none";
-    }
+    } finally { loader.style.display = "none"; }
   }
+
+  function updateCircle(percent) {
+    const circle = document.querySelector(".progress-value");
+    if (!circle) return;
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+
+    circle.style.strokeDasharray = circumference;
+    circle.style.strokeDashoffset = circumference;
+
+    const offset = circumference - (percent / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+
+    // Change color dynamically
+    if (percent < 50) {
+      circle.style.stroke = "#DC2626"; // red
+    } else if (percent < 80) {
+      circle.style.stroke = "#F97316"; // orange
+    } else {
+      circle.style.stroke = "#10B981"; // green
+    }
+
+    // Update text
+    document.getElementById("percent").innerText = percent + "%";
+  }
+
+  // Initialize on load
+  document.addEventListener("DOMContentLoaded", () => {
+    updateCircle(parseFloat("{{precent}}") || 0);
+  });
+
+  
 </script>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("fileNumber");
+    input.focus(); // cursor ready for scanning
+
+    // listen for Enter after scanning
+    input.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // stop form submitting
+        searchPatient(); // run search automatically
+      }
+    });
+  });
+</script>
 {% endblock %}
