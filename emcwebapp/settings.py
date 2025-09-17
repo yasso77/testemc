@@ -160,7 +160,7 @@ USE_TZ = True
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
-
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',  'https://sys.emc-lasik.com']
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 

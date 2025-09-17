@@ -18,6 +18,7 @@ from django.db.models import Q
 from manager.forms.CallCenterReservation import CCFormAddReservation
 from django.utils.timezone import make_aware, is_naive
 from django.db.models import F
+from django.views.decorators.csrf import csrf_exempt
 
 class CallCenterView(ListView):
     
@@ -506,7 +507,7 @@ class CallCenterView(ListView):
 
         return JsonResponse({'reservationsData': data})
 
-    
+    @csrf_exempt
     def validate_mobile(request):
         mobile = request.GET.get('mobile', None)
         if mobile:
