@@ -36,6 +36,8 @@ urlpatterns = [
     path('api/reserve/', ReservePatientAPIView.as_view(), name='reserve-patient'),
     
     path('doctorStats', ReportView.doctors_stats, name='doctorStats'),
+    
+    path("reports/patients/<int:doctor_id>/<str:patient_type>/<str:from_date>/<str:to_date>/", ReportView.patients_by_type, name="patients_by_type",),
 
 
     # PatientView

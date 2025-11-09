@@ -1,0 +1,31 @@
+
+<div class="container mt-4">
+    <h4>{{ title }}</h4>
+    <p><strong>From:</strong> {{ from_date }} — <strong>To:</strong> {{ to_date }}</p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Patient Name</th>
+                <th>Visit Date</th>
+                <th>Evaluation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in visits %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ v.patientid.fullname }}</td>
+                <td>{{ v.visitdate }}</td>
+                <td>{{ v.evaluationeegree }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No patients found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+</div>
+

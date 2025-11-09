@@ -1,0 +1,23 @@
+<h6>{{ title }}</h6>
+<table class="table table-striped table-sm">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Patient Name</th>
+            <th>Visit Date</th>
+            <th>Evaluation</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in visits %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ v.patientid.fullname }}</td>
+            <td>{{ v.visitdate }}</td>
+            <td>{{ v.evaluationeegree }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted">No patients found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>

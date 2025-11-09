@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.core.paginator import Paginator
 from manager.decorators import permission_required_with_redirect
 from django.contrib.auth.decorators import login_required
@@ -300,54 +300,89 @@ class ReportView(ListView):
     def doctors_stats(request):
         from_date = request.GET.get("from_date")
         to_date = request.GET.get("to_date")
+        doctor_id = request.GET.get("doctor")  # <-- new filter
 
-        # Base queryset filtered on VisitType = D
+        # Base queryset
         visits = PatientVisits.objects.filter(visittype="D")
 
-        # Date filtering if provided
+        # Apply date filter
         if from_date and to_date:
             visits = visits.filter(visitdate__range=[from_date, to_date])
 
-        # Aggregate per doctor
-        stats = visits.values("doctorid__username").annotate(
+        # Apply doctor filter
+        if doctor_id:
+            visits = visits.filter(doctorid=doctor_id)
+
+        # Aggregate stats
+        stats = visits.values("doctorid", "doctorid__username").annotate(
             total_visits=Count("visitid"),
             surgery=Count("visitid", filter=Q(evaluationeegree="Surgery")),
             patients_lose=Count("visitid", filter=Q(evaluationeegree="Bad")),
         )
 
-        # Add percentage calculation
+        # Build comparison data
         comparison_data = []
         for row in stats:
             surgery = row["surgery"]
             bad = row["patients_lose"]
             total = row["total_visits"]
 
-            # Example percentage / evaluation
             if total > 0:
-                good_percent = (surgery / total) * 100
+                surgery_percent = (surgery / total) * 100
+                bad_percent = (bad / total) * 100
             else:
-                good_percent = 0
+                surgery_percent = bad_percent = 0
 
-            if good_percent >= 70:
+            if surgery_percent >= 70:
                 status = "Good"
-            elif good_percent >= 40:
+            elif surgery_percent >= 40:
                 status = "Average"
             else:
                 status = "Bad"
 
             comparison_data.append({
+                "doctor_id": row["doctorid"],
                 "doctor_name": row["doctorid__username"],
                 "total_visits": total,
                 "surgery": surgery,
                 "patients_lose": bad,
                 "stats": status,
-                "surgery_percent": good_percent,
-                "bad_percent": (bad / total) * 100 if total > 0 else 0,
+                "surgery_percent": surgery_percent,
+                "bad_percent": bad_percent,
             })
+
+        # Get all doctors for dropdown
+        doctors = User.objects.filter(groups__name="Doctors") if hasattr(User, 'groups') else User.objects.all()
 
         return render(request, "reports/doctorsStats.html", {
             "comparison_data": comparison_data,
             "from_date": from_date,
             "to_date": to_date,
+            "doctors": doctors,
+    })
+        
+    def patients_by_type(request, doctor_id, patient_type, from_date, to_date):
+        visits = PatientVisits.objects.filter(
+            doctorid=doctor_id,
+            visittype="D",
+            visitdate__range=[from_date, to_date]
+        )
+
+        if patient_type == "surgery":
+            visits = visits.filter(evaluationeegree="Surgery")
+            title = "Surgery Patients"
+        elif patient_type == "loss":
+            visits = visits.filter(evaluationeegree="Bad")
+            title = "Lost Patients"
+        else:
+            visits = []
+            title = "Invalid Type"
+
+        # Return only the patient table, not the full layout
+        return render(request, "reports/_patientsTable.html", {
+            "visits": visits,
+            "title": title,
         })
+
+
     

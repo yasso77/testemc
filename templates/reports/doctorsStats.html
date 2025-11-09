@@ -1,5 +1,7 @@
 {% extends 'master.html'%}
 {% block content %}
+<!-- Bootstrap 5 (must be included once at the bottom of your template) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <div class="pagetitle">
     <h2>Doctors Performance Report</h2>
@@ -19,19 +21,36 @@
         <br>
 
         <!-- Filter Form -->
-        <form method="get" class="row g-3 mb-4 ">
-            <div class="col-md-4">
-                <label for="from_date" class="form-label">From Date</label>
-                <input type="date" id="from_date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
-            </div>
-            <div class="col-md-4">
-                <label for="to_date" class="form-label">To Date</label>
-                <input type="date" id="to_date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
-            </div>
-            <div class="col-md-4 d-flex align-items-end justify-content-center">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-            </div>
-        </form>
+       <form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+    <label for="from_date" class="form-label">From Date</label>
+    <input type="date" id="from_date" name="from_date" class="form-control" 
+           value="{{ request.GET.from_date }}" required>
+</div>
+
+<div class="col-md-3">
+    <label for="to_date" class="form-label">To Date</label>
+    <input type="date" id="to_date" name="to_date" class="form-control" 
+           value="{{ request.GET.to_date }}" required>
+</div>
+
+    <div class="col-md-3">
+        <label for="doctor" class="form-label">Doctor</label>
+        <select id="doctor" name="doctor" class="form-select">
+            <option value="">All Doctors</option>
+           {% for doc in doctors %}
+    <option value="{{ doc.id }}" {% if request.GET.doctor == doc.id|stringformat:"s" %}selected{% endif %}>
+        {{ doc.get_full_name|default:doc.username }}
+    </option>
+{% endfor %}
+
+        </select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end justify-content-center">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
 
         <!-- Report Dates -->
         <br>
@@ -56,10 +75,26 @@
                     {% for item in comparison_data %}
                     <tr>
                        <td class="text-start">{{ item.doctor_name }}</td>
+<td>{{item.total_visits}}</td>
+                     <td>
+    <a href="#" 
+       class="view-patients" 
+       data-url="{% url 'patients_by_type' item.doctor_id 'surgery' from_date to_date %}" 
+       data-title="Surgery Patients for {{ item.doctor_name }}">
+        {{ item.surgery }}
+    </a>
+</td>
+<td>
+    <a href="#" 
+       class="view-patients" 
+       data-url="{% url 'patients_by_type' item.doctor_id 'loss' from_date to_date %}" 
+       data-title="Lost Patients for {{ item.doctor_name }}">
+        {{ item.patients_lose }}
+    </a>
+</td>
 
-                        <td>{{ item.total_visits }}</td>
-                        <td>{{ item.surgery }}</td>
-                        <td>{{ item.patients_lose }}</td>
+
+
                         <td>
                             {% if item.stats == 'Good' %}
                                 <span class="badge bg-success">{{ item.stats }}</span>
@@ -82,10 +117,57 @@
     <!-- Chart -->
    <canvas id="doctorChart"></canvas>
   </div>
+
+
+<!-- Patient List Modal -->
+<div class="modal fade" id="patientsModal" tabindex="-1" aria-labelledby="patientsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+
+      <!-- Header -->
+      <div class="modal-header d-flex justify-content-between align-items-center bg-light border-bottom">
+        <h5 class="modal-title fw-semibold text-primary mb-0" id="patientsModalLabel">
+          Patients List
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-sm btn-primary d-flex align-items-center" id="printPatientsModal">
+            <i class="bi bi-printer me-1"></i> Print
+          </button>
+          <button type="button" 
+        class="btn btn-sm btn-danger d-flex align-items-center" 
+        data-bs-dismiss="modal" 
+        aria-label="Close" 
+        id="closePatientsModal">
+  <i class="bi bi-x-circle me-1"></i> Close
+</button>
+
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body bg-white">
+        <div id="patientsModalContent" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Optional Footer (for future actions) -->
+      <!--
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+      -->
+
+    </div>
+  </div>
+</div>
+
 </section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
   const data = {
@@ -115,6 +197,71 @@
       }
     }
   });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('patientsModal');
+    const modal = new bootstrap.Modal(modalEl);
+
+    // When user clicks to view patients
+    $(document).on('click', '.view-patients', function (e) {
+        e.preventDefault();
+
+        const url = $(this).data('url');
+        const title = $(this).data('title');
+
+        $('#patientsModalLabel').text(title);
+        $('#patientsModalContent').html(`
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Loading...</p>
+            </div>
+        `);
+
+        modal.show();
+
+        // Load content via AJAX
+        $.get(url, function (data) {
+            $('#patientsModalContent').html(data);
+        }).fail(function () {
+            $('#patientsModalContent').html('<div class="alert alert-danger">Failed to load data.</div>');
+        });
+    });
+
+    // 🖨️ Print button
+    $('#printPatientsModal').on('click', function () {
+        const content = document.getElementById('patientsModalContent').innerHTML;
+        const printWindow = window.open('', '_blank', 'width=900,height=600');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>${document.getElementById('patientsModalLabel').textContent}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body { padding: 20px; font-family: sans-serif; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+                        th { background-color: #f8f9fa; }
+                    </style>
+                </head>
+                <body>
+                    <h5>${document.getElementById('patientsModalLabel').textContent}</h5>
+                    ${content}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    });
+
+    // 🧹 Clean up modal backdrop and unlock page after closing
+    modalEl.addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('modal-open');
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(b => b.remove());
+    });
+});
 </script>
 
 {% endblock %}
