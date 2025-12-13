@@ -364,7 +364,23 @@ class DoctorView(ListView):
             
             visit_date = datetime.datetime.now().date()  # Use fully qualified datetime
             #objclassifiedID = get_object_or_404(ClassficationsOptions, pk=hdfclassifiedID)
+            already_exists  = PatientVisits.objects.filter(
+                patientid=patient,
+                doctorid=userID,
+                visitdate=visit_date
+            ).exists()
             
+            if already_exists:
+                return render(
+                request,
+                "Duplicated.html",
+                {
+                    'message': "This patient already has a visit added by you today.",
+                    'returnUrl': 'DoctorOp',
+                    'btnText': 'Back'
+                },
+                status=200,
+            )
 
             # Save the patient visit
             data = PatientVisits(

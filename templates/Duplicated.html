@@ -1,0 +1,55 @@
+{%extends 'master.html'%}
+<html>
+    <head>
+<title>Confirm Message</title>
+    </head>
+    <body>
+        {% block content %}
+        <div class="pagetitle">
+            <h1>Confirm Page</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item">Pages</li>
+                <li class="breadcrumb-item active">Duplicated Record</li>
+              </ol>
+            </nav>
+          </div>
+
+
+          <section class="section">
+           <div class="card">
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">Duplicated Record </h4>
+               <p>{{ message|safe }}</p>
+                <hr>
+                
+            
+              </div>
+
+              <div class="d-flex gap-2 mt-3 justify-content-center">
+
+
+                  <a href="{{returnUrl }}" target="{{target}}"  class="btn btn-primary">{{btnText}}</a>
+
+                  {% if returnUrl == 'centerNewreservation' or returnUrl == '/centerPatients/Attendance-Today/' %}
+
+
+                      <a target="_blank" href="{% url 'patientForm' patientid %}" class="btn btn-danger" >
+                     Print Form
+                      </a>
+
+                     
+                  {% endif %}
+
+
+              </div>
+              <br>
+              <br>
+              </div>
+        
+          </section>
+    {% endblock %}
+       
+    </body>
+</html>
