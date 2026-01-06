@@ -59,8 +59,10 @@ urlpatterns = [
      path('dashSearchOnPatient/',CenterView.dashSearchOnPatient,name='dashSearchOnPatient'),
     path('followup/<int:patientid>/', CenterView.follow_reservation, name='followup'),
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
-    path('centeredit_reservation/<int:patientid>/<str:scope>/', CenterView.edit_reservation, name='centeredit_reservation'),
+    path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
+    path("confirm/<int:patientid>/", CenterView.confirm_page,name="confirm_page"),
+
     
 
     # CallCenterView
@@ -74,7 +76,7 @@ urlpatterns = [
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
-    path('callCentersearchOnPatinet/',CenterView.centerSearchOnPatient,name='callCentersearchOnPatinet'),
+    path('callCentersearchOnPatinet/',CenterView.CallcenterSearchOnPatient,name='callCentersearchOnPatinet'),
     
 
     # DoctorView

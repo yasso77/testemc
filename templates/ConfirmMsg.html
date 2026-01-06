@@ -1,55 +1,41 @@
-{%extends 'master.html'%}
-<html>
-    <head>
-<title>Confirm Message</title>
-    </head>
-    <body>
-        {% block content %}
-        <div class="pagetitle">
-            <h1>Confirm Page</h1>
-            <nav>
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item">Pages</li>
-                <li class="breadcrumb-item active">Confirmation</li>
-              </ol>
-            </nav>
-          </div>
+{% extends 'master.html' %}
 
+{% block title %}Confirm Message{% endblock %}
 
-          <section class="section">
-           <div class="card">
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">Operation is done successfully </h4>
-               <p>{{ message|safe }}</p>
-                <hr>
-                
-            
-              </div>
+{% block content %}
+<div class="pagetitle">
+    <h1>Confirm Page</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">Home</li>
+        <li class="breadcrumb-item">Pages</li>
+        <li class="breadcrumb-item active">Confirmation</li>
+      </ol>
+    </nav>
+</div>
 
-              <div class="d-flex gap-2 mt-3 justify-content-center">
+<section class="section">
+    <div class="card">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">Operation is done successfully</h4>
+            <p>{{ message|safe }}</p>
+            <hr>
+        </div>
 
+        <div class="d-flex gap-2 mt-3 justify-content-center">
+            <a href="/centerPatients/Attendance-Today/" class="btn btn-primary">
+                Return to List
+            </a>
 
-                  <a href="{{returnUrl }}" target="{{target}}"  class="btn btn-primary">{{btnText}}</a>
+           {% if show_print %}
+    <a href="{% url 'patientForm' patientid %}" 
+       target="_blank" 
+       class="btn btn-success">
+        Print Form
+    </a>
+{% endif %}
 
-                  {% if returnUrl == 'centerNewreservation' or returnUrl == '/centerPatients/Attendance-Today/' %}
-
-
-                      <a target="_blank" href="{% url 'patientForm' patientid %}" class="btn btn-success" >
-                     Print Form
-                      </a>
-
-                     
-                  {% endif %}
-
-
-              </div>
-              <br>
-              <br>
-              </div>
-        
-          </section>
-    {% endblock %}
-       
-    </body>
-</html>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -330,7 +330,7 @@
                     {% endif %}
             
                     <td class="left">{{ condition }}</td>  {# Show all conditions from CONDITIONS_LIST #}
-                    {% with medical_history|get_item:condition as relation %}  {# Check if the condition exists in medical_history #}
+                    {% with medical_history|get_item:condition.conditionName as relation %}  {# Check if the condition exists in medical_history #}
                     <td >
                         <input type="radio" class="custom-radio" name="medical_conditions_{{ condition }}" value="self" 
                              {% if relation == "self" %} checked {% endif %}>

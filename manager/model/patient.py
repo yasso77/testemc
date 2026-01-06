@@ -135,7 +135,8 @@ class Patient(models.Model):
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.
     reservationCode = models.CharField( max_length=150, blank=False, null=True,verbose_name='Confirmation Code',error_messages='Reservation code is requiered')
-    fileserial = models.CharField( max_length=150, blank=False, null=True,verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
+    fileserial = models.CharField( max_length=150, blank=False, null=True,
+    verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
     reservationType=models.CharField(max_length=150,choices=reservations_CHOICES,verbose_name='Reservation Type',default=reservations_CHOICES[0][0],null=True)
     referral=models.CharField(max_length=150,choices=referral_CHOICES,verbose_name='Referral',null=True)
     leadSource=models.CharField(choices=leadSource_Choices,max_length=100, verbose_name='Lead Source',null=True, blank=True)

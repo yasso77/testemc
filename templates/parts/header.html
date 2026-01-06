@@ -24,7 +24,7 @@
 
       <form class="search-form d-flex align-items-center" method="GET" 
 
-      action="{% if request.user.groups.all.0.name == 'Call Center' %}{% url 'callCentersearchOnPatinet' %}{% elif request.user.groups.all.0.name == 'Reception' %}{% url 'centerSearchOnPatinet' %}{% else %}{% url 'callCentersearchOnPatinet' %}{% endif %}">
+      action="{% if request.user.groups.all.0.name == 'Call Center' %}{% url 'callCentersearchOnPatinet' %}{% elif request.user.groups.all.0.name == 'Reception' %}{% url 'centerSearchOnPatinet' %}{% else %}{% url 'centerSearchOnPatinet' %}{% endif %}">
 
      
 

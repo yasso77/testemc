@@ -2,7 +2,7 @@ from datetime import  date, datetime, time,  timedelta
 import datetime
 from io import BytesIO
 import string
-
+import re
 from urllib import request
 from django.shortcuts import render
 from django.urls import reverse
@@ -41,50 +41,36 @@ class CenterView(ListView):
         """Generate an incremented file serial in the format 'X-00001'."""
         # Generate a list of uppercase letters (A to Z)
         alphabet = list(string.ascii_uppercase)
+        pattern = re.compile(r'^([A-Z])-(\d+)')
+        latest_prefix = 'A'
+        latest_increment = 0
 
-        latest_fileserial = (
-            Patient.objects.filter(fileserial__isnull=False)
-            .order_by('-patientid')
-            .first()
-        )
-        
-        
+        # iterate instead of .first()
+        for fs in (
+            Patient.objects
+            .exclude(fileserial__isnull=True)
+            .exclude(fileserial='')
+            .order_by('-fileserial')
+            .values_list('fileserial', flat=True)
+        ):
+            fs = fs.strip()
+            match = pattern.match(fs)
+            if match:
+                latest_prefix = match.group(1)
+                latest_increment = int(match.group(2))
+                break   # ✅ FIRST VALID ONE ONLY
 
-        # Determine incrementing part
-        if latest_fileserial and latest_fileserial.fileserial:
-            latest_code_parts = latest_fileserial.fileserial.split('-')
-
-            if len(latest_code_parts) == 2:  # Ensure it follows the "X-00001" format
-                latest_prefix = latest_code_parts[0]  # Get current letter
-                latest_increment = int(latest_code_parts[1])  # Get numeric part
-
-                if latest_increment >= 99999:
-                    # Find the next letter in the alphabet
-                    if latest_prefix in alphabet:
-                        current_index = alphabet.index(latest_prefix)
-                        new_prefix = (
-                            alphabet[current_index + 1] if current_index < len(alphabet) - 1 else 'A'
-                        )
-                    else:
-                        new_prefix = 'A'  # Default to 'A' if invalid
-
-                    increment = 1  # Reset the numeric part
-                else:
-                    new_prefix = latest_prefix  # Keep the same prefix
-                    increment = latest_increment + 1
-            else:
-                new_prefix = 'A'  # Default prefix
-                increment = 1
-        else:
-            new_prefix = 'A'  # Start with 'A' if no records exist
+        # increment logic
+        if latest_increment >= 99999:
+            idx = alphabet.index(latest_prefix)
+            latest_prefix = alphabet[idx + 1]
             increment = 1
+        else:
+            increment = latest_increment + 1
 
-        # Format increment with leading zeros (5 digits)
-        increment_part = f"{increment:05d}"
-        fileCode = f"{new_prefix}-{increment_part}"
+        fileCode = f"{latest_prefix}-{increment:05d}"
 
         return fileCode
-
 
     @login_required
     def addNewReservation(request):       
@@ -106,11 +92,17 @@ class CenterView(ListView):
                     patient.age = today.year - birthdate.year - (
                         (today.month, today.day) < (birthdate.month, birthdate.day)
                     )
-                patient.fileserial = latest_fileserial  # Assign generated file serial
+                #patient.fileserial = latest_fileserial  # Assign generated file serial
+                 # 🔐 Safe fileserial assignment
+               
                 patient.createdBy = request.user  # Assign logged-in user
                 patient.reservedBy = request.user  # Assign logged-in user
                 patient.callDirection = None
-                patient.leadSource='Center'               
+                patient.leadSource='Center'  
+                
+                while Patient.objects.filter(fileserial=patient.fileserial).exists():
+                    patient.fileserial = CenterView.generateFileSerial()
+             
                 patient.save()
 
                 # Initialize an empty list to store the conditions and relations
@@ -146,17 +138,9 @@ class CenterView(ListView):
                     #     print(f"Skipping invalid condition: {condition_obj}")
 
 
-                return render(
-                    request,
-                    "ConfirmMsg.html",
-                    {
-                        'message': 'The Reservation is Added Successfully.',
-                        'returnUrl': 'centerNewreservation',
-                        'btnText': 'Add New Reservation',
-                        'patientid':patient.patientid
-                    },
-                    status=200,
-                )
+                
+                return redirect(
+                    reverse("confirm_page", kwargs={"patientid": patient.patientid}))
             else:
                 print(centerform.errors)
 
@@ -181,7 +165,7 @@ class CenterView(ListView):
         # Get today's date
         
         # Get the date 90 days ago (starting from yesterday)
-        past_90_days_date = today_date - timedelta(days=20)
+        past_20_days_date = today_date - timedelta(days=20)
         # Get the date 3 days from today
         next_3_days = today_date + timedelta(days=3)
             # Determine filtering condition based on scopeView
@@ -233,7 +217,7 @@ class CenterView(ListView):
         elif ScopeView == 'All-List':
              # ✅ Ensure today_date is a proper date object
                        
-            past_90_days_dateXX = today_date - timedelta(days=90)    
+            past_20_days_dateXX = today_date - timedelta(days=20)    
           
 
             recent_patients = Patient.objects.annotate(
@@ -243,7 +227,7 @@ class CenterView(ListView):
                 safe_expectedDate=Coalesce("expectedDate", Value(FALLBACK_DATE, output_field=DateField())),  
                 safe_attendanceDate=Coalesce("attendanceDate", Value(FALLBACK_DATE, output_field=DateField()))  
             ).filter(
-                createdDate__gte=past_90_days_dateXX,
+                createdDate__gte=past_20_days_dateXX,
                 isDeleted=False
             ).distinct()
               
@@ -306,15 +290,15 @@ class CenterView(ListView):
             
             
         elif ScopeView=='Missed-Reservations':
-            missed_past_90_days = CallTrack.objects.filter(
+            missed_past_20_days = CallTrack.objects.filter(
             patientID=OuterRef('pk'),  # OuterRef links to the Patient model
-            confirmationDate__gte=past_90_days_date
+            confirmationDate__gte=past_20_days_date
         ).values('patientID')[:1]  # Ensures the query returns at most one match per patient
             
             # Subquery to fetch the latest confirmationDate for each patient
             latest_confirmation_date = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
-                confirmationDate__gte=past_90_days_date
+                confirmationDate__gte=past_20_days_date
             ).order_by('-confirmationDate').values('confirmationDate')[:1]
             
             # Subquery to fetch the latest confirmationDate for each patient
@@ -331,7 +315,7 @@ class CenterView(ListView):
                         ),
                 latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField())
             ).filter(
-                Q(expectedDate__gte=past_90_days_date) | Q(Exists(missed_past_90_days)),
+                Q(expectedDate__gte=past_20_days_date) | Q(Exists(missed_past_20_days)),
                 isDeleted=False,
                 formPrinted=False
             ).distinct()
@@ -482,6 +466,57 @@ class CenterView(ListView):
                 Q(fullname__icontains=strText) |  # Search in name
                 Q(birthdate__icontains=strText) |  # Search in birthdate
                 Q(attendanceDate__icontains=strText),  # Search in attendance date
+                #reservedBy=request.user  # Keep the reservedBy filter
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                ),
+                 has_medical_history=Exists(
+                 PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
+            )  # ✅ Check if patient has a medical history
+            )
+            .values(
+                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
+            )
+        )  
+        
+        return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
+    
+    @login_required   
+    def CallcenterSearchOnPatient(request):
+         
+        strText = request.GET.get('strText', '')  
+        
+        today_date = datetime.date.today()        
+        past_90_days_date = today_date - timedelta(days=90)
+        
+        # Subquery to fetch the latest confirmationDate for each patient
+        latest_confirmation_date = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            confirmationDate__gte=past_90_days_date
+        ).order_by('-confirmationDate').values('confirmationDate')[:1]
+    #print(strText) 
+        recent_patients = (
+            Patient.objects.active()
+            .filter(
+                Q(reservationCode__icontains=strText) |
+                Q(mobile__icontains=strText) |  # Search in mobile
+                Q(fileserial__icontains=strText) |  # Search in file serial
+                Q(fullname__icontains=strText) |  # Search in name
+                Q(birthdate__icontains=strText) |  # Search in birthdate
+                Q(attendanceDate__icontains=strText),  # Search in attendance date
                 reservedBy=request.user  # Keep the reservedBy filter
             )
             .select_related('sufferedcase')
@@ -554,14 +589,24 @@ class CenterView(ListView):
         return render(request, 'center/followup.html', {'form': form, 'patient': patient,'calltracks':calltracks})
     
     @login_required
-    def edit_reservation(request, patientid,scope):
+    def edit_reservation(request, patientid):
                
         patient = get_object_or_404(Patient, patientid=patientid)  
           
         latest_fileserial = None  # Initialize variable
         if patient.fileserial is None or patient.fileserial == "":
                        
-           latest_fileserial = CenterView.generateFileSerial()
+                latest_fileserial = CenterView.generateFileSerial()
+               
+                patient.createdBy = request.user  # Assign logged-in user
+                patient.reservedBy = request.user  # Assign logged-in user
+                patient.callDirection = None
+                patient.leadSource='Center'
+                while Patient.objects.filter(fileserial=patient.fileserial).exists():
+                    patient.fileserial = CenterView.generateFileSerial()
+             
+                patient.save()               
+                
         else:
             latest_fileserial=patient.fileserial  
                    
@@ -598,19 +643,22 @@ class CenterView(ListView):
                         createdBy=request.user  # Assuming user is logged in
                     )
 
-            #return redirect(reverse('centerPatients', args=[scope]))
-            returnUrl = reverse('centerPatients', args=['Attendance-Today'])  # Generate URL dynamically
-            return render(
-                    request,
-                    "ConfirmMsg.html",
-                    {
-                        'message': 'The Reservation is updated Successfully.',
-                        'returnUrl': returnUrl,
-                        'btnText': 'Return to List',
-                        'patientid':patient.patientid
-                    },
-                    status=200,
-                )
+        #         return render(
+        #     request,
+        #     "ConfirmMsg.html",
+        #     {
+        #         "message": "The Reservation is updated Successfully.",
+        #         "returnUrl": reverse("centerPatients", args=["Attendance-Today"]),
+        #         "btnText": "Return to List",
+        #         "patientid": patient.patientid,
+        #         "show_print": True,
+        #     },
+        # )
+                
+            return redirect(
+            reverse("confirm_page", kwargs={"patientid": patientid})
+        )
+
 
         else:
             form = CenterEditReservationForm(instance=patient)
@@ -631,7 +679,17 @@ class CenterView(ListView):
             'conditions_list': CONDITIONS_LIST  # Pass CONDITIONS_LIST to template
         })
    
-      
+    def confirm_page(request, patientid):
+        return render(
+            request,
+            "ConfirmMsg.html",
+            {
+                "message": "The Reservation is updated Successfully.",
+                "patientid": patientid,
+                "show_print": True,
+            },
+        )
+
     def getPatientMedicalCases(PatientObj):        
                 
         medical_history = PatientMedicalHistory.objects.filter(patient=PatientObj)      
