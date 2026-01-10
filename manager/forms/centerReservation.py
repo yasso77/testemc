@@ -47,21 +47,20 @@ class CEAddReservationForm(forms.ModelForm):
 
     class Meta:
         model = Patient
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks','age',
-                  'checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile',
+        
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'leadSource', 'remarks','age','agentID','organizationID',
+                  'checkUpprice',  'birthdate', 'reservationType', 'referral', 'otherMobile',
                   'sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address']
         widgets = {
-            'mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            
+            'mobile': forms.TextInput(attrs={'class': 'form-control'}),            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 
-                                                      'style': 'background-color: yellow;font-weight:bold'}),
+            'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control',
-                                                 'style': 'background-color: #d0e2f3;font-weight:bold; font-size:larger'}),
+           
             'otherMobile': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationType': forms.Select(attrs={'class': 'form-select'}),
+            'organizationID': forms.Select(attrs={'class': 'form-select'}),
             'referral': forms.Select(attrs={'class': 'form-select'}),
             'birthdate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'wearingconduct': forms.RadioSelect(attrs={'class': 'form-check-input'}),

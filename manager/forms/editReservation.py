@@ -17,7 +17,7 @@ class editReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID']
+        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID','organizationID']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
@@ -31,9 +31,8 @@ class editReservationForm(forms.ModelForm):
             
                 }),
             
-            'remarks': forms.TextInput(attrs={'class': 'form-control'}),
-            'fileserial': forms.TextInput(attrs={'class': 'form-control'}),
-           
+            'remarks': forms.TextInput(attrs={'class': 'form-control'}),          
+            'organizationID': forms.Select(attrs={'class': 'form-select'}),
             'leadSource': forms.Select(attrs={'class': 'form-select'}),            
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),

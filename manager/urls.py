@@ -61,7 +61,7 @@ urlpatterns = [
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
     path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
-    path("confirm/<int:patientid>/", CenterView.confirm_page,name="confirm_page"),
+    path("confirm/<int:patientid>/<str:fileserial>/<str:patientName>", CenterView.confirm_page,name="confirm_page"),
 
     
 
@@ -77,6 +77,7 @@ urlpatterns = [
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
     path('callCentersearchOnPatinet/',CenterView.CallcenterSearchOnPatient,name='callCentersearchOnPatinet'),
+     path("confirm_page_call/<int:patientid>/<str:reservationCode>/<str:patientName>", CallCenterView.confirm_page_call,name="confirm_page_call"),
     
 
     # DoctorView

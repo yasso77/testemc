@@ -38,11 +38,11 @@ class MainView(ListView):
         if request.user.groups.filter(name="Reception").exists():
             
             
-             missedCount=CenterView.countMissedLeads()
-             followupCount=CenterView.countFollowUp()
-             attendToday=CenterView.countAttendToday()
+            #  missedCount=CenterView.countMissedLeads()
+            #  followupCount=CenterView.countFollowUp()
+            #  attendToday=CenterView.countAttendToday()
              
-             return render(request, 'dashboards/center.html', {'missedCount':missedCount,'followupCount':followupCount,'attendToday':attendToday})
+             return render(request, 'center/SearchOnReservation.html')
            
         
         elif request.user.groups.filter(name="Marketing").exists():

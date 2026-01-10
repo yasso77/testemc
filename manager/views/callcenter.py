@@ -24,9 +24,7 @@ class CallCenterView(ListView):
     
     @login_required
     def addNewPatient(request):        
-        # Generate reservation code
-        #username_prefix = request.user.username[:2].upper()  # Get first two letters of the username
-        
+      
         username_parts = request.user.username.split('_')
         username_prefix = ''.join([part[0].upper() for part in username_parts if part])
 
@@ -75,17 +73,13 @@ class CallCenterView(ListView):
                    patient.createdDate = make_aware(patient.createdDate)   
                 patient.save()           
                 
-                # Return confirmation message
-                return render(
-                    request,
-                    "ConfirmMsg.html",
-                    {
-                        'message': 'The Reservation is Added Successfully.',
-                        'returnUrl': 'newreservation',
-                        'btnText': 'Add New Reservation',
-                    },
-                    status=200,
-                )
+               
+                
+                return redirect(reverse("confirm_page_call", kwargs={
+                    "patientid": patient.patientid,
+                    "reservationCode": patient.reservationCode,
+                    "patientName": patient.fullname
+                }))
         else:
             # Initialize the form with the generated reservation code
             callCenterform = CCFormAddReservation(request=request, initial={'reservationCode': reservationCode})
@@ -95,7 +89,20 @@ class CallCenterView(ListView):
         # Render the new reservation form
         return render(request, 'callcenter/newReservation.html', {'form': callCenterform, 'code': reservationCode})
     
-    
+    def confirm_page_call(request, patientid, reservationCode,patientName):
+        return render(
+            request,
+            "ConfirmMsgCallCenter.html",
+            {
+                "message": "The Reservation is Added Successfully.",
+                "patientid": patientid,
+                "reservationCode": reservationCode,
+                "patientName": patientName,
+                "show_print": True,
+            },
+        )
+        
+        
     @login_required
     def reservationsList(request):
         # Get the current date
@@ -333,7 +340,12 @@ class CallCenterView(ListView):
             form = editReservationForm(request.POST, instance=patient)
             if form.is_valid():
                 form.save()  # Save the updated instance
-                return redirect('reservationList')  # Redirect to the reservation list page
+                return redirect(reverse("confirm_page_call", kwargs={
+                    "patientid": patient.patientid,
+                    "reservationCode": patient.reservationCode,
+                    "patientName": patient.fullname
+                }))
+              
             else:
                 print(form.errors)
         else:
@@ -375,11 +387,11 @@ class CallCenterView(ListView):
                 calltrack.save()
                 
                
-               
+                
                 # Return confirmation message
                 return render(
                     request,
-                    "ConfirmMsg.html",
+                    "ConfirmMsgCallCenter.html",
                     {
                         'message': 'Follow-UP is added successfully.',
                         'returnUrl': reverse('reservationList'),

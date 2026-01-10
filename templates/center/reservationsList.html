@@ -1,189 +1,174 @@
-{% extends 'master.html'%}
+{% extends 'master.html' %}
 
 {% block content %}
-  <!-- Include DataTables CSS -->
- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"> 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
- <style>
+<style>
+    /* High Visibility Search Bar */
+    .dataTables_wrapper .dataTables_filter {
+        float: none !important;
+        text-align: left !important;
+        background: #f1f4f9;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #e0e6ed;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100% !important;
+        max-width: 400px;
+        margin-left: 10px !important;
+        border: 2px solid #4154f1 !important;
+        border-radius: 8px !important;
+        padding: 8px 15px !important;
+        background-color: white !important;
+        box-shadow: 0 2px 4px rgba(65, 84, 241, 0.1);
+    }
 
-    td {
-        white-space: nowrap;
+    /* Icon Styling */
+    .action-stack {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    .btn-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: none;
+    }
+    .btn-circle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
- </style>
+    /* Column specifically for the File Serial */
+    .serial-box {
+        background: #eef2ff;
+        color: #4154f1;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+</style>
+
 <div class="pagetitle">
-    <h1>Reservation List <span style="color:#BD501AFF;" >{{viewScope}} </span> </h1>
+    <h1>Reservation List <span class="badge bg-primary-light text-primary border ms-2">{{viewScope}}</span></h1>
     <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Center</li>
-        <li class="breadcrumb-item active">Reservations List</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+            <li class="breadcrumb-item">Center</li>
+            <li class="breadcrumb-item active">Reservations List</li>
+        </ol>
     </nav>
-  </div><!-- End Page Title -->
-  <section class="section">
+</div>
 
- 
-        <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
-            <thead>
-                <tr>
-                    {% comment %} <th>R.Code</th> {% endcomment %}
-                    <th>File #</th>
-                    <th>Full Name</th> 
-                    <th>Mobile</th>
-                    {% comment %} <th>Birth Date</th>   {% endcomment %}
-                   
-                               
-                    {% comment %} <th>Lead Source</th> {% endcomment %}
-                    <th>Case-Call</th>
-                    <th>Case-Patient</th>        
-                    <th>Date</th>
-                     <th>ChK-Price</th> 
-                     <th>Follow Up Details</th>   
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for patient in patients %}
-               
-                    <tr >
-                        {% comment %} <td>{{ patient.reservationCode }}</td> {% endcomment %}
-                        <td style="font-weight: bolder; {% if patient.reservationCode %} background-color:#CAE9F0FF; {% endif %}">
-                            File#: {{ patient.fileserial }} <br/>
-                            R.Code: {{ patient.reservationCode }}
-                        </td>
-                        
-                        <td>{{ patient.fullname }}</td>
-                        <td>{{ patient.mobile }}</td>
-                        {% comment %} <td>{{ patient.birthdate }}</td> {% endcomment %}
-                                           
-                        
-                        {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
-                        <td>{{ patient.sufferedcase__caseName }}</td>
-                        <td>{{ patient.sufferedcaseByPatient__caseName }}</td>
-                        
-                        <td data-order="{{ patient.attendanceDate }}">
-                           ATT.Date:{{ patient.attendanceDate}}<br>
-                           EXP.Date:{{patient.expectedDate}}<br>
-                           CFM.Date:{{patient.latestConfirmation}}<br>
-                           NXT.Date:{{patient.reschadule_data}}
-                        </td>
-                        
-                        <td> {{ patient.checkUpprice__checkupPriceName }}</td>
-                        <td>
-                            
-                            <div>
-                                <strong>Call Count:</strong> {{ patient.call_count }}
-                            </div>
-                            <div>
-                                <strong>Date:</strong> 
-                                {% if patient.last_call_date %}
-                                    {{ patient.last_call_date|date:"F d, Y" }}
-                                {% else %}
-                                    <span class="text-muted">None</span>
-                                {% endif %}
-                            </div>
-                            <div>
-                                <strong>Last Call Outcome:</strong> 
+<section class="section">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body pt-4">
+            
+            <div class="table-responsive">
+                <table id="patientsTable" class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID / File Serial</th>
+                            <th>Patient Information</th>
+                            <th>Medical Case</th>
+                            <th>Timeline</th>
+                            <th>Fee</th>
+                            <th>Call Status</th>
+                            <th class="text-center">Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>
+                                <div class="serial-box mb-1 text-center">{{ patient.fileserial }}</div>
+                                <div class="text-muted text-center small">Code: {{ patient.reservationCode|default:"N/A" }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold mb-0" style="font-size: 1rem; color: #012970;">{{ patient.fullname }}</div>
+                                <div class="text-muted small"><i class="bi bi-phone me-1"></i>{{ patient.mobile }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge bg-light text-dark border w-100 text-start text-wrap"><i class="bi bi-telephone-inbound me-1 text-primary"></i> {{ patient.sufferedcase__caseName }}</span>
+                                    <span class="badge bg-light text-dark border w-100 text-start text-wrap"><i class="bi bi-clipboard2-pulse me-1 text-danger"></i> {{ patient.sufferedcaseByPatient__caseName }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small"><span class="text-muted small fw-bold">ATT:</span> {{ patient.attendanceDate|date:"d M" }}</div>
+                                <div class="small"><span class="text-muted small fw-bold">EXP:</span> {{ patient.expectedDate|date:"d M" }}</div>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-dark">{{ patient.checkUpprice__checkupPriceName }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-primary me-2">{{ patient.call_count }}</span>
+                                    <span class="text-muted small">Attempts</span>
+                                </div>
                                 {% if patient.last_call_outcome %}
-                                    <span class="{% if patient.last_call_outcome == 'Eye surgery' %}text-success{% elif patient.last_call_outcome == 'Re-examination' %}text-danger{% else %}text-info{% endif %}">
+                                    <div class="small fw-bold {% if patient.last_call_outcome == 'Eye surgery' %}text-success{% else %}text-info{% endif %}">
                                         {{ patient.last_call_outcome }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">None</span>
+                                    </div>
                                 {% endif %}
-                            </div>
-                        </td>
-                        
-                        <td class="text-nowrap">
-                            
-                            <a href="{% url 'followup' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow-Up">
-                                <i class="bi bi-arrow-repeat"></i>
-                            </a>
-                            
-                       
-  
-  <!-- Print Form Button -->
-  <a target="_blank" 
-     href="{% url 'patientForm' patient.patientid %}" 
-     class="btn btn-sm btn-success" 
-     data-bs-toggle="tooltip" 
-     data-bs-placement="top" 
-     title="Print Form" onclick="return checkMedicalRecords('{{ patient.fileserial }}')">
-      <i class="bi bi-printer"></i>
-
-      {% comment %}  {% endcomment %}
-  </a>
-  
-
-  
-  
-
-                            <a href="{% url 'centeredit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            
-                               
-                        </td>
-                        
-                         
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td class="alert alert-danger" colspan="8">No Reservations Found .</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
- <!-- Bootstrap Modal -->
- <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title text-warning" id="warningModalLabel"><i class="bi bi-exclamation-triangle"></i> Warning</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </td>
+                            <td>
+                                <div class="action-stack">
+                                    <a href="{% url 'followup' patient.patientid %}" 
+                                       class="btn-circle bg-warning text-dark" 
+                                       data-bs-toggle="tooltip" title="Add Follow-up">
+                                        <i class="bi bi-arrow-repeat fs-5"></i>
+                                    </a>
+                                    
+                                    <a target="_blank" href="{% url 'patientForm' patient.patientid %}" 
+                                       class="btn-circle bg-info text-white" 
+                                       data-bs-toggle="tooltip" title="Print Medical Form"
+                                       onclick="return checkMedicalRecords('{{ patient.fileserial }}')">
+                                        <i class="bi bi-file-earmark-pdf fs-5"></i>
+                                    </a>
+                                    
+                                    <a href="{% url 'centeredit_reservation' patient.patientid %}" 
+                                       class="btn-circle bg-primary text-white" 
+                                       data-bs-toggle="tooltip" title="Edit Reservation">
+                                        <i class="bi bi-pencil-square fs-5"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="modal-body" style="font-weight: bold;">
-          This patient does not have medical records.
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
-        </div>
-      </div>
     </div>
-  </div>
-
-    <!-- JavaScript to Handle Modal -->
-    <script>
-        function checkMedicalRecords(fileserial) {
-            if (!fileserial || fileserial === "None") {
-                var warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
-                warningModal.show(); // Show Bootstrap modal
-                return false; // Prevent navigation
-            }
-            return true; // Allow navigation
-        }
-        </script>
 </section>
 
-<!-- Include jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
-<!-- Include DataTables JS -->
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script> 
-
-<!-- Initialize DataTables -->
 <script>
     $(document).ready(function() {
         $('#patientsTable').DataTable({
-            "order": [],  // Sort by 'createdDate' column (index 3) in descending order by default
-            "searching": true,      // Enable search
-            "paging": true,         // Enable pagination
-            "lengthChange": false,  // Disable length change dropdown
-            "info": false,
-            "pageLength": 25           // Disable info display
+            "pageLength": 25,
+            "language": {
+                "search": "<i class='bi bi-search me-2 text-primary'></i><strong>Find Patient:</strong>",
+                "searchPlaceholder": "Start typing name, serial, or mobile..."
+            },
+            "dom": '<"top"f>rt<"bottom"lp><"clear">' // This places the search (f) at the very top
+        });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     });
 </script>
-{%endblock%}
+{% endblock %}

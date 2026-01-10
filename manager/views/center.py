@@ -1,81 +1,125 @@
-from datetime import  date, datetime, time,  timedelta
+from datetime import date, datetime, time, timedelta
 import datetime
-from io import BytesIO
 import string
 import re
+import base64
+from io import BytesIO
 from urllib import request
-from django.shortcuts import render
-from django.urls import reverse
-from django.utils.timezone import now, make_aware, is_naive,localtime
-from django.utils import timezone
-from django.http import Http404
-from manager.forms.CenterEditReservation import CenterEditReservationForm
-from manager.forms.centerReservation import CEAddReservationForm
-from django.db.models.functions import Coalesce,TruncDate
+from django.db.models import Exists, OuterRef
 
-from django.utils.timezone import now
-from django.contrib.auth.decorators import login_required,permission_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from django.http import Http404
+from django.utils import timezone
+from django.utils.timezone import now, make_aware, is_naive, localtime
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.list import ListView
-from django.shortcuts import get_object_or_404, redirect
-from django.db.models import Count,Exists, Q
-from django.db.models import IntegerField,Max, Subquery, OuterRef,  Case, Value, When, Exists, DateField
-from manager.forms.centerFollowUp import centerTrackForm
-from manager.model import patient
-from manager.model.patient import CallTrack,MedicalConditionData, Patient, PatientMedicalHistory
+
 from django.db import models
+from django.db.models import (
+    Count, Q, Max, Subquery, OuterRef,
+    Case, Value, When, DateField, IntegerField
+)
+from django.db.models.functions import Coalesce, TruncDate
+
+from manager.forms.CenterEditReservation import CenterEditReservationForm
+from manager.forms.centerReservation import CEAddReservationForm
+from manager.forms.centerFollowUp import centerTrackForm
+
+# ✅ CORRECT MODEL IMPORTS
+from manager.model.patient import (
+    Patient,
+    CallTrack,
+    MedicalConditionData,
+    PatientMedicalHistory,
+)
 
 from manager.views import barcode
-
 import barcode
-from barcode.writer import ImageWriter
-from io import BytesIO
-import base64
-from django.shortcuts import render
 
 
 
-class CenterView(ListView):
-    
-    def generateFileSerial():
-        """Generate an incremented file serial in the format 'X-00001'."""
-        # Generate a list of uppercase letters (A to Z)
-        alphabet = list(string.ascii_uppercase)
-        pattern = re.compile(r'^([A-Z])-(\d+)')
-        latest_prefix = 'A'
+
+class CenterView(ListView):    
+
+
+
+    def generateFileSerial(organization):
+        """
+        Generate a file serial based on organization.
+        - If prefix is empty (EMC) -> A-00001 rolls to B-00001 after 99999
+        - If prefix is set (IRAQNA/Nour) -> Prefix remains static (e.g., QQ-00001, NN-00001)
+        """
+        prefix = organization.orPrefix  # Example: '', 'QQ', or 'NN'
+
+        # ========================================================
+        # CASE 1: EMC Logic (No specific prefix, uses A-Z rotation)
+        # ========================================================
+        if not prefix:
+            alphabet = list(string.ascii_uppercase)
+            pattern = re.compile(r'^([A-Z])-(\d+)$')
+
+            latest_prefix = 'A'
+            latest_increment = 0
+
+            # Look for the absolute latest serial regardless of specific org 
+            # (or filtered by org if EMC is a specific set of IDs)
+            latest_fs = (
+                Patient.objects
+                .exclude(fileserial__isnull=True)
+                .exclude(fileserial='')
+                .order_by('-fileserial')
+                .values_list('fileserial', flat=True)
+            )
+
+            for fs in latest_fs:
+                match = pattern.match(fs.strip())
+                if match:
+                    latest_prefix = match.group(1)
+                    latest_increment = int(match.group(2))
+                    break
+
+            if latest_increment >= 99999:
+                idx = alphabet.index(latest_prefix)
+                # Ensure we don't go past 'Z'
+                latest_prefix = alphabet[min(idx + 1, 25)]
+                increment = 1
+            else:
+                increment = latest_increment + 1
+
+            return f"{latest_prefix}-{increment:05d}"
+
+        # ========================================================
+        # CASE 2: Fixed Prefix Logic (IRAQNA -> QQ, Nour -> NN)
+        # ========================================================
+        # We look for the latest number specifically for this prefix
+        pattern = re.compile(rf'^{prefix}-(\d+)$')
         latest_increment = 0
 
-        # iterate instead of .first()
-        for fs in (
+        # Filter patients whose serial starts with the specific prefix
+        query_results = (
             Patient.objects
+            .filter(fileserial__startswith=f"{prefix}-")
             .exclude(fileserial__isnull=True)
-            .exclude(fileserial='')
             .order_by('-fileserial')
             .values_list('fileserial', flat=True)
-        ):
-            fs = fs.strip()
-            match = pattern.match(fs)
+        )
+
+        for fs in query_results:
+            match = pattern.match(fs.strip())
             if match:
-                latest_prefix = match.group(1)
-                latest_increment = int(match.group(2))
-                break   # ✅ FIRST VALID ONE ONLY
+                latest_increment = int(match.group(1))
+                break
 
-        # increment logic
-        if latest_increment >= 99999:
-            idx = alphabet.index(latest_prefix)
-            latest_prefix = alphabet[idx + 1]
-            increment = 1
-        else:
-            increment = latest_increment + 1
+        new_increment = latest_increment + 1
+        return f"{prefix}-{new_increment:05d}"
 
-        fileCode = f"{latest_prefix}-{increment:05d}"
-
-        return fileCode
 
     @login_required
     def addNewReservation(request):       
                 
-        latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
+       # latest_fileserial = CenterView.generateFileSerial()  # Get new reservation code       
 
         if request.method == 'POST':
             # Pass request to the form and specify required fields
@@ -99,9 +143,13 @@ class CenterView(ListView):
                 patient.reservedBy = request.user  # Assign logged-in user
                 patient.callDirection = None
                 patient.leadSource='Center'  
-                
-                while Patient.objects.filter(fileserial=patient.fileserial).exists():
-                    patient.fileserial = CenterView.generateFileSerial()
+                 # 👇 selected organization from form
+                organization = patient.organizationID
+
+                patient.fileserial = CenterView.generateFileSerial(organization)
+                #latest_fileserial = CenterView.generateFileSerial()
+                # while Patient.objects.filter(fileserial=patient.fileserial).exists():
+                #     patient.fileserial = CenterView.generateFileSerial()
              
                 patient.save()
 
@@ -140,16 +188,16 @@ class CenterView(ListView):
 
                 
                 return redirect(
-                    reverse("confirm_page", kwargs={"patientid": patient.patientid}))
+                    reverse("confirm_page", kwargs={"patientid": patient.patientid,"fileserial": patient.fileserial,"patientName":patient.fullname}))
             else:
                 print(centerform.errors)
 
         else:
             # Initialize the form with the generated reservation code
-            centerform = CEAddReservationForm(request=request, initial={'fileserial': latest_fileserial})
+            centerform = CEAddReservationForm(request=request)
 
         # Render the new reservation form
-        return render(request, 'center/newReservation.html', {'form': centerform, 'fileserial': latest_fileserial})
+        return render(request, 'center/newReservation.html', {'form': centerform})
         
     def dashSearchOnPatient(request):
         return render(request, 'center/SearchOnReservation.html') 
@@ -590,102 +638,111 @@ class CenterView(ListView):
     
     @login_required
     def edit_reservation(request, patientid):
-               
-        patient = get_object_or_404(Patient, patientid=patientid)  
-          
-        latest_fileserial = None  # Initialize variable
-        if patient.fileserial is None or patient.fileserial == "":
-                       
-                latest_fileserial = CenterView.generateFileSerial()
-               
-                patient.createdBy = request.user  # Assign logged-in user
-                patient.reservedBy = request.user  # Assign logged-in user
-                patient.callDirection = None
-                patient.leadSource='Center'
-                while Patient.objects.filter(fileserial=patient.fileserial).exists():
-                    patient.fileserial = CenterView.generateFileSerial()
-             
-                patient.save()               
-                
+        
+        patient_obj = get_object_or_404(Patient, patientid=patientid)
+
+        existing_serial = (patient_obj.fileserial or "").strip()
+
+        if request.method == "POST":
+            form = CenterEditReservationForm(request.POST, instance=patient_obj)
         else:
-            latest_fileserial=patient.fileserial  
-                   
+            form = CenterEditReservationForm(instance=patient_obj)
+
+        if existing_serial:
+            form.fields["organizationID"].disabled = True
+
 
         if request.method == 'POST':
-            form = CenterEditReservationForm(request.POST, instance=patient)
-            # Extract birthdate from form data
+            form = CenterEditReservationForm(request.POST, instance=patient_obj)
             
+            # Ensure form doesn't block due to missing fileserial
+            if 'fileserial' in form.fields:
+                form.fields['fileserial'].required = False
+
             if form.is_valid():
+                # commit=False allows us to verify data before DB write
+                patient_instance = form.save(commit=False)
+                
+                # 3. FORCE the serial back onto the instance
+                # This prevents request.POST from overwriting it with empty string
+                # patient_instance.fileserial = generated_serial
+                if not existing_serial or not existing_serial.strip():
+                    # Generate new one if it doesn't exist
+                    generated_serial = CenterView.generateFileSerial(patient_obj.organizationID)
+                    patient_obj.fileserial = generated_serial
+                    #print(patient.organizationID)
+                    print("Generated New Serial:", generated_serial)
+                else:
+                    # Keep the one we already have
+                    generated_serial = existing_serial
+
+                # Handle Age calculation
                 birthdate = form.cleaned_data.get('birthdate')
                 if birthdate:
                     today = date.today()
-                    patient.age = today.year - birthdate.year - (
+                    patient_instance.age = today.year - birthdate.year - (
                         (today.month, today.day) < (birthdate.month, birthdate.day)
                     )
-                patient.fileserial=latest_fileserial
-                patient = form.save()
+                
+                # Save the patient record
+                patient_instance.save()
+                form.save_m2m() # Save many-to-many if your form has them
+
+                # --- Medical History Logic ---
+                PatientMedicalHistory.objects.filter(patient=patient_instance).delete()
+                for condition in MedicalConditionData.objects.active():
+                   
+                    choice = request.POST.get(f"medical_choice_{condition.conditionName}")
+                    if choice:
+                        PatientMedicalHistory.objects.create(
+                            patient=patient_instance,
+                            condition=condition,
+                            relation=choice,
+                            createdBy=request.user
+                        )
+
+                return redirect(reverse("confirm_page", kwargs={
+                    "patientid": patient_instance.patientid,
+                    "fileserial": patient_instance.fileserial,
+                    "patientName": patient_instance.fullname
+                }))
             else:
                 print(form.errors)
 
-                # Clear existing medical history before saving new ones
-            PatientMedicalHistory.objects.filter(patient=patient).delete()
-
-            # Loop through medical conditions and save the new selections
-            for condition in MedicalConditionData.objects.active():
-                choice = request.POST.get(f"medical_conditions_{condition}")  # ✅ Works!
-
-                
-                if choice:  # If a selection is made (Self/Relative)
-                    PatientMedicalHistory.objects.create(
-                        patient=patient,
-                        condition=condition,
-                        relation=choice,
-                        createdBy=request.user  # Assuming user is logged in
-                    )
-
-        #         return render(
-        #     request,
-        #     "ConfirmMsg.html",
-        #     {
-        #         "message": "The Reservation is updated Successfully.",
-        #         "returnUrl": reverse("centerPatients", args=["Attendance-Today"]),
-        #         "btnText": "Return to List",
-        #         "patientid": patient.patientid,
-        #         "show_print": True,
-        #     },
-        # )
-                
-            return redirect(
-            reverse("confirm_page", kwargs={"patientid": patientid})
-        )
-
-
         else:
-            form = CenterEditReservationForm(instance=patient)
+            form = CenterEditReservationForm(instance=patient_obj)
 
-        # Fetch existing medical history for this patient
-         # Fetch existing medical history for this patient
-        history_dict = CenterView.getPatientMedicalCases(patient)
-        CONDITIONS_LIST=MedicalConditionData.objects.active()
+            # views.py
+        raw_history = CenterView.getPatientMedicalCases(patient_obj)
+
+        medical_history = {
+            obj.conditionName.strip().upper(): value.strip().lower()
+            for obj, value in raw_history.items()
+            if obj and value
+        }
+
+
         
-        if not history_dict:
-            history_dict = {"": ""}   
+
+        CONDITIONS_LIST = MedicalConditionData.objects.active()
 
         return render(request, 'center/editReservation.html', {
             'form': form,
-            'patient': patient,
-            'fileserial': latest_fileserial,            
-            'medical_history': history_dict,  # Pass history_dict to template
-            'conditions_list': CONDITIONS_LIST  # Pass CONDITIONS_LIST to template
+            'patient': patient_obj,
+            'fileserial': patient_obj.fileserial,            
+            'medical_history': medical_history,
+            'conditions_list': CONDITIONS_LIST
         })
-   
-    def confirm_page(request, patientid):
+
+    def confirm_page(request, patientid, fileserial,patientName):
         return render(
             request,
             "ConfirmMsg.html",
             {
                 "message": "The Reservation is updated Successfully.",
                 "patientid": patientid,
+                "fileserial": fileserial,
+                "patientName": patientName,
                 "show_print": True,
             },
         )

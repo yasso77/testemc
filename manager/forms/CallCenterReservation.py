@@ -28,7 +28,7 @@ class CCFormAddReservation(forms.ModelForm):
 
     class Meta:
         model = Patient
-        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks','expectedDate', 'callDirection', 'checkUpprice', 'agentID', 
+        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks','expectedDate', 'callDirection', 'checkUpprice', 'agentID','organizationID' 
                  ]
         widgets = {
            
@@ -36,7 +36,7 @@ class CCFormAddReservation(forms.ModelForm):
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 'style': 'background-color: yellow;font-weight:bold'}),
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-           
+            'organizationID': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),   
         }

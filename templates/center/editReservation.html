@@ -1,426 +1,295 @@
-{% extends 'master.html'%}
+{% extends 'master.html' %}
 {% load custom_filters %}
-
 
 {% block content %}
 <style>
-  .form-group {
-      margin-bottom: 20px; /* Adjust this value as needed */
-  }
-  .text-danger {
-    color: red;
-}
+    .form-group { margin-bottom: 1.25rem; }
+    .text-danger { color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem; }
+    .table th, .table td { text-align: center; vertical-align: middle; }
+    .left { text-align: left !important; font-weight: 500; }
+    
+    /* UI Enhancements */
+    .form-container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.05); }
+    .section-title { color: #012970; font-weight: 700; font-size: 1.1rem; border-bottom: 2px solid #f6f9ff; padding-bottom: 10px; margin-bottom: 20px; }
+    
+    /* Medical Table Styling */
+    .medical-table thead th { background-color: #012970; color: white; font-size: 0.85rem; padding: 12px; border: none; }
+    .disease-label { background-color: #f8f9fa; font-weight: bold; color: #333; width: 35%; text-transform: uppercase; }
+    .radio-cell { width: 7.5%; text-align: center; }
+    .table-divider { border-left: 3px solid #dee2e6 !important; }
+    .custom-radio { transform: scale(1.3); cursor: pointer; }
+</style>
 
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .left{
-            text-align: left !important;
-            font-weight:500;
-        }
-        /* Increase radio button size */
-        .custom-radio {
-            transform: scale(1.5); /* Increase size */
-            margin: 5px; /* Add spacing */
-        }
-    </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            function toggleReferralField() {
-                let reservationType = $("#{{ form.reservationType.id_for_label }}").val();
-                let referralField = $("#{{ form.referral.id_for_label }}");
-    
-                if (reservationType === "FV") {
-                    referralField.prop("disabled", false);  // Enable if FV
-                } else {
-                    referralField.prop("disabled", true).val("");  // Disable and clear if not FV
-                }
+<script>
+    $(document).ready(function () {
+        function toggleReferralField() {
+            let reservationType = $("#{{ form.reservationType.id_for_label }}").val();
+            let referralField = $("#{{ form.referral.id_for_label }}");
+            if (reservationType === "FV") {
+                referralField.prop("disabled", false);
+            } else {
+                referralField.prop("disabled", true).val("");
             }
-    
-            // Run on page load
+        }
+        toggleReferralField();
+        $("#{{ form.reservationType.id_for_label }}").change(function () {
             toggleReferralField();
-    
-            // Run on change
-            $("#{{ form.reservationType.id_for_label }}").change(function () {
-                toggleReferralField();
-            });
         });
-    </script>
+    });
+</script>
 
 <div class="pagetitle">
     <h1>Edit Reservation</h1>
     <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Center</li>
-        <li class="breadcrumb-item active">Edit Reservation</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item">Center</li>
+            <li class="breadcrumb-item active">Edit Reservation</li>
+        </ol>
     </nav>
-  </div><!-- End Page Title -->
-  <section class="section">
-
-    <div class="row">
-      <div class="col-lg-10">
-     
-    
-<div class="form-container">
-   
-  <form method="post" class="form-horizontal">
-    {% csrf_token %}
-
-    <div class="form-group row">
-        <label for="{{ form.fileserial.id_for_label }}" class="col-sm-3 col-form-label">File Serial</label>
-        <div class="col-sm-8">
-            
-
-            <input type="text" name="fileserial" class="form-control" value="{{ fileserial }}" readonly style="background-color: #d0e2f3;font-weight:bold; font-size:larger">
-            
-        </div>
-    </div>
-
-    <div class="form-group row" id="reservationTypeDiv">
-        <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">
-            Reservation Type <span style="color: red;">*</span>
-        </label>
-        <div class="col-sm-8">
-            {{ form.reservationType }}
-            {% if form.reservationType.errors %}
-                <div class="text-danger">
-                    {{ form.reservationType.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row" id="referaalDiv">
-        <label for="{{ form.referral.id_for_label }}" class="col-sm-3 col-form-label">Referral</label>
-        <div class="col-sm-8">
-            {{ form.referral }}
-            {% if form.referral.errors %}
-                <div class="text-danger">
-                    {{ form.referral.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        
-        <label for="id_mobile" class="col-sm-3 col-form-label">Mobile<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-           
-        
-
-        <div class="col-sm-8">
-            {{ form.mobile }}
-            {% if form.mobile.errors %}
-                <div class="text-danger">
-                    {{ form.mobile.errors }}
-                </div>
-            {% endif %}
-        </div>
-       
-        <span style="display: none;" id="mobile-validation-message" class="alert alert-warning"></span>
-        </div>
-
-       
-    
-</div>
-    
-    <div class="form-group row">
-        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.fullname }}
-            {% if form.fullname.errors %}
-                <div class="text-danger">
-                    {{ form.fullname.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-   
-    <div class="form-group row">
-        
-        <label for="{{ form.otherMobile.id_for_label }}" class="col-sm-3 col-form-label">Other Mobile</label>
-       
-            <div class="col-sm-8">
-                {{ form.otherMobile }}
-               
-            </div>
-       
-    
-</div>
-<div class="form-group row">
-    <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
-    <div class="col-sm-8">
-        <div>
-            {% for radio in form.gender %}
-                <div class="form-check form-check-inline">
-                    {{ radio.tag }}
-                    <label class="form-check-label">{{ radio.choice_label }}</label>
-                </div>
-            {% endfor %}
-        </div>
-        {% if form.gender.errors %}
-            <div class="text-danger">
-                {{ form.gender.errors }}
-            </div>
-        {% endif %}
-    </div>
 </div>
 
-<div class="form-group row">
-    <label for="{{ form.birthdate.id_for_label }}" class="col-sm-3 col-form-label">Birth Date </label>
-    <div class="col-sm-8">
-        {{ form.birthdate  }}
-        {% if form.birthdate.errors %}
-        <div class="text-danger">
-            {{ form.birthdate.errors }}
-        </div>
-    {% endif %}
-    </div>
-</div>
-    <div class="form-group row">
-        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.city }}
-            {% if form.city.errors %}
-                <div class="text-danger">
-                    {{ form.city.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.address.id_for_label }}" class="col-sm-3 col-form-label">Address</label>
-        <div class="col-sm-8">
-            {{ form.address }}
-           
-        </div>
-    </div>
-   
-   
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="form-container">
+                <form method="post" class="form-horizontal">
+                    {% csrf_token %}
 
-    
-    <div class="form-group row">
-        <label for="{{ form.sufferedcaseByPatient.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case by patient<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.sufferedcaseByPatient }}
-            {% if form.sufferedcaseByPatient.errors %}
-                <div class="text-danger">
-                    {{ form.sufferedcaseByPatient.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
+                    <h5 class="section-title"><i class="bi bi-person-badge me-2"></i>Patient Information</h5>
 
-   
-
-    <div class="form-group row">
-        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up price <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.checkUpprice }}
-            {% if form.checkUpprice.errors %}
-                <div class="text-danger">
-                    {{ form.checkUpprice.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    
-    
-    <div class="form-group row">
-        <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
-        <div class="col-sm-8">
-            {{ form.remarks }}
-            
-        </div>
-    </div>
-
-    
-        <div class="form-group row" >
-            <label for="{{ form.rideglass.id_for_label }}" class="col-sm-5 col-form-label">
-                Willing to get rid of glass <span style="color: red;">*</span></label>
-    
-            
-            <div class="col-sm-5">
-                <div class="form-check form-check-inline">
-                    <input 
-                        class="form-check-input" 
-                        type="radio" 
-                        name="rideglass" 
-                        id="rideglassYes" 
-                        value="Y"
-                        {% if form.rideglass.value == "Y" %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="rideglassYes">YES</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input 
-                        class="form-check-input" 
-                        type="radio" 
-                        name="rideglass" 
-                        id="rideglassNo" 
-                        value="N"
-                        {% if form.rideglass.value == "N" %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="rideglassNo">NO</label>
-                </div>
-            </div>
-        </div>
-    
-        <div class="form-group row">
-            <label for="{{ form.wearingconduct.id_for_label }}" class="col-sm-5 col-form-label">
-                Wearing contact lens for the last 2 weeks? <span style="color: red;">*</span>
-            </label>
-            <div class="col-sm-6">
-                <div class="form-check form-check-inline">
-                    <input 
-                        class="form-check-input" 
-                        type="radio" 
-                        name="wearingconduct" 
-                        id="wearingYes" 
-                        value="Y"
-                        {% if form.wearingconduct.value == "Y" %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="wearingYes">YES</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input 
-                        class="form-check-input" 
-                        type="radio" 
-                        name="wearingconduct" 
-                        id="wearingNo" 
-                        value="N"
-                        {% if form.wearingconduct.value == "N" %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="wearingNo">NO</label>
-                </div>
-                <!-- 🔴 Display Validation Errors Here -->
-                {% if form.wearingconduct.errors %}
-                    <div class="text-danger">
-                        {{ form.wearingconduct.errors.as_text }}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">File Serial</label>
+                        <div class="col-sm-8 d-flex align-items-center">
+                            <span class="badge bg-primary fs-6 px-3">{{ patient.fileserial }}</span>
+                        </div>
                     </div>
-                {% endif %}
+
+                    <div class="form-group row" id="reservationTypeDiv">
+                        <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">
+                            Reservation Type <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-8">
+                            {{ form.reservationType }}
+                            {% if form.reservationType.errors %}<div class="text-danger">{{ form.reservationType.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row" id="referaalDiv">
+                        <label for="{{ form.referral.id_for_label }}" class="col-sm-3 col-form-label">Referral</label>
+                        <div class="col-sm-8">
+                            {{ form.referral }}
+                            {% if form.referral.errors %}<div class="text-danger">{{ form.referral.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="id_mobile" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.mobile }}
+                            <div id="mobile-validation-message" class="alert alert-warning mt-2" style="display: none;"></div>
+                            {% if form.mobile.errors %}<div class="text-danger">{{ form.mobile.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.fullname }}
+                            {% if form.fullname.errors %}<div class="text-danger">{{ form.fullname.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.otherMobile.id_for_label }}" class="col-sm-3 col-form-label">Other Mobile</label>
+                        <div class="col-sm-8">{{ form.otherMobile }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Gender <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            <div class="pt-2">
+                                {% for radio in form.gender %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.gender.errors %}<div class="text-danger">{{ form.gender.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.birthdate.id_for_label }}" class="col-sm-3 col-form-label">Birth Date</label>
+                        <div class="col-sm-8">
+                            {{ form.birthdate }}
+                            {% if form.birthdate.errors %}<div class="text-danger">{{ form.birthdate.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <h5 class="section-title mt-4"><i class="bi bi-geo-alt me-2"></i>Address & Location</h5>
+                    <div class="form-group row">
+                        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.city }}
+                            {% if form.city.errors %}<div class="text-danger">{{ form.city.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.address.id_for_label }}" class="col-sm-3 col-form-label">Address</label>
+                        <div class="col-sm-8">{{ form.address }}</div>
+                    </div>
+
+                    <h5 class="section-title mt-4"><i class="bi bi-clipboard-pulse me-2"></i>Case Details</h5>
+                    <div class="form-group row">
+                        <label for="{{ form.sufferedcaseByPatient.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.sufferedcaseByPatient }}
+                            {% if form.sufferedcaseByPatient.errors %}<div class="text-danger">{{ form.sufferedcaseByPatient.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.organizationID.id_for_label }}" class="col-sm-3 col-form-label">Organization <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.organizationID }}
+                            {% if form.organizationID.errors %}<div class="text-danger">{{ form.organizationID.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up Price <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.checkUpprice }}
+                            {% if form.checkUpprice.errors %}<div class="text-danger">{{ form.checkUpprice.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
+                        <div class="col-sm-8">{{ form.remarks }}</div>
+                    </div>
+
+                    <h5 class="section-title mt-4"><i class="bi bi-eye me-2"></i>Vision & Medical History</h5>
+                    <div class="form-group row">
+                        <label class="col-sm-5 col-form-label">Willing to get rid of glasses? <span class="text-danger">*</span></label>
+                        <div class="col-sm-6 d-flex align-items-center">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rideglass" id="rideglassYes" value="Y" {% if form.rideglass.value == "Y" %}checked{% endif %}>
+                                <label class="form-check-label" for="rideglassYes">YES</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rideglass" id="rideglassNo" value="N" {% if form.rideglass.value == "N" %}checked{% endif %}>
+                                <label class="form-check-label" for="rideglassNo">NO</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-5 col-form-label">Wearing contact lens for the last 2 weeks? <span class="text-danger">*</span></label>
+                        <div class="col-sm-6 d-flex align-items-center">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="wearingconduct" id="wearingYes" value="Y" {% if form.wearingconduct.value == "Y" %}checked{% endif %}>
+                                <label class="form-check-label" for="wearingYes">YES</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="wearingconduct" id="wearingNo" value="N" {% if form.wearingconduct.value == "N" %}checked{% endif %}>
+                                <label class="form-check-label" for="wearingNo">NO</label>
+                            </div>
+                            {% if form.wearingconduct.errors %}<div class="text-danger ms-3">{{ form.wearingconduct.errors.as_text }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered align-middle medical-table">
+                            <thead>
+                                <tr>
+                                    <th>Disease</th><th>Self</th><th>Rel</th>
+                                    <th class="table-divider">Disease</th><th>Self</th><th>Rel</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for condition in conditions_list %}
+                                    {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
+                                    <td class="disease-label {% if not forloop.counter0|divisibleby:2 %}table-divider{% endif %}">
+                                        {{ condition.conditionName }}
+                                        <input type="hidden" name="condition_names[]" value="{{ condition.conditionName }}">
+                                    </td>
+                                    {% with condition.conditionName|upper as key %}
+                                    {% with medical_history|get_itemx:key as relation %}
+                                        <td class="radio-cell">
+                                            <input type="radio" class="custom-radio" name="medical_choice_{{ condition.conditionName }}" value="self" {% if relation == "self" %}checked{% endif %}>
+                                        </td>
+                                        <td class="radio-cell">
+                                            <input type="radio" class="custom-radio" name="medical_choice_{{ condition.conditionName }}" value="relative" {% if relation == "relative" %}checked{% endif %}>
+                                        </td>
+                                    {% endwith %}
+                                    {% endwith %}
+                                    {% if forloop.last and not forloop.counter|divisibleby:2 %}
+                                        <td class="table-divider bg-light"></td><td class="bg-light"></td><td class="bg-light"></td>
+                                    {% endif %}
+                                    {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button id="clearRadioBtn" class="btn btn-outline-danger btn-sm mt-2" type="button">
+                        <i class="bi bi-x-circle me-1"></i> Clear Medical Selections
+                    </button>
+
+                    <hr class="my-4">
+
+                    <div class="form-group row">
+                        <div class="col-sm-12 text-center">
+                            <button type="submit" class="btn btn-primary px-5 py-2">Update Reservation</button>
+                            <button type="reset" class="btn btn-secondary ms-2 px-4 py-2">Reset</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        <!-- Medical Conditions Selection -->
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                    <th class="footer-image">Disease</th>
-                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
-                    <th></th>
-                    <th style="border-left: 2px solid #fff; width:7%">SELF</th>
-                    <th style="border-right: 2px solid #fff; width:7%">REL</th>
-                  
-                    
-                </tr>
-            </thead>
-            <tbody>
-            
-                {% for condition in conditions_list %}
-                    {% if forloop.first or forloop.counter0|divisibleby:2 %}
-                        <tr>
-                    {% endif %}
-            
-                    <td class="left">{{ condition }}</td>  {# Show all conditions from CONDITIONS_LIST #}
-                    {% with medical_history|get_item:condition.conditionName as relation %}  {# Check if the condition exists in medical_history #}
-                    <td >
-                        <input type="radio" class="custom-radio" name="medical_conditions_{{ condition }}" value="self" 
-                             {% if relation == "self" %} checked {% endif %}>
-                    </td>
-                    <td >
-                        <input type="radio" class="custom-radio"  name="medical_conditions_{{ condition }}" value="relative" 
-                                 {% if relation == "relative" %} checked {% endif %}>
-                    </td>
-                    
-                    {% endwith %}
-            
-                    {% if forloop.last or forloop.counter|divisibleby:2 %}
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            </tbody>
-            </table>
-            <!-- Clear Selections Button -->
-<!-- Clear Selections Button -->
-<!-- Clear Selections Button -->
-<button id="clearRadioBtn" class="btn btn-danger btn-sm" type="button" style="margin-top: 10px;">Clear Selections</button>
+    </div>
+</section>
 
 <script>
     document.getElementById('clearRadioBtn').addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent any default action
+        event.preventDefault();
         document.querySelectorAll('.custom-radio:checked').forEach(radio => {
-            radio.checked = false; // Uncheck the selected radio buttons
+            radio.checked = false;
         });
     });
-</script>
-            
-        </div>
-        
-        
 
-    
-
-   
-    <div class="form-group row">
-        <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="reset" class="btn btn-secondary">Reset</button>
-        </div>
-    </div>
-    
-</form>
-          
-    </div>
-  </section>
-
-  <script>
     document.addEventListener('DOMContentLoaded', function () {
         const mobileField = document.getElementById('id_mobile');
         const messageSpan = document.getElementById('mobile-validation-message');
-        
         mobileField.addEventListener('blur', function () {
             const mobile = mobileField.value;
-            const strmobile=mobile;
             if (mobile) {
                 fetch(`/validate-mobile/?mobile=${mobile}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/centerReservationByMobile/${strmobile}" target="_blank">Click here to view</a>`;
-                            messageSpan.style.display = 'block'; // Show the message
+                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/centerReservationByMobile/${mobile}" target="_blank" class="fw-bold">View Record</a>`;
+                            messageSpan.style.display = 'block';
                         } else {
-                            messageSpan.style.display = 'none'; // Hide the message if no error
-                            messageSpan.textContent = ''; // Clear message if mobile is valid
+                            messageSpan.style.display = 'none';
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    }).catch(error => console.error('Error:', error));
             }
         });
-    });
 
-
-   
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var leadSource = "{{ patient.leadSource }}"; // Get lead source from Django
+        // Lead Source Logic
+        var leadSource = "{{ patient.leadSource }}";
         var reservationDiv = document.getElementById("reservationTypeDiv");
         var referaalDiv = document.getElementById("referaalDiv");
-
         if (leadSource != "Center") {
-            reservationDiv.style.display = "none"; // Hide the div
-            referaalDiv.style.display = "none"; // Hide the div
+            if(reservationDiv) reservationDiv.style.display = "none";
+            if(referaalDiv) referaalDiv.style.display = "none";
         }
     });
 </script>
-
-{%endblock%}
+{% endblock %}

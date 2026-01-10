@@ -1,144 +1,223 @@
-{% extends 'master.html'%}
+{% extends 'master.html' %}
 
 {% block content %}
- <!-- Include DataTables CSS -->
- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
- <style>
+<style>
+    /* 1. Global Table Styling */
+    .section-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
 
-    td {
-        white-space: nowrap;
+    #patientsTable {
+        border: none !important;
+        margin-top: 15px !important;
+    }
+
+    /* 2. Alternating Row Style (Zebra) */
+    #patientsTable tbody tr:nth-child(even) {
+        background-color: #fcfdfe !important;
     }
     
- </style>
-<div class="pagetitle">
-    <h1>Reservation List <span style="color: blue;" >{{viewScope}} </span> - 30 Days Ago by {{ request.user.username }}</h1>
-    <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Call Center</li>
-        <li class="breadcrumb-item active">Reservations List</li>
-      </ol>
-    </nav>
-  </div><!-- End Page Title -->
-  <section class="section">
+    #patientsTable tbody tr:hover {
+        background-color: #f1f4f9 !important;
+        transition: 0.2s ease;
+    }
 
- 
-        <table id="patientsTable" class="display" style="font-size: smaller;">
+    /* 3. Header Styling */
+    #patientsTable thead th {
+        background-color: #ffffff;
+        color: #899bbd;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f1f4f9 !important;
+        padding: 15px 10px;
+    }
+
+    /* 4. High-Visibility Search Customization */
+    .dataTables_filter {
+        float: none !important;
+        text-align: left !important;
+        margin-bottom: 25px;
+        background: #f6f9ff;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #d0d9ff;
+    }
+
+    .dataTables_filter label {
+        font-weight: 700;
+        color: #012970;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .dataTables_filter input {
+        margin-left: 15px !important;
+        flex-grow: 1;
+        height: 45px;
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        padding: 10px 20px !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-size: 1rem;
+    }
+
+    .dataTables_filter input:focus {
+        border-color: #4154f1 !important;
+        outline: none;
+        box-shadow: 0 0 0 0.25rem rgba(65, 84, 241, 0.1) !important;
+    }
+
+    /* 5. Utility Classes */
+    .res-code {
+        color: #4154f1;
+        font-weight: 700;
+        background: #f0f2ff;
+        padding: 4px 8px;
+        border-radius: 5px;
+    }
+
+    .outcome-pill {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .outcome-confirmed { background: #e7faf3; color: #198754; }
+    .outcome-canceled { background: #ffeef0; color: #dc3545; }
+    .outcome-pending { background: #fff8e6; color: #ffc107; }
+
+    .action-btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+        transition: 0.3s;
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Workspace: <span style="color: #4154f1;">{{viewScope}}</span></h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Reservation Management</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="section-card">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+            <div>
+                <i class="bi bi-person-check text-primary me-2"></i>
+                <span class="text-muted">Agent:</span> <strong>{{ request.user.username }}</strong>
+            </div>
+            <div class="text-muted small">
+                <i class="bi bi-calendar3 me-1"></i> Scope: 30 Days Ago
+            </div>
+        </div>
+
+        <table id="patientsTable" class="display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th>R.Code</th>
-                    <th>Full Name</th> 
-                    <th>Mobile</th>
-                    <th>Age</th>  
-                   
-                               
-                    {% comment %} <th>Lead Source</th> {% endcomment %}
-                    <th>Case</th>        
-                    <th>Created Date</th>
-                     <th>Expected Date</th> 
-                     <th>Follow Up Details</th>   
-                    <th></th>
+                    <th>ID Code</th>
+                    <th>Patient Name</th> 
+                    <th>Contact</th>
+                    <th>Case Type</th>        
+                    <th>Created At</th>
+                    <th>Expected</th> 
+                    <th>Status Summary</th>   
+                    <th class="text-center">Operations</th>
                 </tr>
             </thead>
             <tbody>
                 {% for patient in patients %}
                     <tr>
-                        <td>{{ patient.reservationCode }}</td>
-                        <td>{{ patient.fullname }}</td>
-                        <td>{{ patient.mobile }}</td>
-                        <td>{{ patient.age }}</td>
-                                           
-                        
-                        {% comment %} <td>{{ patient.leadSource }}</td> {% endcomment %}
-                        <td>{{ patient.sufferedcase__caseName }}</td>
-                        
-                        <td data-order="{{ patient.createdDate|date:'Y-m-d H:i:s' }}">
-                            {{ patient.createdDate|date:'M. j, Y, g:i a' }}
-                        </td>
-                        
-                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">{{ patient.expectedDate }}</td>
+                        <td><span class="res-code">{{ patient.reservationCode }}</span></td>
                         <td>
-                            
-                            <div>
-                                <strong>Call Count:</strong> {{ patient.call_count }}
-                            </div>
-                            <div>
-                                <strong>Last Call Date:</strong> 
-                                {% if patient.last_call_date %}
-                                    {{ patient.last_call_date|date:"F d, Y" }}
+                            <div class="fw-bold">{{ patient.fullname }}</div>
+                            <div class="small text-muted">Age: {{ patient.age }}</div>
+                        </td>
+                        <td>
+                            <div><i class="bi bi-phone me-1 text-primary"></i> {{ patient.mobile }}</div>
+                        </td>
+                        <td>
+                            <span class="text-dark">{{ patient.sufferedcase__caseName }}</span>
+                        </td>
+                        <td data-order="{{ patient.createdDate|date:'Y-m-d H:i:s' }}">
+                            <div class="small">{{ patient.createdDate|date:'M d, Y' }}</div>
+                            <div class="text-muted" style="font-size: 10px;">{{ patient.createdDate|date:'g:i a' }}</div>
+                        </td>
+                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">
+                            <span class="badge bg-light text-primary border-primary-light">{{ patient.expectedDate }}</span>
+                        </td>
+                        <td>
+                            <div class="small mb-1">Calls: <strong>{{ patient.call_count }}</strong></div>
+                            {% if patient.last_call_outcome %}
+                                <span class="outcome-pill {% if patient.last_call_outcome == 'Confirmed' %}outcome-confirmed{% elif patient.last_call_outcome == 'Canceled' %}outcome-canceled{% else %}outcome-pending{% endif %}">
+                                    {{ patient.last_call_outcome }}
+                                </span>
+                            {% else %}
+                                <span class="outcome-pill" style="background: #f8f9fa; color: #abb5be;">No Activity</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td class="text-center">
+                            <div class="action-btn-group">
+                                {% if patient.attendanceDate %}
+                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-light text-success border" title="Attended">
+                                        <i class="bi bi-calendar-check-fill"></i>
+                                    </a>
                                 {% else %}
-                                    <span class="text-muted">None</span>
-                                {% endif %}
-                            </div>
-                            <div>
-                                <strong>Last Call Outcome:</strong> 
-                                {% if patient.last_call_outcome %}
-                                    <span class="{% if patient.last_call_outcome == 'Confirmed' %}text-success{% elif patient.last_call_outcome == 'Canceled' %}text-danger{% else %}text-warning{% endif %}">
-                                        {{ patient.last_call_outcome }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">None</span>
+                                    <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-outline-warning" title="Follow-Up">
+                                        <i class="bi bi-telephone-outbound"></i>
+                                    </a>
+
+                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-outline-primary" title="Edit Profile">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Archived" 
+                                            onclick="return confirm('Archive this record?');">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    </form>
                                 {% endif %}
                             </div>
                         </td>
-                        
-                        <td class="text-nowrap">
-                            {% if patient.attendanceDate %}
-    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="Attendance Date: {{ patient.attendanceDate }}">
-        <i class="bi bi-calendar-check"></i>
-    </a>
-{% else %}
-    <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-warning d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow-Up">
-        <i class="bi bi-arrow-repeat"></i>
-    </a>
-
-    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-primary d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-        <i class="bi bi-pencil-square"></i>
-    </a>
-
-    <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-danger d-inline-block mx-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Hide Patient" 
-            onclick="return confirm('Are you sure you want to delete this patient?');">
-            <i class="bi bi-eye-slash"></i>
-        </button>
-    </form>
-{% endif %}
-
-                           
-                        </td>
-                        
-                         
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4">No patients found created within the last 10 days.</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-
-
+    </div>
 </section>
 
-<!-- Include jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Include DataTables JS -->
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
-<!-- Initialize DataTables -->
 <script>
     $(document).ready(function() {
         $('#patientsTable').DataTable({
-            "order": [],  // Disable automatic sorting
-            "searching": true,      // Enable search
-            "paging": true,         // Enable pagination
-            "lengthChange": false,  // Disable length change dropdown
-            "info": false,
-            "pageLength": 25           // Disable info display
+            "order": [],
+            "searching": true,
+            "paging": true,
+            "lengthChange": false,
+            "pageLength": 25,
+            "language": {
+                "search": "<i class='bi bi-search me-2'></i> SEARCH PATIENT:",
+                "searchPlaceholder": "Enter Name, Phone, or Code..."
+            }
         });
     });
 </script>
-{%endblock%}
+{% endblock %}

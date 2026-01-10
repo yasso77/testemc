@@ -1,0 +1,89 @@
+{% extends 'master.html' %}
+
+{% block title %}Confirm Message{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-card {
+        max-width: 600px;
+        margin: 40px auto;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    .success-icon {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 15px;
+    }
+    .info-label {
+        color: #6c757d;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+    .info-value {
+        color: #012970;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    .receipt-line {
+        border-bottom: 1px dashed #dee2e6;
+        padding: 15px 0;
+    }
+    .receipt-line:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Confirmation</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Success</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="card confirm-card">
+        <div class="card-body text-center p-5">
+            
+            <i class="bi bi-check-circle-fill success-icon"></i>
+            <h3 class="fw-bold mb-4">Reservation Created!</h3>
+            
+            <p class="text-muted">{{ message|safe }}</p>
+
+            <div class="bg-light rounded-3 p-4 mt-4 text-start">
+                <div class="receipt-line">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">{{ patientName|default:"Not Provided" }}</div>
+                </div>
+
+                <div class="receipt-line">
+                    <div class="info-label">Reservation Code</div>
+                    <div class="info-value text-primary">#{{ reservationCode|default:"----" }}</div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-5">
+                <a href="/reservationList" class="btn btn-outline-primary px-4">
+                    <i class="bi bi-list-ul me-2"></i> View All Lists
+                </a>
+
+                {% if show_print %}
+                <a href="{% url 'newreservation' %}" class="btn btn-success px-4">
+                    <i class="bi bi-plus-lg me-2"></i> Add New
+                </a>
+                {% endif %}
+            </div>
+            
+            <button class="btn btn-link text-muted mt-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print Confirmation
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

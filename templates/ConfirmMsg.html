@@ -4,37 +4,66 @@
 
 {% block content %}
 <div class="pagetitle">
-    <h1>Confirm Page</h1>
+    <h1>Confirmation</h1>
     <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item">Home</li>
-        <li class="breadcrumb-item">Pages</li>
-        <li class="breadcrumb-item active">Confirmation</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item">Pages</li>
+            <li class="breadcrumb-item active">Confirmation</li>
+        </ol>
     </nav>
 </div>
 
 <section class="section">
-    <div class="card">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <h4 class="alert-heading">Operation is done successfully</h4>
-            <p>{{ message|safe }}</p>
-            <hr>
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    
+                    <div class="text-center mb-4">
+                        <div class="display-1 text-success mb-2">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <h2 class="fw-bold">Operation Successful!</h2>
+                        <p class="text-muted">{{ message|safe }}</p>
+                    </div>
 
-        <div class="d-flex gap-2 mt-3 justify-content-center">
-            <a href="/centerPatients/Attendance-Today/" class="btn btn-primary">
-                Return to List
-            </a>
+                    <div class="bg-light rounded-3 p-4 mb-4">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3" style="letter-spacing: 1px; font-size: 0.8rem;">
+                            Reservation Details
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="text-muted d-block small">Patient Name</label>
+                                <span class="fw-bold fs-5 text-dark">{{ patientName }}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="text-muted d-block small">File Serial</label>
+                                <span class="badge bg-primary fs-6">{{ fileserial }}</span>
+                            </div>
+                        </div>
+                    </div>
 
-           {% if show_print %}
-    <a href="{% url 'patientForm' patientid %}" 
-       target="_blank" 
-       class="btn btn-success">
-        Print Form
-    </a>
-{% endif %}
+                    <div class="d-grid d-md-flex gap-3 justify-content-md-center">
+                        <a href="/centerPatients/All-List/" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-arrow-left me-2"></i>Return to List
+                        </a>
 
+                        {% if show_print %}
+                        <a href="{% url 'patientForm' patientid %}" 
+                           target="_blank" 
+                           class="btn btn-success btn-lg px-4 shadow-sm">
+                            <i class="bi bi-printer me-2"></i>Print Patient Form
+                        </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            
+            <p class="text-center text-muted mt-3 small">
+                The file serial has been automatically generated based on the organization prefix.
+            </p>
         </div>
     </div>
 </section>

@@ -11,6 +11,10 @@ class CityManager(models.Manager):
 class AgentCompanyManager(models.Manager):
      def active(self):
             return self.filter(isVisible=True)
+        
+class OrganizationsManager(models.Manager):
+        def active(self):
+            return self.filter(isVisible=True)
 class OffersManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
@@ -64,7 +68,21 @@ class AgentCompany(models.Model):
         return self.AgentCompany
     class Meta:
         verbose_name='Agent-Company'
-        verbose_name_plural = "Agent-Company"    
+        verbose_name_plural = "Agent-Company"  
+        
+class Organizations(models.Model):    
+    orgID=models.AutoField(primary_key=True)
+    orgName=models.CharField(max_length=200, blank=True, null=True,verbose_name='Organization Name')
+    orPrefix=models.CharField(max_length=3, blank=True, null=True,verbose_name='orPrefix')
+    isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
+    createdDate=models.DateField(auto_now_add=True,verbose_name='Created date')
+    
+    objects = OrganizationsManager()
+    def __str__(self):
+        return self.orgName
+    class Meta:
+        verbose_name='Organization'
+        verbose_name_plural = "Organizations"      
          
 class Offers(models.Model):    
     offerID=models.AutoField(primary_key=True)
@@ -135,7 +153,7 @@ class Patient(models.Model):
 
     patientid = models.AutoField(primary_key=True)  # Field name made lowercase.
     reservationCode = models.CharField( max_length=150, blank=False, null=True,verbose_name='Confirmation Code',error_messages='Reservation code is requiered')
-    fileserial = models.CharField( max_length=150, blank=False, null=True,
+    fileserial = models.CharField( max_length=100, blank=False, null=True,
     verbose_name='File Number',error_messages='The Patient file number is requiered')  # Field name made lowercase.
     reservationType=models.CharField(max_length=150,choices=reservations_CHOICES,verbose_name='Reservation Type',default=reservations_CHOICES[0][0],null=True)
     referral=models.CharField(max_length=150,choices=referral_CHOICES,verbose_name='Referral',null=True)
@@ -152,7 +170,10 @@ class Patient(models.Model):
     checkUpprice =models.ForeignKey(CheckUpPrice, null=True, on_delete=models.DO_NOTHING,related_name='Check_UpPrice')
     reservedBy = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='reserved_patients')  # Field name made lowercase.
     offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
-    agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company')  
+    agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company') 
+    
+    organizationID=models.ForeignKey(Organizations,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='organization_related',verbose_name='Organiztaions',default=2)  
+    
     sufferedcase = models.ForeignKey(
         SufferedCases,
         on_delete=models.SET_NULL,

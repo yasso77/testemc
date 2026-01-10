@@ -30,6 +30,8 @@ def dict_key(d, key):
     return d.get(key, None)  # Default to None if key is not found
 
 @register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key.lower())  # case-insensitive match
+def get_itemx(dictionary, key):
+    if not dictionary:
+        return None
+    return dictionary.get(key)
 

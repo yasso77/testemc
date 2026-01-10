@@ -27,6 +27,9 @@ class CenterEditReservationForm(forms.ModelForm):
     widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     
+    
+    remarks = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
     referral=forms.CharField( required=False,widget=forms.Select(attrs={'class': 'form-control'}))
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City",
                                   widget=forms.Select(attrs={'class': 'form-select'}))    
@@ -58,7 +61,7 @@ class CenterEditReservationForm(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address']
+        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address','organizationID']
         
         widgets = {            
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
@@ -69,6 +72,7 @@ class CenterEditReservationForm(forms.ModelForm):
                                                       'style': 'background-color: yellow;font-weight:bold'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'fileserial': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+            'organizationID': forms.Select(attrs={'class': 'form-select'}),
            
             'reservationType': forms.Select(attrs={'class': 'form-select'}),
             'referral': forms.Select(attrs={'class': 'form-select'}),

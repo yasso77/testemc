@@ -1,233 +1,257 @@
-{% extends 'master.html'%}
-
+{% extends 'master.html' %}
 
 {% block content %}
 <style>
-  .form-group {
-      margin-bottom: 20px; /* Adjust this value as needed */
-  }
-  .text-danger {
-    color: red;
-}
+    /* Styling refinements */
+    .form-container {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+    /* Info Bar Styling */
+    .reservation-info-bar {
+        background-color: #f0f7f0;
+        border: 1px solid #d4edda;
+        padding: 15px 25px;
+        border-radius: 8px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .info-tag {
+        font-weight: 700;
+        color: #155724;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    /* Custom Section Headers */
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        color: #012970;
+        font-weight: 600;
+        border-left: 5px solid #012970;
+    }
+    .section-header i {
+        margin-right: 10px;
+    }
+    /* Timeline / Call Track styling */
+    .timeline-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 30px;
+    }
+    .timeline-item {
+        border-left: 2px solid #e9ecef;
+        padding-left: 20px;
+        padding-bottom: 15px;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -7px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        background: #012970;
+        border-radius: 50%;
+    }
 </style>
+
 <div class="pagetitle">
     <h1>Edit Reservation</h1>
     <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Call Center</li>
-        <li class="breadcrumb-item active">Edit Reservation</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item">Call Center</li>
+            <li class="breadcrumb-item active">Edit Reservation</li>
+        </ol>
     </nav>
-  </div><!-- End Page Title -->
-  <section class="section">
-
-    <div class="row">
-      <div class="col-lg-10">
-        <div style="border: 2px solid #4CAF50; padding: 10px 20px; border-radius: 10px; background-color: #f9f9f9; color: #333; display: inline-block; margin-bottom: 15px;">
-            <span style="font-weight: bold; color: #4CAF50;">Reservation Details:</span>
-            <span>Reservation Number: <span style="color: #000;font-weight: bold">{{ patient.reservationCode }}</span></span>,
-            <span>For: <span style="color: #000;font-weight: bold">{{ patient.fullname }}</span></span>
-        </div>
-        
-        
-
-<div class="form-container">
-  <form method="post" class="form-horizontal">
-    {% csrf_token %}
-    
-    <input type="hidden" name="reservationCode" value="{{ form.reservationCode.value }}">
-
-    <div class="form-group row">
-        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.fullname }}
-            {% if form.fullname.errors %}
-                <div class="text-danger">
-                    {{ form.fullname.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div> 
-    <div class="form-group row">
-        <label for="{{ form.mobile.id_for_label }}" aria-placeholder="7776556565" class="col-sm-3 col-form-label">Mobile <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.mobile }}
-            {% if form.mobile.errors %}
-                <div class="text-danger">
-                    {{ form.mobile.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.city.id_for_label }}" class="col-sm-3 col-form-label">City<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.city }}
-            {% if form.city.errors %}
-                <div class="text-danger">
-                    {{ form.city.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.age }}
-            {% if form.age.errors %}
-                <div class="text-danger">
-                    {{ form.age.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label class="col-sm-3 col-form-label">Gender<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            <div>
-                {% for radio in form.gender %}
-                    <div class="form-check form-check-inline">
-                        {{ radio.tag }}
-                        <label class="form-check-label">{{ radio.choice_label }}</label>
-                    </div>
-                {% endfor %}
-            </div>
-            {% if form.gender.errors %}
-                <div class="text-danger">
-                    {{ form.gender.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Comming Source<span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.leadSource }}
-            {% if form.leadSource.errors %}
-                <div class="text-danger">
-                    {{ form.leadSource.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span style="color: red;">*</span></label>
-        <div class="col-sm-8">
-            {{ form.sufferedcase }}
-            {% if form.sufferedcase.errors %}
-                <div class="text-danger">
-                    {{ form.sufferedcase.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers </label>
-        <div class="col-sm-8">
-            {{ form.offerID }}
-            {% if form.offerID.errors %}
-                <div class="text-danger">
-                    {{ form.offerID.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up Price </label>
-        <div class="col-sm-8">
-            {{ form.checkUpprice }}
-            {% if form.checkUpprice.errors %}
-                <div class="text-danger">
-                    {{ form.checkUpprice.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.agentID.id_for_label }}" class="col-sm-3 col-form-label">Agent/Company </label>
-        <div class="col-sm-8">
-            {{ form.agentID }}
-            {% if form.agentID.errors %}
-                <div class="text-danger">
-                    {{ form.agentID.errors }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    
-    <div class="form-group row">
-        <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">Remarks</label>
-        <div class="col-sm-8">
-            {{ form.remarks }}
-            
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction </label>
-      
-        <div class="col-sm-8">
-            <div>
-                {% for radio in form.callDirection %}
-                    <div class="form-check form-check-inline">
-                        {{ radio.tag }}
-                        <label class="form-check-label">{{ radio.choice_label }}</label>
-                    </div>
-                {% endfor %}
-            </div>
-            {% if form.callDirection.errors %}
-                <div class="text-danger">
-                    {{ form.callDirection.errors }}
-                </div>
-            {% endif %}
-
-        </div>
-    </div>
-<hr>
-
-<ul>
-    {% for track in calltracks %}
-            <li>
-                <strong>Confirmation date:</strong> {{ track.confirmationDate }} <br>
-                <strong>Remarks:</strong> {{ track.remarks }}<br>
-                <strong>Created date:</strong> {{ track.createdDate }}
-                <strong>Created by:</strong> {{ track.createdBy }}
-            </li>
-        {% empty %}
-            <li>No call tracks available for this patient.</li>
-        {% endfor %}
-</ul>
-<div class="form-group row">
-    {% for field in insert_form %}
-    <div class="form-group row">
-        <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">
-            {{ field.label }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
-        </label>
-        <div class="col-sm-8">
-            {{ field }}
-            {% if field.errors %}
-                <div class="text-danger">
-                    {{ field.errors|join:", " }}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
 </div>
-    <div class="form-group row">
-        <div class="col-sm-12 text-center"> <!-- Use text-center to center align content -->
-            <button type="submit" class="btn btn-primary">Edit Reservation</button>
-            <a href="{% url 'reservationList' %}" class="btn btn-secondary">Cancel</a>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-11">
             
+            <div class="reservation-info-bar">
+                <span class="info-tag"><i class="bi bi-info-circle me-1"></i> Reservation Details:</span>
+                <span><span class="info-label">Number:</span> {{ patient.reservationCode }}</span>
+                <span><span class="info-label">Patient:</span> {{ patient.fullname }}</span>
+            </div>
+
+            <div class="form-container">
+                <form method="post" class="form-horizontal">
+                    {% csrf_token %}
+                    
+                    <input type="hidden" name="reservationCode" value="{{ form.reservationCode.value }}">
+
+                    <div class="section-header">
+                        <i class="bi bi-person-lines-fill"></i> Patient Profile
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.fullname }}
+                            {% if form.fullname.errors %}<div class="text-danger">{{ form.fullname.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.mobile.id_for_label }}" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            {{ form.mobile }}
+                            {% if form.mobile.errors %}<div class="text-danger">{{ form.mobile.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label for="{{ form.city.id_for_label }}" class="col-sm-6 col-form-label">City <span class="text-danger">*</span></label>
+                                <div class="col-sm-6">{{ form.city }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label for="{{ form.age.id_for_label }}" class="col-sm-3 col-form-label">Age <span class="text-danger">*</span></label>
+                                <div class="col-sm-9">{{ form.age }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Gender <span class="text-danger">*</span></label>
+                        <div class="col-sm-8 pt-1">
+                            {% for radio in form.gender %}
+                                <div class="form-check form-check-inline">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label">{{ radio.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                            {% if form.gender.errors %}<div class="text-danger">{{ form.gender.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <i class="bi bi-briefcase"></i> Source & Pricing
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.leadSource.id_for_label }}" class="col-sm-3 col-form-label">Coming Source <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">{{ form.leadSource }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.sufferedcase.id_for_label }}" class="col-sm-3 col-form-label">Suffered Case <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">{{ form.sufferedcase }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.organizationID.id_for_label }}" class="col-sm-3 col-form-label">Organization <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">{{ form.organizationID }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up Price</label>
+                        <div class="col-sm-8">{{ form.checkUpprice }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.offerID.id_for_label }}" class="col-sm-3 col-form-label">Offers</label>
+                        <div class="col-sm-8">{{ form.offerID }}</div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.agentID.id_for_label }}" class="col-sm-3 col-form-label">Agent/Company</label>
+                        <div class="col-sm-8">{{ form.agentID }}</div>
+                    </div>
+
+                    <div class="section-header">
+                        <i class="bi bi-chat-dots"></i> Communication Details
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.callDirection_for_label }}" class="col-sm-3 col-form-label">Call Direction</label>
+                        <div class="col-sm-8 pt-1">
+                            {% for radio in form.callDirection %}
+                                <div class="form-check form-check-inline">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label">{{ radio.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ form.remarks.id_for_label }}" class="col-sm-3 col-form-label">General Remarks</label>
+                        <div class="col-sm-8">{{ form.remarks }}</div>
+                    </div>
+
+                    <div class="section-header mt-5">
+                        <i class="bi bi-clock-history"></i> Call History Timeline
+                    </div>
+                    
+                    <div class="px-3">
+                        <ul class="timeline-list">
+                            {% for track in calltracks %}
+                                <li class="timeline-item">
+                                    <div class="small text-muted mb-1"><i class="bi bi-calendar3 me-1"></i> {{ track.createdDate }} | <strong>By:</strong> {{ track.createdBy }}</div>
+                                    <div class="fw-bold text-dark">Confirmation: {{ track.confirmationDate }}</div>
+                                    <div class="text-muted fst-italic">"{{ track.remarks }}"</div>
+                                </li>
+                            {% empty %}
+                                <li class="text-muted"><i class="bi bi-info-circle me-1"></i> No call tracks available for this patient.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="section-header">
+                        <i class="bi bi-plus-circle"></i> New Follow-up Entry
+                    </div>
+
+                    {% for field in insert_form %}
+                        <div class="form-group row">
+                            <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">
+                                {{ field.label }}{% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <div class="col-sm-8">
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-group row mt-5">
+                        <div class="col-sm-12 text-center">
+                            <button type="submit" class="btn btn-primary px-5 py-2 me-2 shadow-sm">
+                                <i class="bi bi-save me-1"></i> Update Reservation
+                            </button>
+                            <a href="{% url 'reservationList' %}" class="btn btn-outline-secondary px-5 py-2">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    
-</form>
-          
-    </div>
-  </section>
-{%endblock%}
+</section>
+{% endblock %}
