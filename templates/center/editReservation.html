@@ -62,7 +62,7 @@
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">File Serial</label>
                         <div class="col-sm-8 d-flex align-items-center">
-                            <span class="badge bg-primary fs-6 px-3">{{ patient.fileserial }}</span>
+                            <span class="badge bg-primary fs-6 px-3">{{ form.fileserial }}</span>
                         </div>
                     </div>
 
@@ -152,13 +152,36 @@
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="{{ form.organizationID.id_for_label }}" class="col-sm-3 col-form-label">Organization <span class="text-danger">*</span></label>
-                        <div class="col-sm-8">
-                            {{ form.organizationID }}
-                            {% if form.organizationID.errors %}<div class="text-danger">{{ form.organizationID.errors }}</div>{% endif %}
-                        </div>
-                    </div>
+                   <div class="form-group row">
+    <label for="{{ form.organizationID.id_for_label }}"
+           class="col-sm-3 col-form-label">
+        Organization <span class="text-danger">*</span>
+    </label>
+
+    <div class="col-sm-8">
+        <select
+            name="{{ form.organizationID.name }}"
+            id="{{ form.organizationID.id_for_label }}"
+            class="form-control"
+            {% if form.fileserial %}disabled{% endif %}
+        >
+            {% for option in form.organizationID.field.choices %}
+                <option value="{{ option.0 }}"
+                    {% if option.0|stringformat:"s" == form.organizationID.value|stringformat:"s" %}
+                        selected
+                    {% endif %}
+                >
+                    {{ option.1 }}
+                </option>
+            {% endfor %}
+        </select>
+
+        {% if form.organizationID.errors %}
+            <div class="text-danger">{{ form.organizationID.errors }}</div>
+        {% endif %}
+    </div>
+</div>
+
 
                     <div class="form-group row">
                         <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-3 col-form-label">Check-Up Price <span class="text-danger">*</span></label>

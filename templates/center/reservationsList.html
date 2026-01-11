@@ -155,20 +155,27 @@
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#patientsTable').DataTable({
-            "pageLength": 25,
-            "language": {
-                "search": "<i class='bi bi-search me-2 text-primary'></i><strong>Find Patient:</strong>",
-                "searchPlaceholder": "Start typing name, serial, or mobile..."
-            },
-            "dom": '<"top"f>rt<"bottom"lp><"clear">' // This places the search (f) at the very top
-        });
+    $(document).ready(function () {
+    if ($.fn.DataTable.isDataTable('#patientsTable')) {
+        $('#patientsTable').DataTable().destroy();
+    }
 
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+    $('#patientsTable').DataTable({
+        paging: true,
+        searching: true,
+        lengthChange: false,
+        info: false,
+        pageLength: 25,
+
+        order: [],        // ✅ keep backend order
+        ordering: false,   // ✅ MUST be true for search to work reliably
+
+        language: {
+            search: "SEARCH PATIENT:",
+            searchPlaceholder: "Search by Name or File Serial Number..."
+        }
     });
+});
+
 </script>
 {% endblock %}

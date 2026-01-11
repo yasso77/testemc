@@ -1,0 +1,113 @@
+{% extends 'master.html' %}
+
+{% block title %}Confirm Message{% endblock %}
+
+{% block content %}
+<style>
+    /* Success Animation */
+    .success-animation {
+        animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.5); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Modern Card Styling */
+    .confirmation-card {
+        border-radius: 20px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .detail-box {
+        background: #fcfdfe;
+        border: 1px dashed #dee2e6;
+        border-radius: 15px;
+    }
+
+    .btn-take-new {
+        background: #10B981;
+        border: none;
+        padding: 12px 30px;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+
+    .btn-take-new:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Confirmation</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item">Pages</li>
+            <li class="breadcrumb-item active">Confirmation</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-10">
+            <div class="card confirmation-card shadow-lg">
+                <div class="card-body p-5">
+                    
+                    <div class="text-center mb-5">
+                        <div class="display-1 text-success mb-3 success-animation">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <h2 class="fw-extra-bold text-dark">Operation Successful!</h2>
+                        <div class="text-muted px-md-5 mt-2">
+                            {{ message|safe }}
+                        </div>
+                    </div>
+
+                    <div class="detail-box p-4 mb-5">
+                        <h6 class="text-uppercase text-secondary fw-bold mb-4" style="letter-spacing: 1.5px; font-size: 0.75rem;">
+                            <i class="bi bi-file-earmark-person me-2"></i>Patient Summary
+                        </h6>
+                        <div class="row align-items-center">
+                            <div class="col-sm-7 border-end-sm">
+                                <label class="text-muted d-block small mb-1">Full Name</label>
+                                {% comment %} <span class="fw-bold fs-4 text-dark">{{ patientName }}</span> {% endcomment %}
+                            </div>
+                            <div class="col-sm-5 mt-3 mt-sm-0 ps-sm-4">
+                                <label class="text-muted d-block small mb-1">File Serial Number</label>
+                                <span class="badge bg-primary-light text-primary fs-5 px-3 py-2" style="background-color: rgba(13, 110, 253, 0.1);">
+                                    {{ fileserial }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{% url 'DoctorOp' %}" 
+                           class="btn btn-take-new btn-lg text-white shadow-sm rounded-pill">
+                            <i class="bi bi-person-plus-fill me-2"></i>Take Next Patient
+                        </a>
+                        <div class="mt-3">
+                            <a href="{% url 'index' %}" class="btn btn-link text-muted text-decoration-none small">
+                                <i class="bi bi-house-door me-1"></i> Return Home
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center justify-content-center text-muted mt-4">
+                <i class="bi bi-info-circle me-2"></i>
+                <p class="mb-0 small">The file serial was generated automatically for your records.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

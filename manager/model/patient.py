@@ -71,7 +71,7 @@ class AgentCompany(models.Model):
         verbose_name_plural = "Agent-Company"  
         
 class Organizations(models.Model):    
-    orgID=models.AutoField(primary_key=True)
+    orgID=models.BigAutoField(primary_key=True)
     orgName=models.CharField(max_length=200, blank=True, null=True,verbose_name='Organization Name')
     orPrefix=models.CharField(max_length=3, blank=True, null=True,verbose_name='orPrefix')
     isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
@@ -173,7 +173,11 @@ class Patient(models.Model):
     agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company') 
     
     organizationID=models.ForeignKey(Organizations,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='organization_related',verbose_name='Organiztaions',default=2)  
-    
+    # organizationID = models.ForeignKey(
+    #     Organizations,
+    #     on_delete=models.DO_NOTHING,
+    #     db_constraint=True
+    # )
     sufferedcase = models.ForeignKey(
         SufferedCases,
         on_delete=models.SET_NULL,

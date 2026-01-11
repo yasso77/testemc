@@ -6,7 +6,8 @@ import base64
 from io import BytesIO
 from urllib import request
 from django.db.models import Exists, OuterRef
-
+import barcode
+from barcode.writer import ImageWriter
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import Http404
@@ -188,7 +189,7 @@ class CenterView(ListView):
 
                 
                 return redirect(
-                    reverse("confirm_page", kwargs={"patientid": patient.patientid,"fileserial": patient.fileserial,"patientName":patient.fullname}))
+                    reverse("confirm_page", kwargs={"patientid": patient.patientid,"fileserial": patient.fileserial}))
             else:
                 print(centerform.errors)
 
@@ -277,7 +278,8 @@ class CenterView(ListView):
             ).filter(
                 createdDate__gte=past_20_days_dateXX,
                 isDeleted=False
-            ).distinct()
+                
+            ) .order_by('-patientid') .distinct()
               
             # get all patients who should who their follow update is today or 3 days in future
         elif ScopeView=='Follow-Up':
@@ -287,13 +289,13 @@ class CenterView(ListView):
             latest_confirmation_date = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
                 confirmationDate__range=[today_date, next_3_days]
-            ).order_by('-confirmationDate').values('confirmationDate')[:1]
+            ).order_by('-patientID').values('confirmationDate')[:1]
             
             # Subquery to fetch the latest confirmationDate for each patient
             reschadule_date = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
                 nextFollow=today_date
-            ).order_by('-nextFollow').values('nextFollow')[:1]
+            ).order_by('-patientID').values('nextFollow')[:1]
 
             # Check if a patient has an upcoming follow-up (excluding 'Canceled' outcomes)
             # Subquery to check if a patient has a valid upcoming follow-up within the range
@@ -347,7 +349,7 @@ class CenterView(ListView):
             latest_confirmation_date = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
                 confirmationDate__gte=past_20_days_date
-            ).order_by('-confirmationDate').values('confirmationDate')[:1]
+            ).order_by('-patientID').values('confirmationDate')[:1]
             
             # Subquery to fetch the latest confirmationDate for each patient
             reschadule_date = CallTrack.objects.filter(
@@ -381,13 +383,13 @@ class CenterView(ListView):
                     patientID=OuterRef('pk'),  # Reference the current patient
                     trackType='CE'
                 )
-                .order_by('-createdDate')
+                .order_by('-patientID')
                 .values('outcome')[:1]  # Get the outcome of the latest call
             ),
             has_medical_history=Exists(
             PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
         ))
-        .order_by('-createdDate')
+        .order_by('-patientid')
         .values(
             'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
             'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
@@ -503,7 +505,7 @@ class CenterView(ListView):
         latest_confirmation_date = CallTrack.objects.filter(
             patientID=OuterRef('pk'),
             confirmationDate__gte=past_90_days_date
-        ).order_by('-confirmationDate').values('confirmationDate')[:1]
+        ).order_by('-patientID').values('confirmationDate')[:1]
     #print(strText) 
         recent_patients = (
             Patient.objects.active()
@@ -525,7 +527,7 @@ class CenterView(ListView):
                     CallTrack.objects.filter(
                         patientID=OuterRef('pk')  # Reference the current patient
                     )
-                    .order_by('-createdDate')
+                    .order_by('-patientID')
                     .values('outcome')[:1]  # Get the outcome of the latest call
                 ),
                  has_medical_history=Exists(
@@ -533,7 +535,7 @@ class CenterView(ListView):
             )  # ✅ Check if patient has a medical history
             )
             .values(
-                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
@@ -641,15 +643,19 @@ class CenterView(ListView):
         
         patient_obj = get_object_or_404(Patient, patientid=patientid)
 
-        existing_serial = (patient_obj.fileserial or "").strip()
+        # 🔹 Ensure serial exists BEFORE rendering edit page
+        if not patient_obj.fileserial:
+            patient_obj.fileserial = CenterView.generateFileSerial(
+                patient_obj.organizationID
+            )
+            patient_obj.save(update_fields=["fileserial"])
 
-        if request.method == "POST":
-            form = CenterEditReservationForm(request.POST, instance=patient_obj)
-        else:
-            form = CenterEditReservationForm(instance=patient_obj)
+        # Now it's guaranteed to exist
+        form = CenterEditReservationForm(instance=patient_obj)
 
-        if existing_serial:
-            form.fields["organizationID"].disabled = True
+        # Optional UI rule
+        form.fields["fileserial"].disabled = True
+        form.fields["organizationID"].disabled = True
 
 
         if request.method == 'POST':
@@ -666,16 +672,7 @@ class CenterView(ListView):
                 # 3. FORCE the serial back onto the instance
                 # This prevents request.POST from overwriting it with empty string
                 # patient_instance.fileserial = generated_serial
-                if not existing_serial or not existing_serial.strip():
-                    # Generate new one if it doesn't exist
-                    generated_serial = CenterView.generateFileSerial(patient_obj.organizationID)
-                    patient_obj.fileserial = generated_serial
-                    #print(patient.organizationID)
-                    print("Generated New Serial:", generated_serial)
-                else:
-                    # Keep the one we already have
-                    generated_serial = existing_serial
-
+               
                 # Handle Age calculation
                 birthdate = form.cleaned_data.get('birthdate')
                 if birthdate:
@@ -703,8 +700,7 @@ class CenterView(ListView):
 
                 return redirect(reverse("confirm_page", kwargs={
                     "patientid": patient_instance.patientid,
-                    "fileserial": patient_instance.fileserial,
-                    "patientName": patient_instance.fullname
+                    "fileserial": patient_instance.fileserial                   
                 }))
             else:
                 print(form.errors)
@@ -734,7 +730,7 @@ class CenterView(ListView):
             'conditions_list': CONDITIONS_LIST
         })
 
-    def confirm_page(request, patientid, fileserial,patientName):
+    def confirm_page(request, patientid, fileserial):
         return render(
             request,
             "ConfirmMsg.html",
@@ -742,8 +738,8 @@ class CenterView(ListView):
                 "message": "The Reservation is updated Successfully.",
                 "patientid": patientid,
                 "fileserial": fileserial,
-                "patientName": patientName,
-                "show_print": True,
+                #"patientName": patientName,
+                #"show_print": True,
             },
         )
 

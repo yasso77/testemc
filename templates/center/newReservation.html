@@ -1,40 +1,76 @@
-{% extends 'master.html'%}
+{% extends 'master.html' %}
+{% load static %}
 
 {% block content %}
 <style>
-    .form-group { margin-bottom: 1.5rem; }
-    .text-danger { color: red; }
-    .table th, .table td { text-align: center; vertical-align: middle; }
-    .left { text-align: left !important; font-weight: 500; }
-    .custom-radio { transform: scale(1.3); margin: 5px; }
-    .card-title { font-size: 1.1rem; font-weight: 600; color: #012970; }
-    .section-header { border-bottom: 2px solid #f6f9ff; margin-bottom: 20px; padding-bottom: 10px; }
-</style>
+    :root {
+        --emc-teal: #1a4d4d;
+        --emc-green: #76bc43;
+        --emc-light-bg: #f8fafb;
+    }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        function toggleReferralField() {
-            let reservationType = $("#{{ form.reservationType.id_for_label }}").val();
-            let referralField = $("#{{ form.referral.id_for_label }}");
-            if (reservationType === "FV") {
-                referralField.prop("disabled", false);
-            } else {
-                referralField.prop("disabled", true).val("");
-            }
-        }
-        toggleReferralField();
-        $("#{{ form.reservationType.id_for_label }}").change(function () {
-            toggleReferralField();
-        });
-    });
-</script>
+    /* Form Container Styling */
+    .card { 
+        border: none; 
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); 
+        border-radius: 12px; 
+        margin-bottom: 25px; 
+    }
+    .card-body { padding: 2rem; }
+
+    /* Section Headers */
+    .section-header { 
+        background: #f8f9fa; 
+        padding: 12px 20px; 
+        border-radius: 8px; 
+        margin-bottom: 25px;
+        border-left: 5px solid var(--emc-teal);
+        display: flex;
+        align-items: center;
+    }
+    .section-header i { font-size: 1.4rem; margin-right: 12px; color: var(--emc-teal); }
+    .section-header span { font-size: 1.1rem; font-weight: 700; color: var(--emc-teal); text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Input Styling */
+    .form-label { font-weight: 600; color: #444; margin-bottom: 8px; font-size: 0.9rem; }
+    .form-control, .form-select { border-radius: 8px; padding: 10px 15px; border: 1px solid #dce1e6; }
+    .form-control:focus { border-color: var(--emc-teal); box-shadow: 0 0 0 0.2rem rgba(26, 77, 77, 0.1); }
+    
+    /* Medical History Table */
+    .table-history { border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+    .table-history thead { background-color: var(--emc-teal); color: white; }
+    .custom-radio-lg { transform: scale(1.4); cursor: pointer; }
+    
+    /* YES/NO Toggle Buttons */
+    .btn-check:checked + .btn-outline-primary { 
+        background-color: var(--emc-teal); 
+        border-color: var(--emc-teal); 
+        color: white; 
+    }
+    .btn-outline-primary { color: var(--emc-teal); border-color: var(--emc-teal); }
+    .btn-outline-primary:hover { background-color: var(--emc-teal); color: white; }
+
+    /* Required Star */
+    .required-star { color: #dc3545; margin-left: 3px; }
+
+    /* Sticky Footer for Submit */
+    .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 20px;
+        border-top: 1px solid #eee;
+        z-index: 100;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        margin-top: 20px;
+    }
+</style>
 
 <div class="pagetitle">
     <h1>New Reservation</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
             <li class="breadcrumb-item">Center</li>
             <li class="breadcrumb-item active">Add New Reservation</li>
         </ol>
@@ -48,210 +84,205 @@
         <div class="row">
             <div class="col-lg-12">
 
-                   <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title section-header"><i class="bi bi-person"></i> Patient Information</h5>
-                        <div class="row">
-                             <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.fullname.id_for_label }}" class="col-sm-4 col-form-label">Full Name<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">{{ form.fullname }} {% if form.fullname.errors %}<div class="text-danger small">{{ form.fullname.errors }}</div>{% endif %}</div>
-                                </div>
-                            </div>
-                              <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label class="col-sm-4 col-form-label">Gender<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">
-                                        {% for radio in form.gender %}
-                                        <div class="form-check form-check-inline">
-                                            {{ radio.tag }} <label class="form-check-label">{{ radio.choice_label }}</label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="id_mobile" class="col-sm-4 col-form-label">Mobile<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">
-                                        <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control" required>
-                                        <div id="mobile-validation-message" class="alert alert-warning mt-2" style="display: none;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                           
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="id_othermobile" class="col-sm-4 col-form-label">Other Mobile</label>
-                                    <div class="col-sm-8"><input type="text" id="id_othermobile" name="othermobile" maxlength="12" class="form-control"></div>
-                                </div>
-                            </div>
-                          
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.birthdate.id_for_label }}" class="col-sm-4 col-form-label">Birth Date</label>
-                                    <div class="col-sm-8">{{ form.birthdate }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.city.id_for_label }}" class="col-sm-4 col-form-label">City<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">{{ form.city }}</div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <label for="{{ form.address.id_for_label }}" class="col-sm-2 col-form-label">Address</label>
-                                    <div class="col-sm-10">{{ form.address }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title section-header"><i class="bi bi-info-circle"></i> Reservation Details</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.reservationType.id_for_label }}" class="col-sm-4 col-form-label">Type<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">{{ form.reservationType }} {% if form.reservationType.errors %}<div class="text-danger small">{{ form.reservationType.errors }}</div>{% endif %}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.referral.id_for_label }}" class="col-sm-4 col-form-label">Referral</label>
-                                    <div class="col-sm-8">{{ form.referral }} {% if form.referral.errors %}<div class="text-danger small">{{ form.referral.errors }}</div>{% endif %}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.organizationID.id_for_label }}" class="col-sm-4 col-form-label">Organization<span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">{{ form.organizationID }} {% if form.organizationID.errors %}<div class="text-danger small">{{ form.organizationID.errors }}</div>{% endif %}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group row">
-                                    <label for="{{ form.checkUpprice.id_for_label }}" class="col-sm-4 col-form-label">Price <span class="text-danger">*</span></label>
-                                    <div class="col-sm-8">{{ form.checkUpprice }} {% if form.checkUpprice.errors %}<div class="text-danger small">{{ form.checkUpprice.errors }}</div>{% endif %}</div>
-                                </div>
-                            </div>
+                        <div class="section-header">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Patient Identification</span>
                         </div>
-                    </div>
-                </div>
-
-             
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title section-header"><i class="bi bi-heart-pulse"></i> Medical History</h5>
                         
-                        <div class="form-group row">
-                            <label for="{{ form.sufferedcaseByPatient.id_for_label }}" class="col-sm-3 col-form-label">Case Complaint<span class="text-danger">*</span></label>
-                            <div class="col-sm-9">{{ form.sufferedcaseByPatient }}</div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Willing to get rid of glass? <span class="text-danger">*</span></label>
-                                <div id="rideglass-error" class="text-danger small"></div>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="rideglass" id="rideglassYes" value="Y" {% if form.rideglass.value == "Y" %}checked{% endif %}>
-                                        <label class="form-check-label" for="rideglassYes">YES</label>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Full Name <span class="required-star">*</span></label>
+                                {{ form.fullname }}
+                                {% if form.fullname.errors %}<div class="text-danger small">{{ form.fullname.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Gender <span class="required-star">*</span></label>
+                                <div class="d-flex pt-2">
+                                    {% for radio in form.gender %}
+                                    <div class="form-check me-4">
+                                        {{ radio.tag }} <label class="form-check-label ms-1">{{ radio.choice_label }}</label>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="rideglass" id="rideglassNo" value="N" {% if form.rideglass.value == "N" %}checked{% endif %}>
-                                        <label class="form-check-label" for="rideglassNo">NO</label>
-                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Mobile Number <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                    <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control" placeholder="Primary Mobile" required>
+                                </div>
+                                <div id="mobile-validation-message" class="alert alert-warning p-2 mt-2 small" style="display: none;"></div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Alternative Mobile</label>
+                                <input type="text" id="id_othermobile" name="othermobile" class="form-control" placeholder="Backup (Optional)">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Birth Date</label>
+                                {{ form.birthdate }}
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">City <span class="required-star">*</span></label>
+                                {{ form.city }}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Residential Address</label>
+                                {{ form.address }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="section-header">
+                            <i class="bi bi-calendar-check"></i>
+                            <span>Visit Information</span>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Appointment Type <span class="required-star">*</span></label>
+                                {{ form.reservationType }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Referral Source</label>
+                                {{ form.referral }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Organization <span class="required-star">*</span></label>
+                                {{ form.organizationID }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Service Price (IQD) <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    {{ form.checkUpprice }}
+                                    <span class="input-group-text">.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="section-header">
+                            <i class="bi bi-clipboard-pulse"></i>
+                            <span>Medical Screening</span>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <label class="form-label">Main Complaint / Case Complaint <span class="required-star">*</span></label>
+                                {{ form.sufferedcaseByPatient }}
+                            </div>
+
                             <div class="col-md-6">
-                                <label class="form-label">Contact lens (Last 2 weeks)? <span class="text-danger">*</span></label>
-                                <div id="wearingconduct-error" class="text-danger small"></div>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="wearingconduct" id="wearingYes" value="Y" {% if form.wearingconduct.value == "Y" %}checked{% endif %}>
-                                        <label class="form-check-label" for="wearingYes">YES</label>
+                                <div class="p-3 border rounded bg-light">
+                                    <label class="form-label d-block text-center">Willing to get rid of glass? <span class="required-star">*</span></label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="rideglass" id="rideglassYes" value="Y" {% if form.rideglass.value == "Y" %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="rideglassYes">YES</label>
+                                        <input type="radio" class="btn-check" name="rideglass" id="rideglassNo" value="N" {% if form.rideglass.value == "N" %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="rideglassNo">NO</label>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="wearingconduct" id="wearingNo" value="N" {% if form.wearingconduct.value == "N" %}checked{% endif %}>
-                                        <label class="form-check-label" for="wearingNo">NO</label>
+                                    <div id="rideglass-error" class="text-danger small mt-1 text-center"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded bg-light">
+                                    <label class="form-label d-block text-center">Contact lens (Last 2 weeks)? <span class="required-star">*</span></label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="wearingconduct" id="wearingYes" value="Y" {% if form.wearingconduct.value == "Y" %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="wearingYes">YES</label>
+                                        <input type="radio" class="btn-check" name="wearingconduct" id="wearingNo" value="N" {% if form.wearingconduct.value == "N" %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="wearingNo">NO</label>
                                     </div>
+                                    <div id="wearingconduct-error" class="text-danger small mt-1 text-center"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="table-responsive mt-3">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-light">
+                        <div class="table-responsive mt-4">
+                            <table class="table table-history table-hover align-middle text-center">
+                                <thead>
                                     <tr>
-                                        <th class="left">Disease</th>
+                                        <th class="text-start ps-3" width="30%">Disease</th>
                                         <th>Self</th>
                                         <th>Relative</th>
-                                        <th class="left">Disease</th>
+                                        <th class="text-start ps-3" width="30%">Disease</th>
                                         <th>Self</th>
                                         <th>Relative</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="left">DIABETES</td>
-                                        <td><input type="radio" name="medical_conditions[DIABETES]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[DIABETES]" value="relative" class="form-check-input custom-radio"></td>
-                                        <td class="left">HEART DISEASE</td>
-                                        <td><input type="radio" name="medical_conditions[HEART DISEASE]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[HEART DISEASE]" value="relative" class="form-check-input custom-radio"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">DIABETES</td>
+                                        <td><input type="radio" name="medical_conditions[DIABETES]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[DIABETES]" value="relative" class="form-check-input custom-radio-lg"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">HEART DISEASE</td>
+                                        <td><input type="radio" name="medical_conditions[HEART DISEASE]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[HEART DISEASE]" value="relative" class="form-check-input custom-radio-lg"></td>
                                     </tr>
                                     <tr>
-                                        <td class="left">HTN</td>
-                                        <td><input type="radio" name="medical_conditions[HTN]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[HTN]" value="relative" class="form-check-input custom-radio"></td>
-                                        <td class="left">ASTHMA ALLERGY</td>
-                                        <td><input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="relative" class="form-check-input custom-radio"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">HTN</td>
+                                        <td><input type="radio" name="medical_conditions[HTN]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[HTN]" value="relative" class="form-check-input custom-radio-lg"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">ASTHMA ALLERGY</td>
+                                        <td><input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[ASTHMA ALLERGY]" value="relative" class="form-check-input custom-radio-lg"></td>
                                     </tr>
                                     <tr>
-                                        <td class="left">CANCER</td>
-                                        <td><input type="radio" name="medical_conditions[CANCER]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[CANCER]" value="relative" class="form-check-input custom-radio"></td>
-                                        <td class="left">GLAUCOMA</td>
-                                        <td><input type="radio" name="medical_conditions[GLAUCOMA]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[GLAUCOMA]" value="relative" class="form-check-input custom-radio"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">CANCER</td>
+                                        <td><input type="radio" name="medical_conditions[CANCER]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[CANCER]" value="relative" class="form-check-input custom-radio-lg"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">GLAUCOMA</td>
+                                        <td><input type="radio" name="medical_conditions[GLAUCOMA]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[GLAUCOMA]" value="relative" class="form-check-input custom-radio-lg"></td>
                                     </tr>
                                     <tr>
-                                        <td class="left">CATARACT</td>
-                                        <td><input type="radio" name="medical_conditions[CATARACT]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[CATARACT]" value="relative" class="form-check-input custom-radio"></td>
-                                        <td class="left">RETINAL D.</td>
-                                        <td><input type="radio" name="medical_conditions[RETINAL D.]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[RETINAL D.]" value="relative" class="form-check-input custom-radio"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">CATARACT</td>
+                                        <td><input type="radio" name="medical_conditions[CATARACT]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[CATARACT]" value="relative" class="form-check-input custom-radio-lg"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">RETINAL D.</td>
+                                        <td><input type="radio" name="medical_conditions[RETINAL D.]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[RETINAL D.]" value="relative" class="form-check-input custom-radio-lg"></td>
                                     </tr>
                                     <tr>
-                                        <td class="left">EYE SURGERY</td>
-                                        <td><input type="radio" name="medical_conditions[EYE SURGERY]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[EYE SURGERY]" value="relative" class="form-check-input custom-radio"></td>
-                                        <td class="left">EYE INJURY</td>
-                                        <td><input type="radio" name="medical_conditions[EYE INJURY]" value="self" class="form-check-input custom-radio"></td>
-                                        <td><input type="radio" name="medical_conditions[EYE INJURY]" value="relative" class="form-check-input custom-radio"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">EYE SURGERY</td>
+                                        <td><input type="radio" name="medical_conditions[EYE SURGERY]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[EYE SURGERY]" value="relative" class="form-check-input custom-radio-lg"></td>
+                                        <td class="text-start fw-bold text-secondary ps-3">EYE INJURY</td>
+                                        <td><input type="radio" name="medical_conditions[EYE INJURY]" value="self" class="form-check-input custom-radio-lg"></td>
+                                        <td><input type="radio" name="medical_conditions[EYE INJURY]" value="relative" class="form-check-input custom-radio-lg"></td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <button id="clearRadioBtn" class="btn btn-outline-danger btn-sm" type="button"><i class="bi bi-eraser"></i> Clear Selections</button>
+                            <button id="clearRadioBtn" class="btn btn-light btn-sm border" type="button">
+                                <i class="bi bi-arrow-counterclockwise"></i> Clear History
+                            </button>
                         </div>
 
                         <div class="mt-4">
-                            <label for="{{ form.remarks.id_for_label }}" class="form-label">General Remarks</label>
+                            <label class="form-label">General Remarks / Notes</label>
                             {{ form.remarks }}
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center mb-5">
+                <div class="form-actions text-center rounded-bottom">
                     <div id="form-error" class="alert alert-danger d-none mb-3"></div>
-                    <button id="submitBtn" type="submit" class="btn btn-primary btn-lg px-5">Create Reservation</button>
-                    <button type="reset" class="btn btn-secondary btn-lg px-5">Reset</button>
+                    <button id="submitBtn" type="submit" class="btn btn-primary btn-lg px-5 shadow">
+                        <i class="bi bi-check2-circle me-2"></i> Create Reservation
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary btn-lg px-4 ms-2">Reset</button>
                 </div>
 
             </div>
@@ -259,41 +290,23 @@
     </form>
 </section>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.getElementById('clearRadioBtn').addEventListener('click', function(event) {
-        event.preventDefault(); 
-        document.querySelectorAll('.custom-radio:checked').forEach(radio => {
-            radio.checked = false;
-        });
-    });
-
-    document.getElementById('myform').addEventListener('submit', function(event) {
-        let wearingConductChecked = document.querySelector('input[name="wearingconduct"]:checked');
-        let rideGlassChecked = document.querySelector('input[name="rideglass"]:checked');
-        let wearingConductError = document.getElementById('wearingconduct-error');
-        let rideGlassError = document.getElementById('rideglass-error');
-        let formError = document.getElementById('form-error');
-        let submitBtn = document.getElementById('submitBtn');
-    
-        wearingConductError.textContent = "";
-        rideGlassError.textContent = "";
-        formError.classList.add('d-none');
-    
-        let hasError = false;
-        if (!wearingConductChecked) { wearingConductError.textContent = "Required !"; hasError = true; }
-        if (!rideGlassChecked) { rideGlassError.textContent = "Required !"; hasError = true; }
-    
-        if (hasError) {
-            formError.textContent = "There are errors in the form. Please fix them before submitting.";
-            formError.classList.remove('d-none');
-            event.preventDefault();
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'Submitting...';
+    $(document).ready(function () {
+        // Handle Referral logic
+        function toggleReferralField() {
+            let reservationType = $("#{{ form.reservationType.id_for_label }}").val();
+            let referralField = $("#{{ form.referral.id_for_label }}");
+            if (reservationType === "FV") {
+                referralField.prop("disabled", false);
+            } else {
+                referralField.prop("disabled", true).val("");
+            }
         }
-    });
+        toggleReferralField();
+        $("#{{ form.reservationType.id_for_label }}").change(toggleReferralField);
 
-    document.addEventListener('DOMContentLoaded', function () {
+        // Mobile Validation
         const mobileField = document.getElementById('id_mobile');
         const messageSpan = document.getElementById('mobile-validation-message');
         
@@ -304,20 +317,42 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = "A patient with this Mobile Number already exists. ";
+                            messageSpan.innerHTML = "<i class='bi bi-exclamation-triangle-fill me-2'></i> Patient exists! ";
                             const link = document.createElement("a");
                             link.href = `/centerReservationByMobile/${mobile}`;
                             link.target = "_blank";
-                            link.innerText = "Click here to view";
+                            link.className = "fw-bold text-dark";
+                            link.innerText = "View Profile";
                             messageSpan.appendChild(link);
                             messageSpan.style.display = 'block';
                         } else {
                             messageSpan.style.display = 'none';
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    });
+            }
+        });
+
+        // Clear Table Radios
+        $('#clearRadioBtn').click(function(e) {
+            e.preventDefault();
+            $('.custom-radio-lg').prop('checked', false);
+        });
+
+        // Form Submission Logic
+        $('#myform').submit(function(e) {
+            let wearing = $('input[name="wearingconduct"]:checked').length;
+            let glass = $('input[name="rideglass"]:checked').length;
+            let formError = $('#form-error');
+
+            if (wearing === 0 || glass === 0) {
+                e.preventDefault();
+                formError.html("<i class='bi bi-x-circle me-2'></i> Please select 'Yes/No' for Glasses and Contact Lenses.");
+                formError.removeClass('d-none');
+                window.scrollTo(0, document.body.scrollHeight);
+            } else {
+                $('#submitBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Processing...');
             }
         });
     });
 </script>
-{%endblock%}
+{% endblock %}

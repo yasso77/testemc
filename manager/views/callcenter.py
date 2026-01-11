@@ -78,7 +78,7 @@ class CallCenterView(ListView):
                 return redirect(reverse("confirm_page_call", kwargs={
                     "patientid": patient.patientid,
                     "reservationCode": patient.reservationCode,
-                    "patientName": patient.fullname
+                    #"patientName": patient.fullname
                 }))
         else:
             # Initialize the form with the generated reservation code
@@ -89,7 +89,7 @@ class CallCenterView(ListView):
         # Render the new reservation form
         return render(request, 'callcenter/newReservation.html', {'form': callCenterform, 'code': reservationCode})
     
-    def confirm_page_call(request, patientid, reservationCode,patientName):
+    def confirm_page_call(request, patientid, reservationCode):
         return render(
             request,
             "ConfirmMsgCallCenter.html",
@@ -97,7 +97,7 @@ class CallCenterView(ListView):
                 "message": "The Reservation is Added Successfully.",
                 "patientid": patientid,
                 "reservationCode": reservationCode,
-                "patientName": patientName,
+                #"patientName": patientName,
                 "show_print": True,
             },
         )
@@ -343,7 +343,7 @@ class CallCenterView(ListView):
                 return redirect(reverse("confirm_page_call", kwargs={
                     "patientid": patient.patientid,
                     "reservationCode": patient.reservationCode,
-                    "patientName": patient.fullname
+                    #"patientName": patient.fullname
                 }))
               
             else:

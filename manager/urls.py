@@ -61,7 +61,7 @@ urlpatterns = [
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
     path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
-    path("confirm/<int:patientid>/<str:fileserial>/<str:patientName>", CenterView.confirm_page,name="confirm_page"),
+    path("confirm/<int:patientid>/<str:fileserial>/", CenterView.confirm_page,name="confirm_page"),
 
     
 
@@ -77,16 +77,28 @@ urlpatterns = [
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
     path('callCentersearchOnPatinet/',CenterView.CallcenterSearchOnPatient,name='callCentersearchOnPatinet'),
-     path("confirm_page_call/<int:patientid>/<str:reservationCode>/<str:patientName>", CallCenterView.confirm_page_call,name="confirm_page_call"),
+    path("confirm_page_call/<int:patientid>/<str:reservationCode>/", CallCenterView.confirm_page_call,name="confirm_page_call"),
     
 
     # DoctorView
+    #operations for doctor (operation or losing the patient)
     path('DoctorEvaluation', DoctorView.doctorPatientvisit, name='DoctorEvaluation'),
+    
+    
     path('AuditEvaluation', DoctorView.auditPatientvisit, name='AuditEvaluation'),
+    
     path('doctorPatientvisit', DoctorView.doctorPatientvisit, name='doctorPatientvisit'),
+    
     path('VisitstList/<str:visittype>/<str:scopeview>', DoctorView.getPatientVisits, name='VisitstList'),
+    
     path('AuditEvaluation', DoctorView.doctorPatientvisit, name='AuditEvaluation'),
+    
     path('DoctorOp', DoctorView.doctorOperation, name='DoctorOp'),
+    path("confirm_page_doctor/<str:fileserial>/<str:patientName>",DoctorView.confirm_page_doctor, name="confirm_page_doctor"),
+    
+    path("confirm_page_audit/<str:fileserial>/",DoctorView.confirm_page_audit, name="confirm_page_audit"),
+
+    
     
     
         

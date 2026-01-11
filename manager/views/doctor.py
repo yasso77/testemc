@@ -1,8 +1,9 @@
 import datetime  # Use fully qualified import for datetime
-from django.shortcuts import  render
+from django.shortcuts import  redirect, render
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
+from django.urls import reverse
   # Import from the package, not the specific file
 from manager.decorators import permission_required_with_redirect
 from manager.model.doctor import Doctor
@@ -59,16 +60,11 @@ class DoctorView(ListView):
             )
             data.save()
 
-            return render(
-                request,
-                "ConfirmMsg.html",
-                {
-                    'message': "Patient's Visit is added successfully",
-                    'returnUrl': 'DoctorEvaluation',
-                    'btnText': 'New Patient'
-                },
-                status=200,
-            )
+            
+            return redirect(reverse("confirm_page_doctor", kwargs={                   
+                    "fileserial": patient.fileserial,
+                    "patientName": patient.fullname
+                }))
 
         
         patientList = ormObj.getPatientsForDoctorExam()
@@ -83,7 +79,36 @@ class DoctorView(ListView):
                 'classifiedOptionsJSON': classifiedOptionsJSON,
             }
         )
+
+    
+    def confirm_page_doctor(request, fileserial, patientName):
+        # use fileserial safely
+        print(fileserial)
+        print(patientName)
+
+        return render(request, "ConfirmMsgDoctor.html", {
+            "fileserial": fileserial,
+            "patientName": patientName,
+            "show_print": True,
+            
+            
+            
+        })
         
+    def confirm_page_audit(request, fileserial, patientName):
+        # use fileserial safely
+        print(fileserial)
+        print(patientName)
+
+        return render(request, "ConfirmMsgAudit.html", {
+            "fileserial": fileserial,
+            "patientName": patientName,
+            "show_print": True,
+            
+            
+            
+        })
+
 
 
    # @permission_required_with_redirect('manager.addNewVisitForPatient',login_url='/no-permission/')
@@ -123,17 +148,11 @@ class DoctorView(ListView):
             )
             data.save()
 
-            return render(
-                request,
-                "ConfirmMsg.html",
-                {
-                    'message': "Patient's Visit is added successfully",
-                    'returnUrl': 'AuditEvaluation',
-                    'btnText': 'Take New Patient'
-                },
-                status=200,
-            )
-
+            return redirect(reverse("confirm_page_audit", kwargs={                   
+                    "fileserial": patient.fileserial,
+                    #"patientName": patient.fullname
+                   
+                }))
         
         patientList = ormObj.getPatientsAttendedToday()
         patientcount = patientList.count()
@@ -148,7 +167,7 @@ class DoctorView(ListView):
             }
         )
 
-    
+    #visit list
     def getPatientVisits(request,visittype,scopeview=None):
         if scopeview == 'None':    
             scopeview = None
@@ -340,6 +359,7 @@ class DoctorView(ListView):
     
     
     
+    # function of operation or losing the patient
     def doctorPatientvisit(request): 
         classifiedOptions = ClassficationsOptions.objects.filter(isActive=True).values(
             'classifiedID', 'classifiedCategory', 'optionClassified', 'isActive'
@@ -396,17 +416,10 @@ class DoctorView(ListView):
             )
             data.save()
 
-            return render(
-                request,
-                "ConfirmMsg.html",
-                {
-                    'message': "Patient's Visit is added successfully",
-                    'returnUrl': 'DoctorOp',
-                    'btnText': 'Take New Patient'
-                },
-                status=200,
-            )
-
+            return redirect(reverse("confirm_page_doctor", kwargs={                   
+                    "fileserial": patient.fileserial,
+                    "patientName": patient.fullname
+                }))
         
         patientList = ormObj.getPatientsAttendedToday()
         patientcount = patientList.count()

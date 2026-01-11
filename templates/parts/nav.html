@@ -1,117 +1,233 @@
 {% load custom_filters %}
+
 <style>
+
   /* Sidebar Icon Scaling */
+
 .sidebar-nav .nav-link i {
+
     font-size: 1.25rem; /* Larger main icons */
+
     margin-right: 10px;
+
     color: #4154f1;    /* Primary blue color */
+
 }
+
+
 
 .sidebar-nav .nav-content i {
+
     font-size: 1.1rem;  /* Larger sub-menu icons */
+
     margin-right: 8px;
+
     color: #899bbd;     /* Subtle grey for sub-icons */
+
 }
+
+
 
 /* Ensure icons and text align perfectly */
-.sidebar-nav .nav-link, 
+
+.sidebar-nav .nav-link,
+
 .sidebar-nav .nav-content a {
+
     display: flex;
+
     align-items: center;
+
 }
+
+
 
 /* Optional: Make sub-menu text a bit larger to match icons */
+
 .sidebar-nav .nav-content a span {
+
     font-size: 0.95rem;
+
 }
+
+
 
 .sidebar-nav i {
+
     font-size: 1.3rem !important;
+
     font-weight: bold !important;
+
 }
+
 </style>
+
 <aside id="sidebar" class="sidebar">
 
+
+
     <ul class="sidebar-nav" id="sidebar-nav">
+
     {% if user.is_authenticated %}
 
+
+
       <li class="nav-item">
+
         <a class="nav-link" href="{% url 'index' %}">
+
           <i class="bi bi-grid-fill"></i>
+
           <span>Dashboard</span>
+
         </a>
+
       </li>
+
+
 
       {% if request.user|in_group:"Call Center" or request.user|in_group:"Admin" or request.user|in_group:"Marketing" %}
+
       <li class="nav-item">
+
         <a class="nav-link" data-bs-target="#call-center-nav" data-bs-toggle="collapse" href="#">
+
           <i class="bi bi-headset"></i><span>Call Center</span><i class="bi bi-chevron-down ms-auto"></i>
+
         </a>
+
         <ul id="call-center-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
+
           <li>
+
             <a href="{% url 'newreservation' %}">
+
               <i class="bi bi-plus-circle"></i><span>New Reservation</span>
+
             </a>
+
           </li>
+
           <li>
+
             <a href="{% url 'reservationList' %}">
+
               <i class="bi bi-list-ul"></i><span>Reservations List</span>
+
             </a>
-          </li> 
+
+          </li>
+
         </ul>
+
       </li>
+
       {% endif %}
+
+
 
       {% if request.user|in_group:"Reception" or request.user|in_group:"Admin" %}
+
       <li class="nav-item">
+
         <a class="nav-link" data-bs-target="#emc-center-nav" data-bs-toggle="collapse" href="#">
+
           <i class="bi bi-building"></i><span>EMC Center</span><i class="bi bi-chevron-down ms-auto"></i>
+
         </a>
+
         <ul id="emc-center-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
+
           <li><a href="{% url 'centerNewreservation' %}"><i class="bi bi-plus-lg"></i><span>New Reservation</span></a></li>
+
           <li><a href="{% url 'centerPatients' 'Attendance-Today' %}"><i class="bi bi-calendar-check"></i><span>Attendance Today</span></a></li>
+
           <li><a href="{% url 'centerPatients' 'All-List' %}"><i class="bi bi-people"></i><span>Reservations List</span></a></li>
+
           <li><a href="{% url 'centerPatients' 'Follow-Up' %}"><i class="bi bi-arrow-repeat"></i><span>Follow Up List</span></a></li>
+
           <li><a href="{% url 'centerPatients' 'Missed-Reservations' %}"><i class="bi bi-person-x"></i><span>Missed List</span></a></li>
+
           <li><a href="{% url 'dashSearchOnPatient' %}"><i class="bi bi-search"></i><span>Search Reservation</span></a></li>
+
         </ul>
+
       </li>
+
       {% endif %}
+
+
 
       {% if request.user|in_group:"Doctors" or request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
+
       <li class="nav-item">
+
         <a class="nav-link" data-bs-target="#doctor-nav" data-bs-toggle="collapse" href="#">
+
           <i class="bi bi-stethoscope"></i><span>Audit / Doctor</span><i class="bi bi-chevron-down ms-auto"></i>
+
         </a>
+
         <ul id="doctor-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
+
           {% if request.user|in_group:"Doctors" or request.user|in_group:"Admin" %}
+
           <li><a href="{% url 'DoctorOp' %}"><i class="bi bi-clipboard-pulse"></i><span>Doctor Examination</span></a></li>
+
           <li><a href="{% url 'VisitstList' 'D' 'None' %}"><i class="bi bi-person-badge"></i><span>D/Patients List</span></a></li>
+
           {% endif %}
+
+
 
           {% if request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
+
           <li><a href="{% url 'AuditEvaluation' %}"><i class="bi bi-shield-check"></i><span>Audit Examination</span></a></li>
+
           <li><a href="{% url 'VisitstList' 'A' 'None' %}"><i class="bi bi-journal-text"></i><span>A/Patients List</span></a></li>
+
           {% endif %}
+
         </ul>
+
       </li>
+
       {% endif %}
+
+
 
       {% if request.user.is_staff %}
+
       <li class="nav-item">
+
         <a class="nav-link" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
+
           <i class="bi bi-bar-chart-line"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
+
         </a>
+
         <ul id="reports-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
+
           <li><a href="{% url 'patient_report' %}"><i class="bi bi-file-earmark-spreadsheet"></i><span>Export Patients</span></a></li>
+
           <li><a href="{% url 'visit_report' %}"><i class="bi bi-files"></i><span>Patients Visits</span></a></li>
+
           <li><a href="{% url 'doctorStats' %}"><i class="bi bi-graph-up-arrow"></i><span>Doctors Stats</span></a></li>
+
           <li><a href="{% url 'liveReportDegree' %}"><i class="bi bi-broadcast"></i><span>Live Report</span></a></li>
+
           <li><a href="{% url 'compare_visits' %}"><i class="bi bi-arrow-left-right"></i><span>Audit-vs-Doctor</span></a></li>
+
         </ul>
+
       </li>
+
       {% endif %}
 
+
+
     {% endif %}
+
     </ul>
+
 </aside>

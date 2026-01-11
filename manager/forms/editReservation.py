@@ -95,3 +95,10 @@ class editReservationForm(forms.ModelForm):
         self.fields['gender'].choices = [
             choice for choice in self.fields['gender'].choices if choice[0] != ''
         ]
+        
+    def __init__(self, *args, existing_serial=False, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if existing_serial:
+            self.fields["organizationID"].disabled = True
+            self.fields["organizationID"].widget.attrs["disabled"] = "disabled"

@@ -33,10 +33,10 @@
                             Reservation Details
                         </h6>
                         <div class="row g-3">
-                            <div class="col-sm-6">
+                            {% comment %} <div class="col-sm-6">
                                 <label class="text-muted d-block small">Patient Name</label>
                                 <span class="fw-bold fs-5 text-dark">{{ patientName }}</span>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="col-sm-6">
                                 <label class="text-muted d-block small">File Serial</label>
                                 <span class="badge bg-primary fs-6">{{ fileserial }}</span>
@@ -49,13 +49,13 @@
                             <i class="bi bi-arrow-left me-2"></i>Return to List
                         </a>
 
-                        {% if show_print %}
+                      
                         <a href="{% url 'patientForm' patientid %}" 
                            target="_blank" 
                            class="btn btn-success btn-lg px-4 shadow-sm">
                             <i class="bi bi-printer me-2"></i>Print Patient Form
                         </a>
-                        {% endif %}
+                        
                     </div>
 
                 </div>

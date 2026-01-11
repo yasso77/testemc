@@ -33,7 +33,11 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 1. The Theme (Must be at the very top)
+    'jazzmin',
+
+    # 2. Core Django Apps
+    'django.contrib.admin',  # Do NOT change this to 'admin'
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -41,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #'debuggy',
     #'debug_toolbar',
-    'manager',
+    'manager',  
    
 ]
 

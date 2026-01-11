@@ -1,328 +1,349 @@
 {% extends 'master.html'%}
 
 {% block content %}
-  <!-- Include DataTables CSS -->
- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"> 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
- <style>
-
+<style>
     td {
         white-space: nowrap;
+        vertical-align: middle;
     }
-    
- </style>
+
+    /* 1. Styled Search Section */
+    .custom-search-card {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #4154f1;
+        box-shadow: 0px 5px 20px rgba(1, 41, 112, 0.1);
+        margin-bottom: 25px;
+    }
+
+    /* Target the DataTables generated search input */
+    .dataTables_filter {
+        float: none !important;
+        text-align: left !important;
+    }
+
+    .dataTables_filter label {
+        font-weight: 600;
+        color: #012970;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dataTables_filter input {
+        flex-grow: 1;
+        height: 45px;
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        padding: 10px 15px !important;
+        margin-left: 0 !important;
+        transition: all 0.3s;
+    }
+
+    .dataTables_filter input:focus {
+        border-color: #4154f1 !important;
+        box-shadow: 0 0 0 0.25 margin rgba(65, 84, 241, 0.25);
+        outline: none;
+    }
+
+    /* 2. Surgery (Green) and Bad (Red) Status Styling */
+    .file-badge {
+        font-weight: bolder;
+        padding: 8px 12px;
+        border-radius: 6px;
+        color: #000;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .status-surgery { background-color: #28a745 !important; color: white !important; } /* Surgery Green */
+    .status-bad { background-color: #dc3545 !important; color: white !important; }     /* Bad Red */
+    .status-ok { background-color: #74c476 !important; }
+    .status-plus { background-color: #ff8100 !important; }
+    .status-default { background-color: #ffffff; border: 1px solid #dee2e6; }
+
+    /* Action Button Hover */
+    .edit-btn:hover {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+</style>
+
 <div class="pagetitle">
-    <h1> Patient Examinations List </h1>
+    <h1>Patient Examinations List</h1>
     <nav>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
-        <li class="breadcrumb-item">Center</li>
-        <li class="breadcrumb-item active">Patient Examinations List</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{%url 'index'%}">Home</a></li>
+            <li class="breadcrumb-item">Center</li>
+            <li class="breadcrumb-item active">Patient Examinations List</li>
+        </ol>
     </nav>
-  </div><!-- End Page Title -->
-  <section class="section">
+</div>
 
- <!-- Bootstrap Modal -->
- <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Visit Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editForm">
-                   
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="bg-light text-primary text-end" width="30%">File Serial:</th>
-                                        <td id="editFileSerial" class="fw-bold text-dark"></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="bg-light text-primary text-end">Full Name:</th>
-                                        <td id="editFullName" class="fw-bold text-dark"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <input type="hidden" name="editVisitId" id="editVisitId">
-                  
-                    
-
-                    <!-- Classification Category -->
-                    <div class="mb-3">
-                        <label for="editevaluationeegree" class="form-label">Classification Category</label>
-                        <select class="form-control" id="editevaluationeegree" name="editevaluationeegree"  onchange="updateSelectColor(this)">
-                           {% for category in classfications_options %}
-        <option value="{{ category.classifiedCategory }}">
-            {% if category.classifiedCategory == 'OK' %} 🟢 
-            {% elif category.classifiedCategory == 'Surgery' %} 🟣
-            {% elif category.classifiedCategory == 'Bad' %} 🟡 
-            {% elif category.classifiedCategory == '++' %} 🟠 
-            {% elif category.classifiedCategory == '6/6' %} ⚪ 
-            {% endif %}
-            {{ category.classifiedCategory }}
-        </option>
-    {% endfor %}
-                        </select>
+<section class="section">
+    <div class="custom-search-card">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="search-injection-point">
                     </div>
-                    
-                    <!-- Classified Reason (Dynamically Updated) -->
-                    <div class="mb-3">
-                        <label for="editClassified" class="form-label">Classified Reason</label>
-                        <select class="form-control" id="editClassified" name="classified">
-                            <option value="">Select Reason</option>
-                        </select>
-                    </div>
-
-                    <input type="hidden" id="editPatientId">
-
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
             </div>
         </div>
     </div>
-</div>
 
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Visit Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light text-primary text-end" width="30%">File Serial:</th>
+                                    <td id="editFileSerial" class="fw-bold text-dark"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-primary text-end">Full Name:</th>
+                                    <td id="editFullName" class="fw-bold text-dark"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="editVisitId" id="editVisitId">
 
-        <table id="patientsTable" class="display table-striped" style="font-size: smaller;">
-            <thead>
-                <tr>
-                    
-                    <th>File #</th>
-                    <th>Full Name</th> 
-                    <th>Classified Category</th> 
-                    <th>Classified Reason</th> 
-                                                   
-                    <th>Case-Patient</th>   
-                    <th>Visit Type</th>     
-                    <th>Visit Date</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for patient in patients %}
-               
-                    <tr >
-                       
-                        <td style="font-weight: bolder; 
-    {% if patient.evaluationeegree == 'OK' %} background-color:#74c476;
-    {% elif patient.evaluationeegree == 'Surgery' %} background-color:#FFC0CB;
-    {% elif patient.evaluationeegree == 'Bad' %} background-color:yellow;
-    {% elif patient.evaluationeegree == '++' %} background-color:#ff8100;
-    {% elif patient.evaluationeegree == '6/6' %} background-color:#FFFFFFFF;
-    {% endif %}">
-    {{ patient.patientid.fileserial }}
-</td>
-                        <td>{{ patient.patientid.fullname }}</td>
-                       
-                        <td>{{patient.evaluationeegree}}</td> 
-                         <td>{{patient.classifiedID.optionClassified}}</td> 
-                        
-                                    
-                      
+                        <div class="mb-3">
+                            <label for="editevaluationeegree" class="form-label">Classification Category</label>
+                            <select class="form-control" id="editevaluationeegree" name="editevaluationeegree" onchange="updateSelectColor(this)">
+                                {% for category in classfications_options %}
+                                <option value="{{ category.classifiedCategory }}">
+                                    {% if category.classifiedCategory == 'OK' %} 🟢 
+                                    {% elif category.classifiedCategory == 'Surgery' %} 🟢
+                                    {% elif category.classifiedCategory == 'Bad' %} 🔴 
+                                    {% elif category.classifiedCategory == '++' %} 🟠 
+                                    {% elif category.classifiedCategory == '6/6' %} ⚪ 
+                                    {% endif %}
+                                    {{ category.classifiedCategory }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editClassified" class="form-label">Classified Reason</label>
+                            <select class="form-control" id="editClassified" name="classified">
+                                <option value="">Select Reason</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="editPatientId">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body pt-3">
+            <table id="patientsTable" class="display table table-hover" style="font-size: 0.85rem; width: 100%;">
+                <thead class="table-light">
+                    <tr>
+                        <th>File #</th>
+                        <th>Full Name</th>
+                        <th>Category</th>
+                        <th>Reason</th>
+                        <th>Case-Patient</th>
+                        <th>Visit Type</th>
+                        <th>Visit Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>
+                            <span class="file-badge 
+                                {% if patient.evaluationeegree == 'OK' %}status-ok
+                                {% elif patient.evaluationeegree == 'Surgery' %}status-surgery
+                                {% elif patient.evaluationeegree == 'Bad' %}status-bad
+                                {% elif patient.evaluationeegree == '++' %}status-plus
+                                {% else %}status-default{% endif %}">
+                                {{ patient.patientid.fileserial }}
+                            </span>
+                        </td>
+                        <td class="fw-bold">{{ patient.patientid.fullname }}</td>
+                        <td>{{patient.evaluationeegree}}</td>
+                        <td>{{patient.classifiedID.optionClassified}}</td>
                         <td>{{ patient.patientid.sufferedcaseByPatient }}</td>
-
                         <td>{{ patient.visittype }}</td>
-                        
                         <td data-order="{{ patient.visitdate|date:'Ymd' }}">
                             {{ patient.visitdate|date:'d-M-Y' }}
-                           
-                          
-                        
                         </td>
-                        
-                      
-                       
-                        
-                        <td class="text-nowrap">
-                            <a href="#" class="btn btn-sm btn-primary d-inline-block mx-1 edit-btn"
-                               data-id="{{ patient.visitid }}"
-                               data-fileserial="{{ patient.patientid.fileserial }}"
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary edit-btn" 
+                               data-id="{{ patient.visitid }}" 
+                               data-fileserial="{{ patient.patientid.fileserial }}" 
                                data-fullname="{{ patient.patientid.fullname }}" 
-                               
-                               data-evluationDegree="{{ patient.evaluationeegree }}"
-
-                               data-classified="{{ patient.classifiedID.optionClassified }}"
-                               data-bs-toggle="tooltip"
-                               data-bs-placement="top" title="Edit">
+                               data-evluationDegree="{{ patient.evaluationeegree }}" 
+                               data-classified="{{ patient.classifiedID.optionClassified }}" 
+                               data-bs-toggle="tooltip" title="Edit">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
                         </td>
-                        
-                         
                     </tr>
-                {% empty %}
+                    {% empty %}
                     <tr>
-                        <td class="alert alert-danger" colspan="7">No Patients Visit Found .</td>
+                        <td class="alert alert-danger" colspan="8">No Patients Visit Found.</td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
- <!-- Bootstrap Modal -->
- <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title text-warning" id="warningModalLabel"><i class="bi bi-exclamation-triangle"></i> Warning</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <div class="modal-body" style="font-weight: bold;">
-          This patient does not have medical records.
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-    <!-- JavaScript to Handle Modal -->
-    <script>
-        function checkMedicalRecords(fileserial) {
-            if (!fileserial || fileserial === "None") {
-                var warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
-                warningModal.show(); // Show Bootstrap modal
-                return false; // Prevent navigation
-            }
-            return true; // Allow navigation
-        }
-        </script>
+    <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning" id="warningModalLabel"><i class="bi bi-exclamation-triangle"></i> Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="font-weight: bold;">
+                    This patient does not have medical records.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 
-<!-- Include jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
-<!-- Include DataTables JS -->
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script> 
-
-<!-- Initialize DataTables -->
 <script>
     $(document).ready(function() {
-        $('#patientsTable').DataTable({
-            "order": [],  // Sort by 'createdDate' column (index 3) in descending order by default
-            "searching": true,      // Enable search
-            "paging": true,         // Enable pagination
-            "lengthChange": false,  // Disable length change dropdown
+        var table = $('#patientsTable').DataTable({
+            
+            "searching": true,
+            "paging": true,
+            "lengthChange": false,
             "info": false,
-            "pageLength": 25           // Disable info display
+            "pageLength": 25,
+            "ordering: false,  
+            "order": [],         
+            "language": {
+                "search": "SEARCH PATIENT:",
+                "searchPlaceholder": "Search by Name or File Serial Number..."
+            }
         });
+        
+        // Relocate search input for style
+        $('.dataTables_filter').appendTo('#search-injection-point');
     });
 </script>
 
 <script>
+    // --- YOUR ORIGINAL JS UNCHANGED ---
+    function checkMedicalRecords(fileserial) {
+        if (!fileserial || fileserial === "None") {
+            var warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+            warningModal.show();
+            return false;
+        }
+        return true;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".edit-btn").forEach(button => {
-            button.addEventListener("click", function (event) {
-                event.preventDefault(); // Prevent default action
-    
-                // Get modal element
+        // Use Delegation to ensure it works on all pages/search results
+        document.addEventListener("click", function(e) {
+            const button = e.target.closest(".edit-btn");
+            if (button) {
+                e.preventDefault();
                 let modalElement = document.getElementById("editModal");
                 let modal = new bootstrap.Modal(modalElement);
-    
-                // Remove any incorrect aria-hidden attributes (if present)
                 modalElement.removeAttribute("aria-hidden");
-    
-                // Get data attributes
-                let visitID = this.getAttribute("data-id");
-                let fileSerial = this.getAttribute("data-fileserial");
-                let fullName = this.getAttribute("data-fullname");
-                let classified = this.getAttribute("data-classified")?.trim(); // Trim spaces/tabs
-                let evaluationDegree = this.getAttribute("data-evluationDegree")?.trim(); // Trim spaces/tabs
-    
-                // Select dropdown elements
+
+                let visitID = button.getAttribute("data-id");
+                let fileSerial = button.getAttribute("data-fileserial");
+                let fullName = button.getAttribute("data-fullname");
+                let classified = button.getAttribute("data-classified")?.trim();
+                let evaluationDegree = button.getAttribute("data-evluationDegree")?.trim();
+
                 let categorySelect = document.getElementById("editevaluationeegree");
                 let reasonSelect = document.getElementById("editClassified");
-    
-                // Populate static modal fields
+
                 document.getElementById("editVisitId").value = visitID;
                 document.getElementById("editFileSerial").textContent = fileSerial;
                 document.getElementById("editFullName").textContent = fullName;
-    
-                // Set selected value for Classification Category
                 categorySelect.value = evaluationDegree;
-    
-                // Reset and update "Classified Reason" dropdown
+
                 function updateClassifiedOptions(category) {
                     if (category) {
                         fetch(`/get_classified_options/?category=${encodeURIComponent(category)}`)
                             .then(response => response.json())
                             .then(data => {
-                                // Clear old options
                                 reasonSelect.innerHTML = '<option value="">Select Reason</option>';
-    
-                                // Add new options
                                 data.options.forEach(option => {
                                     let newOption = new Option(option, option);
                                     reasonSelect.add(newOption);
                                 });
-    
-                                // Set selected value if available
-                                if (classified) {
-                                    reasonSelect.value = classified;
-                                }
+                                if (classified) { reasonSelect.value = classified; }
                             })
                             .catch(error => console.error("Error fetching classified options:", error));
                     } else {
-                        // Reset the classified reason dropdown if no category is selected
                         reasonSelect.innerHTML = '<option value="">Select Reason</option>';
                     }
                 }
-    
-                // Fetch options on category selection change
+
                 categorySelect.addEventListener("change", function () {
                     updateClassifiedOptions(this.value);
                 });
-    
-                // Initial fetch for selected category
+
                 updateClassifiedOptions(evaluationDegree);
-    
-                // Show the modal
                 modal.show();
-            });
+            }
         });
     });
-    
+
     function updateSelectColor(selectElement) {
         let selectedOption = selectElement.options[selectElement.selectedIndex];
-    
-        // Set background color of the select box to match selected option
         selectElement.style.backgroundColor = selectedOption.style.backgroundColor;
         selectElement.style.color = selectedOption.style.color;
     }
-    
-    // Run this on page load to apply color to the pre-selected option
+
     document.addEventListener("DOMContentLoaded", function () {
         let categorySelect = document.getElementById("editevaluationeegree");
         updateSelectColor(categorySelect);
-    
-        // Reset the dropdown background color when modal is closed
         let editModal = document.getElementById("editModal");
         editModal.addEventListener("hidden.bs.modal", function () {
-            categorySelect.style.backgroundColor = ""; // Reset to default
-            categorySelect.style.color = ""; // Reset text color
-            categorySelect.selectedIndex = 0; // Reset selection to first option (optional)
+            categorySelect.style.backgroundColor = "";
+            categorySelect.style.color = "";
+            categorySelect.selectedIndex = 0;
         });
     });
 
-
     document.addEventListener("DOMContentLoaded", function () {
         let editForm = document.getElementById("editForm");
-    
         editForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevent default submission
-    
+            event.preventDefault();
             let visitId = document.getElementById("editVisitId").value;
             let evaluationDegree = document.getElementById("editevaluationeegree").value;
             let classifiedReason = document.getElementById("editClassified").value;
-    
+
             fetch("/update_patient_visit/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": getCookie("csrftoken") // CSRF protection
+                    "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: new URLSearchParams({
                     visit_id: visitId,
@@ -330,20 +351,18 @@
                     classified_id: classifiedReason
                 })
             })
-            .then(response => response.json()) // Ensure response is JSON
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     let modal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
-                    modal.hide(); // Close modal
-                    window.location.reload(); // Refresh page
+                    modal.hide();
+                    window.location.reload();
                 } else {
                     alert("Error: " + data.error);
-                    console.error("Server Error:", data.error);
                 }
-            })
-            .catch(error => console.error("Error updating visit:", error));
+            });
         });
-    
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== "") {
@@ -359,8 +378,5 @@
             return cookieValue;
         }
     });
-    
-    
 </script>
-    
 {%endblock%}

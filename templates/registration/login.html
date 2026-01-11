@@ -1,176 +1,187 @@
-{% load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>EMC Portal | Secure Login</title>
 
-  <title>EMC / Login - EMC Portal</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
 
-  <!-- Favicons -->
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+    <style>
+        :root {
+            /* Branding Colors from Logo */
+            --emc-dark: #1a4d4d; /* Dark teal from logo */
+            --emc-green: #76bc43; /* Bright green from logo */
+            --emc-soft-bg: #f0f4f4;
+        }
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--emc-soft-bg);
+            margin: 0;
+        }
 
-  <!-- Vendor CSS Files -->
-  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/quill/quill.snow.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/quill/quill.bubble.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/simple-datatables/style.css' %}" rel="stylesheet">
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+        }
 
-  <!-- Template Main CSS File -->
-  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+        /* Left Side: Branded Backdrop */
+        .login-side-image {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(26, 77, 77, 0.95), rgba(118, 188, 67, 0.8)), 
+                        url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 40px;
+        }
 
-  <!-- =======================================================
-  * Template Name: NiceAdmin
-  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
-  * Updated: Apr 20 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+        .logo-glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
 
+        .logo-glass-card img {
+            max-width: 280px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            margin-bottom: 20px;
+        }
+
+        /* Right Side: Form */
+        .login-side-form {
+            width: 480px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            box-shadow: -15px 0 35px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 991px) {
+            .login-side-image { display: none; }
+            .login-side-form { width: 100%; padding: 30px; }
+        }
+
+        .login-title {
+            font-weight: 700;
+            color: var(--emc-dark);
+            font-size: 1.8rem;
+        }
+
+        /* Input Styling */
+        .form-floating > .form-control:focus {
+            border-color: var(--emc-green);
+            box-shadow: 0 0 0 0.25rem rgba(118, 188, 67, 0.15);
+        }
+
+        .btn-login {
+            background: var(--emc-dark);
+            border: none;
+            padding: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background: var(--emc-green);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(118, 188, 67, 0.3);
+        }
+
+        .error-alert {
+            background-color: #fff5f5;
+            border-left: 4px solid #f87171;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+    </style>
 </head>
 
 <body>
-
-  <main>
-    <div class="container">
-
-      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-
-              <div class="d-flex justify-content-center py-4">
-                <a href="index.html" class="logo d-flex align-items-center w-auto">
-                  <img src="{% static 'assets/img/logo.png' %}" alt="">
-                  <span class="d-none d-lg-block">EMC Portal</span>
-                </a>
-              </div><!-- End Logo -->
-
-              <div class="card mb-3">
-
-                <div class="card-body">
-
-                  <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
-                    <p class="text-center small">Enter your username & password to login</p>
-                  </div>
-
-                  {% if form.errors %}
-    <p style="color:red;">Your username and password didn't match. Please try again.</p>
-  {% endif %}
-
-  {% if next %}
-    {% if user.is_authenticated %}
-      <p>Your account doesn't have access to this page. To proceed,
-      please login with an account that has access.</p>
-    {% else %}
-      <p>Please login to see this page.</p>
-    {% endif %}
-  {% endif %}
-
-
-                    <form method="post" class="row g-3 needs-validation" novalidate action="{% url 'login' %}">
-                    {% csrf_token %}
-                
-                                    <div class="col-12">
-                                      <label for="yourUsername" class="form-label">{{ form.username.label_tag }}</label>
-                                      <div class="input-group has-validation">
-                                        
-                                        {{ form.username }}
-                                        <div class="invalid-feedback">Please enter your username.</div>
-                                      </div>
-                                    </div>
-                
-                                    <div class="col-12">
-                                      <label for="yourPassword" class="form-label">{{ form.password.label_tag }}</label>
-                                       <div class="input-group has-validation">
-                                      {{ form.password }}
-                                      <div class="invalid-feedback">Please enter your password!</div>
-                                    </div>
-                                    
-                
-                                    <div class="col-12">
-                                      <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="remember" value="true" id="rememberMe">
-                                        <label class="form-check-label" for="rememberMe">Remember me</label>
-                                      </div>
-                                    </div>
-                                    <div class="col-12">
-                                      <button class="btn btn-primary w-100" value="login" type="submit">Login</button>
-                                      <input type="hidden" name="next" value="{{ next }}">
-                                    </div>
-                                   
-                                  </form>
-                
-                 
-                  {# Assumes you set up the password_reset view in your URLconf #}
-                  {% comment %} <p><a href="{% url 'password_reset' %}">Lost password?</a></p> {% endcomment %}
- 
-                </div>
-              </div>
-
-            
-
+    <div class="login-container">
+        <div class="login-side-image">
+            <div class="logo-glass-card">
+                <img src="{% static 'assets/img/logo.jpg' %}" alt="EMC Logo" class="img-fluid">
+                <h2 class="fw-light">Management Portal</h2>
+                <p class="opacity-75">Secure access for clinical staff and administration</p>
             </div>
-          </div>
         </div>
 
-      </section>
+        <div class="login-side-form">
+            <div class="text-center mb-4 d-lg-none">
+                 <img src="{% static 'assets/img/logo_emc.png' %}" alt="Logo" height="80">
+            </div>
 
+            <div class="mb-5">
+                <h2 class="login-title">Sign In</h2>
+                <p class="text-muted">Enter your credentials to manage patient follow-ups.</p>
+            </div>
+
+            {% if form.errors %}
+            <div class="error-alert">
+                <i class="bi bi-shield-lock-fill me-2"></i>
+                Authentication failed. Please check your username/password.
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
+    {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <div class="form-floating mb-3">
+                    {{ form.username }}
+                    <label for="id_username">Username</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    {{ form.password }}
+                    <label for="id_password">Password</label>
+                </div>
+
+                <button class="btn btn-primary btn-login w-100 mb-4" type="submit">
+                    Login to Workstation
+                </button>
+            </form>
+
+            <div class="mt-auto pt-5 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">© 2026 EMC Center</span>
+                    <a href="mailto:it-support@emc.com" class="small text-decoration-none" style="color: var(--emc-green);">Technical Support</a>
+                </div>
+            </div>
+        </div>
     </div>
-  </main><!-- End #main -->
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
-  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
- 
-
-  <!-- Template Main JS File -->
-  <script src="{% static 'assets/js/main.js' %}"></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInp = document.querySelector('input[name="username"]');
+            const passInp = document.querySelector('input[name="password"]');
+            
+            if(userInp) {
+                userInp.classList.add('form-control');
+                userInp.placeholder = "Username"; 
+            }
+            if(passInp) {
+                passInp.classList.add('form-control');
+                passInp.placeholder = "Password";
+            }
+        });
+    </script>
 </body>
-
-<script>
- 
-    document.addEventListener('DOMContentLoaded', function() {
-        applyCSSClassToInputByName('username', 'form-control input-form');
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      applyCSSClassToInputByName('password', 'form-control input-form');
-  });
-    function applyCSSClassToInputByName(inputName, classNames) {
-        // Select the input element by name attribute
-        const inputElement = document.querySelector(`input[name="${inputName}"]`);
-        
-        // Check if the input element exists
-        if (inputElement) {
-           
-            // Split the classNames string into an array of individual class names
-            const classes = classNames.split(' ');
-
-            // Add each class name to the element's classList
-            classes.forEach(className => {
-                inputElement.classList.add(className);
-            });
-        } else {
-            console.error(`Input element with name ${inputName} not found.`);
-        }
-    }
-</script>
-
 </html>
