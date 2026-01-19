@@ -31,8 +31,9 @@ urlpatterns = [
     path('LiveEvulationReport', ReportView.ajaxReportChartEvlDegree, name='LiveEvulationReport'),
     path('compare-visits/', ReportView.compare_visits, name='compare_visits'),
     path('patient-report/', ReportView.patient_report_view, name='patient_report'),
-    path('visit-report/', ReportView.visit_report_view, name='visit_report'),
-    
+    #path('visit-report/', ReportView.visit_report_view, name='visit_report'),
+    path('reports/attendance/', ReportView.showPatientDataAttendedToday, name='attendance_report'),
+
     path('api/reserve/', ReservePatientAPIView.as_view(), name='reserve-patient'),
     
     path('doctorStats', ReportView.doctors_stats, name='doctorStats'),
@@ -56,7 +57,7 @@ urlpatterns = [
     path('centerPatients/<str:ScopeView>/', CenterView.centerReservations, name='centerPatients'),
     path('centerSearchOnPatinet/',CenterView.centerSearchOnPatient,name='centerSearchOnPatinet'),
     
-     path('dashSearchOnPatient/',CenterView.dashSearchOnPatient,name='dashSearchOnPatient'),
+    path('dashSearchOnPatient/',CenterView.dashSearchOnPatient,name='dashSearchOnPatient'),
     path('followup/<int:patientid>/', CenterView.follow_reservation, name='followup'),
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
     path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
@@ -91,12 +92,12 @@ urlpatterns = [
     
     path('VisitstList/<str:visittype>/<str:scopeview>', DoctorView.getPatientVisits, name='VisitstList'),
     
-    path('AuditEvaluation', DoctorView.doctorPatientvisit, name='AuditEvaluation'),
+    #path('AuditEvaluation', DoctorView.doctorPatientvisit, name='AuditEvaluation'),
     
     path('DoctorOp', DoctorView.doctorOperation, name='DoctorOp'),
-    path("confirm_page_doctor/<str:fileserial>/<str:patientName>",DoctorView.confirm_page_doctor, name="confirm_page_doctor"),
+    path("confirm_page_doctor/<str:fileserial>",DoctorView.confirm_page_doctor, name="confirm_page_doctor"),
     
-    path("confirm_page_audit/<str:fileserial>/",DoctorView.confirm_page_audit, name="confirm_page_audit"),
+    path("confirm_page_audit/<str:fileserial>",DoctorView.confirm_page_audit, name="confirm_page_audit"),
 
     
     

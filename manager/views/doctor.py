@@ -62,8 +62,8 @@ class DoctorView(ListView):
 
             
             return redirect(reverse("confirm_page_doctor", kwargs={                   
-                    "fileserial": patient.fileserial,
-                    "patientName": patient.fullname
+                    "fileserial": patient.fileserial
+                   
                 }))
 
         
@@ -81,29 +81,28 @@ class DoctorView(ListView):
         )
 
     
-    def confirm_page_doctor(request, fileserial, patientName):
+    def confirm_page_doctor(request, fileserial):
         # use fileserial safely
-        print(fileserial)
-        print(patientName)
+        # print(fileserial)
+      
 
         return render(request, "ConfirmMsgDoctor.html", {
             "fileserial": fileserial,
-            "patientName": patientName,
-            "show_print": True,
+            #"patientName": patientName,
+            ##"show_print": True,
             
             
             
         })
         
-    def confirm_page_audit(request, fileserial, patientName):
+    def confirm_page_audit(request, fileserial):
         # use fileserial safely
-        print(fileserial)
-        print(patientName)
+       
 
         return render(request, "ConfirmMsgAudit.html", {
             "fileserial": fileserial,
-            "patientName": patientName,
-            "show_print": True,
+            #"patientName": patientName,
+            
             
             
             
@@ -149,7 +148,7 @@ class DoctorView(ListView):
             data.save()
 
             return redirect(reverse("confirm_page_audit", kwargs={                   
-                    "fileserial": patient.fileserial,
+                    "fileserial": patient.fileserial
                     #"patientName": patient.fullname
                    
                 }))
@@ -418,7 +417,7 @@ class DoctorView(ListView):
 
             return redirect(reverse("confirm_page_doctor", kwargs={                   
                     "fileserial": patient.fileserial,
-                    "patientName": patient.fullname
+                    #"patientName": patient.fullname
                 }))
         
         patientList = ormObj.getPatientsAttendedToday()

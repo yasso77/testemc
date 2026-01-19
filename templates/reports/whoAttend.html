@@ -1,0 +1,249 @@
+{% extends 'master.html'%}{% load static%}
+{% load custom_filters %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static 'assets/css/doctorExam.css' %}">
+
+<style>
+  :root {
+    --primary-color: #4154f1;
+    --secondary-bg: #f6f9ff;
+    --text-main: #444444;
+    --glass-shadow: 0px 5px 20px rgba(1, 41, 112, 0.1);
+  }
+
+  .pagetitle h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, #012970, #4154f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Modern Filter Bar */
+  .filter-wrapper {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+  }
+
+  .filter-wrapper label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Table Customizations */
+  .report-container {
+    background: transparent;
+  }
+
+  .custom-table {
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Space between rows */
+  }
+
+  .custom-table thead th {
+    background: transparent;
+    border: none;
+    color: #899bbd;
+    font-size: 0.8rem;
+    padding: 10px 20px;
+  }
+
+  .custom-table tbody tr {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+  }
+
+  .custom-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(1, 41, 112, 0.08);
+  }
+
+  .custom-table td {
+    padding: 18px 20px;
+    border: none;
+    vertical-align: middle;
+  }
+
+  /* Styling Cell content */
+  .res-code {
+    background: #eef2ff;
+    color: var(--primary-color);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'Monaco', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .patient-info .name {
+    display: block;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 0.95rem;
+  }
+
+  .patient-info .serial {
+    font-size: 0.75rem;
+    color: #a5a5a5;
+  }
+
+  .step-pill {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    background: #e0f7fa;
+    color: #00838f;
+    margin-right: 4px;
+  }
+
+  .time-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  .creator-badge {
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pagetitle">
+  <h1>Patient Visits Report</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item active">Visits Analysis</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section dashboard">
+  
+  <div class="filter-wrapper">
+    <form method="get" class="row g-3">
+      <div class="col-md-4">
+        <label>Start Date</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar-event"></i></span>
+          <input type="date" name="from_date" class="form-control border-start-0" value="{{ request.GET.from_date }}">
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label>End Date</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar-check"></i></span>
+          <input type="date" name="to_date" class="form-control border-start-0" value="{{ request.GET.to_date }}">
+        </div>
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+          <i class="bi bi-search me-2"></i> Generate Report
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="report-container">
+    <div class="table-responsive">
+      <table class="table custom-table">
+        <thead>
+          <tr>
+             <th>File No.</th>
+            <th>ID / Reservation</th>
+            <th>Patient Details</th>
+            <th>Attendance</th>
+            <th>Steps Inside</th>
+            <th>Officer</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in patients %}
+          <tr>
+             <td>
+              <span class="res-code">{{ p.fileserial }}</span>
+            </td>
+            <td>
+              <span class="res-code">{{ p.reservationCode }}</span>
+            </td>
+            
+            <td>
+              <div class="patient-info">
+                <span class="name">{{ p.fullname }}</span>
+                <span class="serial">File: #{{ p.fileserial }}</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="time-text"><i class="bi bi-calendar3 me-1 text-primary"></i> {{ p.attendanceDate }}</div>
+              <div class="small text-muted"><i class="bi bi-clock me-1"></i> {{ p.attendanceTime }}</div>
+            </td>
+
+            <td>
+              <div class="d-flex flex-wrap gap-1">
+                {% if p.formPrinted %}
+                  <span class="step-pill" style="background: #fff3e0; color: #ef6c00;">
+                    <i class="bi bi-printer"></i> Printed
+                  </span>
+                {% endif %}
+                
+                {% for visit in p.patientvisits.all %}
+                  <span class="step-pill">
+                    {{ visit.visittype }}
+                  </span>
+                {% empty %}
+                  {% if not p.formPrinted %}
+                    <span class="text-muted small">No Activity</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </td>
+
+            <td>
+              <span class="creator-badge">
+                <i class="bi bi-shield-check text-success me-1"></i> {{ p.createdBy.username }}
+              </span>
+            </td>
+
+            <td class="small text-muted">
+              {{ p.createdDate|date:"M d, Y" }}<br>
+              <span style="font-size: 0.7rem;">{{ p.createdDate|date:"H:i" }}</span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-2">No records found for the selected period.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+{% endblock %}

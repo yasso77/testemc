@@ -19,7 +19,7 @@ from django.db.models import Count
 from django.shortcuts import render
 from django.db.models import Count, Q
 from django.contrib.auth.models import User
-
+from django.db.models import Prefetch
 context = {
     'users': User.objects.filter(
         is_active=True,
@@ -261,40 +261,43 @@ class ReportView(ListView):
         return render(request, 'reports/export_patients_xl.html', context)
     
    
-    def visit_report_view(request):
-        start_date = request.GET.get('start_date')
-        end_date = request.GET.get('end_date')
+    @permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')
+    def showPatientDataAttendedToday(request):
 
-        visits = PatientVisits.objects.all()
+        from_date = request.GET.get('from_date')
+        to_date = request.GET.get('to_date')
 
-        if start_date and end_date:
-            visits = visits.filter(visitdate__range=[start_date, end_date])
+        # 🚫 Hard stop if dates are missing
+        if not from_date or not to_date:
+            return render(request, 'reports/whoAttend.html', {
+                'patients': [],
+                'Total': 0,
+                'error': 'Please select FROM and TO dates'
+            })
 
-        total_visits = visits.count()
-
-        classified_counts = (
-            visits.values('classifiedID__classifiedCategory')  # adjust field name as needed
-            .annotate(count=Count('classifiedID'))
-            .order_by('-count')
+        visit_qs = PatientVisits.objects.filter(
+            visitdate__gte=from_date,
+            visitdate__lte=to_date
         )
-        category_colors = {
-            'ok': 'bg-green text-dark',
-            'bad': 'bg-warning text-dark',
-            '++': 'bg-orange text-dark',
-            '6/6': 'bg-white text-dark',
-            'Surgery': 'bg-pink text-dark',
-            }
 
-        context = {
-            'total_visits': total_visits,
-            'classified_counts': classified_counts,
-            'start_date': start_date,
-            'end_date': end_date,
-            'category_colors': category_colors,
-            
-        }
-        return render(request, 'reports/count_visit_classified.html', context)
+        patientList = (
+            Patient.objects
+            .filter(
+                attendanceDate__gte=from_date,
+                attendanceDate__lte=to_date
+            )
+            .prefetch_related(
+                Prefetch('patientvisits', queryset=visit_qs)
+            )
+            .order_by('-attendanceDate')
+        )
 
+        return render(request, 'reports/whoAttend.html', {
+            'patients': patientList,
+            'Total': patientList.count(),
+            'from_date': from_date,
+            'to_date': to_date
+        })
 
     
     def doctors_stats(request):

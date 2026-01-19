@@ -173,11 +173,7 @@ class Patient(models.Model):
     agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company') 
     
     organizationID=models.ForeignKey(Organizations,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='organization_related',verbose_name='Organiztaions',default=2)  
-    # organizationID = models.ForeignKey(
-    #     Organizations,
-    #     on_delete=models.DO_NOTHING,
-    #     db_constraint=True
-    # )
+    
     sufferedcase = models.ForeignKey(
         SufferedCases,
         on_delete=models.SET_NULL,
