@@ -82,7 +82,10 @@
                             <th>Timeline</th>
                             <th>Fee</th>
                             <th>Call Status</th>
+                            <th>Created by</th>
+                            <th>Created Date</th>
                             <th class="text-center">Quick Actions</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -120,6 +123,9 @@
                                     </div>
                                 {% endif %}
                             </td>
+                              <td>{{ patient.createdBy__username }}</td>
+            <td>{{ patient.createdDate|date:"Y-m-d H:i" }}</td>
+          
                             <td>
                                 <div class="action-stack">
                                     <a href="{% url 'followup' patient.patientid %}" 

@@ -142,10 +142,11 @@ class ReportView(ListView):
         return render(request, 'reports/compare_visits.html', {'comparison_data': comparison_data})
 
     
+ 
     def patient_report_view(request):
-        patients = Patient.objects.filter(isDeleted=False)
-
-        # Get filters from request
+        # =========================
+        # Read filters from request
+        # =========================
         date_field = request.GET.get('date_field', 'createdDate')
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
@@ -155,45 +156,87 @@ class ReportView(ListView):
         user_id = request.GET.get('users')
         export = request.GET.get('export')
 
-        # Date filtering with proper range logic
-        if date_from and date_to:
-            try:
-                date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
-                date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+        # =========================
+        # Detect if any filter is applied
+        # =========================
+        has_filters = any([
+            date_from,
+            date_to,
+            city_id,
+            agent_id,
+            lead_source,
+            user_id,
+        ])
 
-                if date_field == 'createdDate':
-                    # DateTimeField: include full day
-                    start_datetime = date_from_obj
-                    end_datetime = date_to_obj + timedelta(days=1)
-                    patients = patients.filter(**{
-                        f"{date_field}__range": [start_datetime, end_datetime]
-                    })
-                else:
-                    # DateField
-                    patients = patients.filter(**{
-                        f"{date_field}__range": [date_from_obj.date(), date_to_obj.date()]
-                    })
-            except ValueError:
-                pass  # Ignore invalid date formats
+        # =========================
+        # Start with EMPTY queryset
+        # =========================
+        patients = Patient.objects.none()
 
-        # Additional filters
-        if city_id:
-            patients = patients.filter(city_id=city_id)
-        if agent_id:
-            patients = patients.filter(agentID_id=agent_id)
-        if lead_source:
-            patients = patients.filter(leadSource=lead_source)
-        if user_id:
-            patients = patients.filter(createdBy_id=user_id)
+        # =========================
+        # Apply filters only if user filtered
+        # =========================
+        if has_filters:
+            patients = Patient.objects.filter(isDeleted=False)
 
-        # Excel export
-        if export == 'excel':
+            # ---- Date filtering
+            if date_from and date_to:
+                try:
+                    date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+                    date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+
+                    if date_field == 'createdDate':
+                        patients = patients.filter(
+                            createdDate__range=(
+                                date_from_obj,
+                                date_to_obj + timedelta(days=1)
+                            )
+                        )
+                    else:
+                        patients = patients.filter(
+                            **{
+                                f"{date_field}__range": (
+                                    date_from_obj.date(),
+                                    date_to_obj.date()
+                                )
+                            }
+                        )
+                except ValueError:
+                    pass
+
+            # ---- Other filters
+            if city_id:
+                patients = patients.filter(city_id=city_id)
+
+            if agent_id:
+                patients = patients.filter(agentID_id=agent_id)
+
+            if lead_source:
+                patients = patients.filter(leadSource=lead_source)
+
+            if user_id:
+                patients = patients.filter(createdBy_id=user_id)
+
+            # ---- Optimize FK loading
+            patients = patients.select_related(
+                'city',
+                'agentID',
+                'createdBy'
+            )
+
+        # =========================
+        # Excel Export (only if filtered)
+        # =========================
+        if export == 'excel' and has_filters:
             wb = Workbook()
             ws = wb.active
             ws.title = "Patients Report"
 
-            # English column headers
-            headers = ['Code','File Serial', 'Name', 'Mobile','Lead Source','Suffered Case', 'City','Created By','Created Date', 'Attendance Date']
+            headers = [
+                'Code', 'File Serial', 'Name', 'Mobile',
+                'Lead Source', 'Agent', 'Suffered Case',
+                'City', 'Created By', 'Created Date', 'Attendance Date'
+            ]
             ws.append(headers)
 
             for p in patients:
@@ -203,17 +246,14 @@ class ReportView(ListView):
                     p.fullname,
                     p.mobile,
                     p.leadSource,
+                    p.agentID.AgentCompany if p.agentID else '',
                     str(p.sufferedcase),
-                    
                     p.city.cityName if p.city else '',
                     str(p.createdBy),
-                    #p.agentID.AgentCompany if p.agentID else '',
-                    
                     localtime(p.createdDate).strftime('%Y-%m-%d %H:%M') if p.createdDate else '',
                     p.attendanceDate.strftime('%Y-%m-%d') if p.attendanceDate else '',
                 ])
 
-            # Auto-fit column widths
             for col in ws.columns:
                 max_length = max(len(str(cell.value)) if cell.value else 0 for cell in col)
                 ws.column_dimensions[get_column_letter(col[0].column)].width = max_length + 2
@@ -225,40 +265,63 @@ class ReportView(ListView):
             wb.save(response)
             return response
 
-        # Pagination
+        # =========================
+        # Pagination (safe & fast)
+        # =========================
         paginator = Paginator(patients.order_by('-createdDate'), 50)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
-        leadSource_Choices=[('Facebook','Facebook'),('Whatsapp','Whatsapp'),('Youtube','Youtube'),('Newspaper','Newspaper'),('Friend','Friend'),('Call','Call'),('Instagram','Instagram'),('Center','Center')]
-        
-        # Clean query string without 'page'
-        get_params = request.GET.copy()
-        if 'page' in get_params:
-            get_params.pop('page')
-        query_string = get_params.urlencode()
-        
-       
 
+        # =========================
+        # Static choices
+        # =========================
+        leadSource_Choices = [
+            ('Facebook', 'Facebook'),
+            ('Whatsapp', 'Whatsapp'),
+            ('Youtube', 'Youtube'),
+            ('Newspaper', 'Newspaper'),
+            ('Friend', 'Friend'),
+            ('Call', 'Call'),
+            ('Instagram', 'Instagram'),
+            ('Center', 'Center'),
+        ]
+
+        # =========================
+        # Preserve query params
+        # =========================
+        get_params = request.GET.copy()
+        get_params.pop('page', None)
+        query_string = get_params.urlencode()
+
+        # =========================
+        # Context
+        # =========================
         context = {
             'page_obj': page_obj,
-            'total_count': paginator.count,
-            'cities': City.objects.all(),
-            'users': User.objects.filter(Q(groups__name__iexact="Call Center") | Q(groups__name__iexact="Reception")             
-                ).distinct().order_by('username'),
+            'total_count': paginator.count if has_filters else 0,
+            'has_filters': has_filters,
 
+            'cities': City.objects.all(),
             'agents': AgentCompany.objects.all(),
+            'users': User.objects.filter(
+                Q(groups__name__iexact="Call Center") |
+                Q(groups__name__iexact="Reception")
+            ).distinct().order_by('username'),
+
             'date_field': date_field,
             'date_from': date_from,
             'date_to': date_to,
             'city_id': str(city_id) if city_id else '',
             'agent_id': str(agent_id) if agent_id else '',
+            'user_id': str(user_id) if user_id else '',
             'lead_source': lead_source or '',
-            'lead_sources': dict(leadSource_Choices),  # This is important
+            'lead_sources': dict(leadSource_Choices),
+
             'query_string': query_string,
         }
 
         return render(request, 'reports/export_patients_xl.html', context)
+
     
    
     @permission_required_with_redirect('manager.UpdatePatinetData', login_url='/no-permission/')

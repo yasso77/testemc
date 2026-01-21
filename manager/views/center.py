@@ -392,7 +392,7 @@ class CenterView(ListView):
         .order_by('-patientid')
         .values(
             'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
-            'createdDate', 'city', 'mobile', 'sufferedcase__caseName',
+            'createdDate', 'createdBy__username', 'city', 'mobile', 'sufferedcase__caseName',
             'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate','checkUpprice__checkupPriceName',
             'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','reschadule_data'  # Add annotated fields
         )
@@ -482,7 +482,7 @@ class CenterView(ListView):
             .order_by('-createdDate')
             .values(
                 'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age','sufferedcase__caseName','latestConfirmation',
+                'createdDate', 'createdBy__username', 'city', 'mobile', 'age','sufferedcase__caseName','latestConfirmation',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
             )
@@ -536,7 +536,7 @@ class CenterView(ListView):
             )
             .values(
                 'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'createdDate','createdby__username', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
             )
@@ -587,7 +587,7 @@ class CenterView(ListView):
             )
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'createdDate', 'createdBy__username', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
             )
@@ -894,7 +894,7 @@ class CenterView(ListView):
             )
             .values(
                 'patientid', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age', 'sufferedcase__caseName',
+                'createdDate',  'createdBy__username','city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
                 'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
             )
