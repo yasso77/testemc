@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 
-# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# # Build paths inside the project like this: BASE_DIR / 'subdirFFFFFFFFFFFFF'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # # This is where the files will be COPIED to
