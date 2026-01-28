@@ -108,7 +108,12 @@
                     <div class="form-group row">
                         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name <span class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            {{ form.fullname }}
+                            {% comment %} {{ form.fullname }} {% endcomment %}
+
+                               <div class="col-sm-8">
+                            <input type="text" id="id_fullname" name="fullname"  class="form-control"  required>
+                            <div id="fullname-validation-message" class="alert alert-warning py-2 px-3" style="display: none;"></div>
+                        </div>
                             {% if form.fullname.errors %}<div class="text-danger">{{ form.fullname.errors }}</div>{% endif %}
                         </div>
                     </div>
@@ -116,7 +121,7 @@
                     <div class="form-group row">
                         <label for="id_mobile" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="text" id="id_mobile" name="mobile" maxlength="12" class="form-control" placeholder="01XXXXXXXXX" required>
+                            <input type="text" id="id_mobile" name="mobile" maxlength="15" class="form-control" placeholder="01XXXXXXXXX" required>
                             <div id="mobile-validation-message" class="alert alert-warning py-2 px-3" style="display: none;"></div>
                         </div>
                     </div>
@@ -230,6 +235,28 @@
                     .then(data => {
                         if (data.exists) {
                             messageSpan.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> This Mobile Number already exists. <a href="/reservationListMobile/${mobile}" target="_blank" class="fw-bold">View History</a>`;
+                            messageSpan.style.display = 'block';
+                        } else {
+                            messageSpan.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
+     document.addEventListener('DOMContentLoaded', function () {
+        const fullnameField = document.getElementById('id_fullname');
+        const messageSpan = document.getElementById('fullname-validation-message');
+        
+        fullnameField.addEventListener('blur', function () {
+            const fullname = fullnameField.value;
+            if (fullname) {
+                fetch(`/validate-fullname/?fullname=${fullname}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            messageSpan.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> This Name already exists. <a href="/reservationListName/${fullname}" target="_blank" class="fw-bold">View History</a>`;
                             messageSpan.style.display = 'block';
                         } else {
                             messageSpan.style.display = 'none';

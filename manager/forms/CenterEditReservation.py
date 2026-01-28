@@ -16,11 +16,11 @@ class CenterEditReservationForm(forms.ModelForm):
         error_messages={'required': 'Full Name is required!'},
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'})
     )
-    mobile = forms.CharField(
-    required=True,
-    error_messages={'required': 'Mobile is required!'},
-    widget=forms.TextInput(attrs={'id': 'id_mobile', 'class': 'form-control'})
-)
+#     mobile = forms.CharField(
+#     required=True,
+#     error_messages={'required': 'Mobile is required!'},
+#     widget=forms.TextInput(attrs={'id': 'id_mobile', 'class': 'form-control'})
+# )
     
     otherMobile = forms.CharField( 
                                   required=False,   
@@ -60,11 +60,11 @@ class CenterEditReservationForm(forms.ModelForm):
     )
     class Meta:
         model = Patient
-        exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = ['fullname', 'mobile', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address','organizationID']
+        exclude = ['createdDate', 'createdby','mobile']  # Exclude non-editable fields
+        fields = ['fullname', 'city', 'gender', 'offerID', 'remarks','checkUpprice', 'fileserial', 'birthdate', 'reservationType', 'referral', 'otherMobile','sufferedcaseByPatient', 'wearingconduct', 'rideglass','attendanceTime','attendanceDate','address','organizationID']
         
         widgets = {            
-            'mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            #'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             'otherMobile': forms.TextInput(attrs={'class': 'form-control'}),            
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),

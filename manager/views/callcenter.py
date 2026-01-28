@@ -3,14 +3,15 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from manager.decorators import permission_required_with_redirect
-
+from django.template.loader import render_to_string
+from django.core.paginator import Paginator
 from django.utils import timezone
 from manager.forms.addFollowUp import insertCallTrackForm
 from manager.forms.editReservation import editReservationForm
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
 from django.db.models import Count, Max, Subquery, OuterRef
-from manager.model.patient import CallTrack, Patient
+from manager.model.patient import AgentCompany, CallTrack, City, Patient
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
@@ -19,6 +20,8 @@ from manager.forms.CallCenterReservation import CCFormAddReservation
 from django.utils.timezone import make_aware, is_naive
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from openpyxl import Workbook
 
 class CallCenterView(ListView):
     
@@ -101,56 +104,218 @@ class CallCenterView(ListView):
                 "show_print": True,
             },
         )
-        
-        
-    @login_required
+    
+    
+    @login_required  
     def reservationsList(request):
-        # Get the current date
         today = date.today()
-        
-        # Calculate the date 30 days ago
-        thirty_days_ago = today - timedelta(days=30)
-        
-        # Check if the user is an admin
-        is_admin_or_marketing = request.user.groups.filter(name__in=['Admin', 'Marketing']).exists()
 
-        
-        # Filter recent patients
-        recent_patients = (
+        # =========================
+        # Filters
+        # =========================
+        date_field = request.GET.get('date_field', 'createdDate')
+        export = request.GET.get('export')
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
+        city_id = request.GET.get('city')
+        agent_id = request.GET.get('agentID')
+        lead_source = request.GET.get('leadSource') 
+        txtSearch = request.GET.get('txtSearch')      
+        search = request.GET.get('search', '').strip()
+
+        # =========================
+        # Permissions
+        # =========================
+        is_admin_or_marketing = request.user.groups.filter(
+            name__in=['Admin', 'Marketing']
+        ).exists()
+
+        # =========================
+        # Base queryset
+        # =========================
+        patients_qs = (
             Patient.objects.active()
             .exclude(leadSource='Center')
-            .filter(                
-                Q(createdDate__gte=thirty_days_ago) &
+            .filter(
                 (Q(reservedBy=request.user) if not is_admin_or_marketing else Q())
             )
-            .select_related('sufferedcase')
-            .annotate(
-                call_count=Count('call_patients', filter=Q(call_patients__trackType='CC')),  
-                last_call_date=Max('call_patients__createdDate', filter=Q(call_patients__trackType='CC')),
-                last_call_outcome=Subquery(
-                    CallTrack.objects.filter(
-                        patientID=OuterRef('pk'),
-                        trackType='CC'
-                        # Reference the current patient
-                        
-                    )
-                    .order_by('-createdDate')
-                    .values('outcome')[:1]  # Get the outcome of the latest call
-                )
-            )
-            .order_by('-createdDate')  # Ensure descending order
-            .values(
-                'patientid', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate', 'city', 'mobile', 'age',
-                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
-                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
-            )
         )
+
+        # =========================
+        # Date filtering
+        # =========================
+        if date_from and date_to:
+            try:
+                date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+                date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+
+                patients_qs = patients_qs.filter(
+                        createdDate__range=(
+                            date_from_obj,
+                            date_to_obj + timedelta(days=1)
+                        )
+                    )
+              
+            except ValueError:
+                pass
+
+        # =========================
+        # Other filters
+        # =========================
+        if txtSearch:
+            patients_qs = patients_qs.filter(
+                Q(fullname__icontains=txtSearch) |
+                Q(mobile__icontains=txtSearch)
+            )
+        if city_id:
+            patients_qs = patients_qs.filter(city_id=city_id)
+
+        if agent_id:
+            patients_qs = patients_qs.filter(agentID_id=agent_id)
+
+        if lead_source:
+            patients_qs = patients_qs.filter(leadSource=lead_source)       
+
+        if search:
+            patients_qs = patients_qs.filter(
+                Q(fullname__icontains=search) |
+                Q(phone__icontains=search)
+            )
+
+        # =========================
+        # Annotations & optimization
+        # =========================
+        patients_qs = patients_qs.select_related(
+            'sufferedcase', 'createdBy', 'city', 'agentID'
+        ).annotate(
+            call_count=Count(
+                'call_patients',
+                filter=Q(call_patients__trackType='CC')
+            ),
+            last_call_date=Max(
+                'call_patients__createdDate',
+                filter=Q(call_patients__trackType='CC')
+            ),
+            last_call_outcome=Subquery(
+                CallTrack.objects.filter(
+                    patientID=OuterRef('pk'),
+                    trackType='CC'
+                )
+                .order_by('-createdDate')
+                .values('outcome')[:1]
+            )
+        ).order_by('-createdDate')
+
+        # =========================
+        # Pagination
+        # =========================
+        paginator = Paginator(patients_qs, 20)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        # =========================
+        # AJAX response
+        # =========================
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            html = render_to_string(
+                'callcenter/patient_rows.html',
+                {'patients': page_obj}
+            )
+            return JsonResponse({
+                'html': html,
+                'has_next': page_obj.has_next(),
+                'total_count': paginator.count
+            })
+
+        # =========================
+        # Normal render
+         # =========================
+        leadSource_Choices = [
+            ('Facebook', 'Facebook'),
+            ('Whatsapp', 'Whatsapp'),
+            ('Youtube', 'Youtube'),
+            ('Newspaper', 'Newspaper'),
+            ('Friend', 'Friend'),
+            ('Call', 'Call'),
+            ('Instagram', 'Instagram'),
+            ('Center', 'Center'),
+        ]
+
+        # =========================
         
-        return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients})
+        # EXPORT TO EXCEL
+        if export == 'excel':
+            return CallCenterView.export_patients_excel(patients_qs)
+
+        context = {
+            'patients': page_obj,
+            'total_count': paginator.count,
+            
+
+            'cities': City.objects.all(),
+            'agents': AgentCompany.objects.all(),    
+            'date_field': date_field,
+            'date_from': date_from,
+            'date_to': date_to,
+            'city_id': str(city_id) if city_id else '',
+            'agent_id': str(agent_id) if agent_id else '',           
+            'lead_source': lead_source or '',
+            'lead_sources': dict(leadSource_Choices),
+            
+        }
+        return render(request, 'callcenter/reservationsList.html', context)
 
         
-        
+    def export_patients_excel(queryset):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Patients"
+
+        # Header
+        headers = [          
+            'Reservation Code',
+            'File Serial',
+            'Patient Name',
+            'Gender',
+            'Mobile',
+            'City',
+            'Agent',
+            'Check Price',
+            'Organization',
+            'Suffered Case',
+            'Lead Source',
+            'Created Date',
+            'Attendance Date',
+        ]
+        ws.append(headers)
+
+        # Rows
+        for p in queryset:
+            ws.append([              
+                p.reservationCode,
+                p.fileserial,
+                p.fullname,
+                p.gender,
+                p.mobile,
+                p.city.cityName if p.city else '',
+                p.agentID.AgentCompany if p.agentID else '',
+                str(p.checkUpprice) if p.checkUpprice else '',
+               
+                p.organizationID.orgName,
+                str(p.sufferedcase) if p.sufferedcase else '',
+               
+                p.leadSource,
+                p.createdDate.strftime('%Y-%m-%d'),
+                p.attendanceDate.strftime('%Y-%m-%d'),
+            ])
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=patients.xlsx'
+        wb.save(response)
+        return response
+    
     @login_required
    
     def reservationsListviewScope(request,viewScope):
@@ -184,7 +349,7 @@ class CallCenterView(ListView):
                 )
             )
             .values(
-                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'patientid', 'fullname', 'createdBy__username','reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age',
                 'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                 'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
@@ -211,7 +376,7 @@ class CallCenterView(ListView):
                         .values('outcome')[:1]  # Get the outcome of the latest call
                     )
                 ).values(
-                    'patientid', 'fullname', 'reservationCode', 'leadSource',
+                    'patientid', 'fullname', 'reservationCode','createdBy__username', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                     'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
@@ -243,7 +408,7 @@ class CallCenterView(ListView):
                 )
                 .filter(call_count__gt=0)  # Ensure patients have at least one confirmed call
                 .values(
-                    'patientid', 'fullname', 'reservationCode', 'leadSource',
+                    'patientid', 'fullname','createdBy__username', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                     'call_count', 'last_call_date', 'last_call_outcome'
@@ -272,7 +437,7 @@ class CallCenterView(ListView):
                     )
                 )
                 .values(
-                    'patientid', 'fullname', 'reservationCode', 'leadSource',
+                    'patientid', 'fullname','createdBy__username', 'reservationCode', 'leadSource',
                     'createdDate', 'city', 'mobile', 'age',
                     'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                     'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
@@ -304,7 +469,7 @@ class CallCenterView(ListView):
                 )
             )
             .values(
-                'patientid', 'fullname', 'reservationCode', 'leadSource',
+                'patientid', 'fullname', 'createdBy__username','reservationCode', 'leadSource',
                 'createdDate', 'city', 'mobile', 'age',
                 'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
                 'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
@@ -315,7 +480,42 @@ class CallCenterView(ListView):
         # Pass the data to the template      
         
             return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':strmobile})
-       
+    @login_required
+    def reservationsListviewName(request,strname):
+            
+            recent_patients = (
+            Patient.objects.active()
+            .filter(
+                
+                reservedBy=request.user,
+                fullname=strname,
+                #isDeleted=False
+            )
+            .select_related('sufferedcase')
+            .annotate(
+                call_count=Count('call_patients'),  # Count number of call tracks for each patient
+                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                last_call_outcome=Subquery(
+                    CallTrack.objects.filter(
+                        patientID=OuterRef('pk')  # Reference the current patient
+                    )
+                    .order_by('-createdDate')
+                    .values('outcome')[:1]  # Get the outcome of the latest call
+                )
+            )
+            .values(
+                'patientid', 'fullname', 'createdBy__username','reservationCode', 'leadSource',
+                'createdDate', 'city', 'mobile', 'age',
+                'sufferedcase__caseName', 'expectedDate', 'gender', 'attendanceDate',
+                'call_count', 'last_call_date', 'last_call_outcome'  # Add annotated fields
+            )
+        )
+        
+        
+        # Pass the data to the template      
+        
+            return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':strname})
+           
     def check_reservationCode(request):
         if request.method == 'GET':
             reservation_Code = request.GET.get('reservation_Code')
@@ -525,5 +725,13 @@ class CallCenterView(ListView):
         if mobile:
             if Patient.objects.filter(mobile=mobile).exists():
                 return JsonResponse({'exists': True, 'message': 'A patient with this Mobile Number already exists.'})
+        return JsonResponse({'exists': False})
+    
+    @csrf_exempt
+    def validate_fullname(request):
+        name = request.GET.get('fullname', None)
+        if name:
+            if Patient.objects.filter(fullname=name).exists():
+                return JsonResponse({'exists': True, 'message': 'A patient with this Name Number already exists.'})
         return JsonResponse({'exists': False})
 

@@ -1,0 +1,61 @@
+
+{% for patient in patients %}
+                    <tr>
+                        <td><span class="res-code">{{ patient.reservationCode }}</span></td>
+                        <td>
+                            <div class="fw-bold">{{ patient.fullname }}</div>
+                            <div class="small text-muted">Age: {{ patient.age }}</div>
+                        </td>
+                        <td>
+                            <div><i class="bi bi-phone me-1 text-primary"></i> {{ patient.mobile }}</div>
+                        </td>
+                        <td>
+                            <span class="text-dark">{{ patient.sufferedcase__caseName }}</span>
+                        </td>
+                        <td data-order="{{ patient.createdDate|date:'Y-m-d H:i:s' }}">
+                            <div class="small">{{ patient.createdDate|date:'M d, Y' }}</div>
+                            <div class="text-muted" style="font-size: 10px;">{{ patient.createdDate|date:'g:i a' }}</div>
+                        </td>
+                        <td>{{ patient.createdBy.username }}</td>
+
+                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">
+                            <span class="badge bg-light text-primary border-primary-light">{{ patient.expectedDate }}</span>
+                        </td>
+                        <td>
+                            <div class="small mb-1">Calls: <strong>{{ patient.call_count }}</strong></div>
+                            {% if patient.last_call_outcome %}
+                                <span class="outcome-pill {% if patient.last_call_outcome == 'Confirmed' %}outcome-confirmed{% elif patient.last_call_outcome == 'Canceled' %}outcome-canceled{% else %}outcome-pending{% endif %}">
+                                    {{ patient.last_call_outcome }}
+                                </span>
+                            {% else %}
+                                <span class="outcome-pill" style="background: #f8f9fa; color: #abb5be;">No Activity</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td class="text-center">
+                            <div class="action-btn-group">
+                                {% if patient.attendanceDate %}
+                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-light text-success border" title="Attended">
+                                        <i class="bi bi-calendar-check-fill"></i>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-outline-warning" title="Follow-Up">
+                                        <i class="bi bi-telephone-outbound"></i>
+                                    </a>
+
+                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-outline-primary" title="Edit Profile">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Archived" 
+                                            onclick="return confirm('Archive this record?');">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %} 

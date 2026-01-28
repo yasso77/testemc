@@ -62,6 +62,7 @@ urlpatterns = [
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
     path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
+    path('validate-fullname/', CallCenterView.validate_fullname, name='validate-fullname'),
     path("confirm/<int:patientid>/<str:fileserial>/", CenterView.confirm_page,name="confirm_page"),
 
     
@@ -71,12 +72,14 @@ urlpatterns = [
     path('reservationList', CallCenterView.reservationsList, name='reservationList'),
     path('reservationListScope/<str:viewScope>/', CallCenterView.reservationsListviewScope, name='reservationListScope'),
     path('reservationListMobile/<str:strmobile>/', CallCenterView.reservationsListviewMobile, name='reservationListMobile'),
+     path('reservationListName/<str:strname>/', CallCenterView.reservationsListviewName, name='reservationListName'),
     path('edit_reservation/<int:patientid>/', CallCenterView.edit_reservation, name='edit_reservation'),
     path('follow_reservation/<int:patientid>/', CallCenterView.follow_reservation, name='follow_reservation'),
     path('delete_patient/<int:patientid>/', CallCenterView.delete_patient, name='delete_patient'),
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
+    
     path('callCentersearchOnPatinet/',CenterView.CallcenterSearchOnPatient,name='callCentersearchOnPatinet'),
     path("confirm_page_call/<int:patientid>/<str:reservationCode>/", CallCenterView.confirm_page_call,name="confirm_page_call"),
     

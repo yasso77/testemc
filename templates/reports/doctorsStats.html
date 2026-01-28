@@ -1,172 +1,176 @@
-{% extends 'master.html'%}
+{% extends 'master.html' %}
 {% block content %}
-<!-- Bootstrap 5 (must be included once at the bottom of your template) -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<div class="pagetitle">
-    <h2>Doctors Performance Report</h2>
-  <nav>
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-      <li class="breadcrumb-item">Managers</li>
-      <li class="breadcrumb-item active">Doctors Stats</li>
-    </ol>
-  </nav>
-</div><!-- End Page Title -->
+<div class="pagetitle mb-4">
+    <h2 class="fw-bold">Doctors Performance Report</h2>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Managers</li>
+            <li class="breadcrumb-item active">Doctors Stats</li>
+        </ol>
+    </nav>
+</div>
 
 <section class="section dashboard">
-    <div class="container mt-4">
+    <div class="container-fluid">
 
-      
-        <br>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body pt-3">
+                <h5 class="card-title border-bottom pb-2 mb-3"><i class="bi bi-filter-left me-2"></i>Filter Data</h5>
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="from_date" class="form-label small fw-bold">From Date</label>
+                        <input type="date" id="from_date" name="from_date" class="form-control form-control-sm" 
+                               value="{{ request.GET.from_date }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="to_date" class="form-label small fw-bold">To Date</label>
+                        <input type="date" id="to_date" name="to_date" class="form-control form-control-sm" 
+                               value="{{ request.GET.to_date }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="doctor" class="form-label small fw-bold">Doctor</label>
+                        <select id="doctor" name="doctor" class="form-select form-select-sm">
+                            <option value="">All Doctors</option>
+                            {% for doc in doctors %}
+                                <option value="{{ doc.id }}" {% if request.GET.doctor == doc.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ doc.get_full_name|default:doc.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm">
+                            <i class="bi bi-search me-1"></i> Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        <!-- Filter Form -->
-       <form method="get" class="row g-3 mb-4">
-    <div class="col-md-3">
-    <label for="from_date" class="form-label">From Date</label>
-    <input type="date" id="from_date" name="from_date" class="form-control" 
-           value="{{ request.GET.from_date }}" required>
-</div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body pt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">Performance Overview</h5>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-calendar3 me-1"></i> {{ from_date }} — {{ to_date }}
+                            </span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="border-0">Doctor Name</th>
+                                        <th class="text-center border-0">Total Visits</th>
+                                        <th class="text-center border-0">Surgery</th>
+                                        <th class="text-center border-0">Loss</th>
+                                        <th class="text-center border-0">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in comparison_data %}
+                                    <tr>
+                                        <td class="fw-semibold text-dark">{{ item.doctor_name }}</td>
+                                        <td class="text-center"><span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3">{{item.total_visits}}</span></td>
+                                        <td class="text-center">
+                                            {% if from_date and to_date %}
+                                            <a href="#" class="view-patients text-decoration-none fw-bold text-success" 
+                                               data-url="{% url 'patients_by_type' item.doctor_id 'surgery' from_date to_date %}" 
+                                               data-title="Surgery Patients for {{ item.doctor_name }}">
+                                                {{ item.surgery }} <i class="bi bi-eye ms-1 small"></i>
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted" onclick="alert('Please select dates');">{{ item.surgery }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if from_date and to_date %}
+                                            <a href="#" class="view-patients text-decoration-none fw-bold text-danger"
+                                               data-url="{% url 'patients_by_type' item.doctor_id 'loss' from_date to_date %}"
+                                               data-title="Lost Patients for {{ item.doctor_name }}">
+                                                {{ item.patients_lose }} <i class="bi bi-eye ms-1 small"></i>
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted" onclick="alert('Please select dates');">{{ item.patients_lose }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.stats == 'Good' %}
+                                                <span class="badge bg-success-light text-success border border-success border-opacity-25"><i class="bi bi-check-circle me-1"></i>{{ item.stats }}</span>
+                                            {% elif item.stats == 'Average' %}
+                                                <span class="badge bg-warning-light text-warning border border-warning border-opacity-25"><i class="bi bi-dash-circle me-1"></i>{{ item.stats }}</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-light text-danger border border-danger border-opacity-25"><i class="bi bi-exclamation-circle me-1"></i>{{ item.stats }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">No data available for the selected period.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div class="col-md-3">
-    <label for="to_date" class="form-label">To Date</label>
-    <input type="date" id="to_date" name="to_date" class="form-control" 
-           value="{{ request.GET.to_date }}" required>
-</div>
-
-    <div class="col-md-3">
-        <label for="doctor" class="form-label">Doctor</label>
-        <select id="doctor" name="doctor" class="form-select">
-            <option value="">All Doctors</option>
-           {% for doc in doctors %}
-    <option value="{{ doc.id }}" {% if request.GET.doctor == doc.id|stringformat:"s" %}selected{% endif %}>
-        {{ doc.get_full_name|default:doc.username }}
-    </option>
-{% endfor %}
-
-        </select>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body pt-3">
+                        <h5 class="card-title mb-4">Visual Analytics</h5>
+                        <div style="height: 350px;">
+                            <canvas id="doctorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-3 d-flex align-items-end justify-content-center">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    <div class="modal fade" id="patientsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="patientsModalLabel">Patients List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <div id="patientsModalContent">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Fetching medical records...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="printPatientsModal">
+                        <i class="bi bi-printer me-1"></i> Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
-
-        <!-- Report Dates -->
-        <br>
-        <div class=" mb-3">
-            <strong>Report From:</strong> {{ from_date }} &nbsp; 
-            <strong>To:</strong> {{ to_date }}
-        </div>
-
-        <!-- Doctors Statistics Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped text-center align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-start">Doctor Name</th>
-                        <th>Total Visits</th>
-                        <th>Surgery</th>
-                        <th>Patient Loss</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in comparison_data %}
-                    <tr>
-                       <td class="text-start">{{ item.doctor_name }}</td>
-<td>{{item.total_visits}}</td>
-                     <td>
-    <a href="#" 
-       class="view-patients" 
-       data-url="{% url 'patients_by_type' item.doctor_id 'surgery' from_date to_date %}" 
-       data-title="Surgery Patients for {{ item.doctor_name }}">
-        {{ item.surgery }}
-    </a>
-</td>
-<td>
-    <a href="#" 
-       class="view-patients" 
-       data-url="{% url 'patients_by_type' item.doctor_id 'loss' from_date to_date %}" 
-       data-title="Lost Patients for {{ item.doctor_name }}">
-        {{ item.patients_lose }}
-    </a>
-</td>
-
-
-
-                        <td>
-                            {% if item.stats == 'Good' %}
-                                <span class="badge bg-success">{{ item.stats }}</span>
-                            {% elif item.stats == 'Average' %}
-                                <span class="badge bg-warning text-dark">{{ item.stats }}</span>
-                            {% else %}
-                                <span class="badge bg-danger">{{ item.stats }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">No data available for the selected period.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-    <!-- Chart -->
-   <canvas id="doctorChart"></canvas>
-  </div>
-
-
-<!-- Patient List Modal -->
-<div class="modal fade" id="patientsModal" tabindex="-1" aria-labelledby="patientsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content border-0 shadow-lg rounded-3">
-
-      <!-- Header -->
-      <div class="modal-header d-flex justify-content-between align-items-center bg-light border-bottom">
-        <h5 class="modal-title fw-semibold text-primary mb-0" id="patientsModalLabel">
-          Patients List
-        </h5>
-        <div class="d-flex align-items-center gap-2">
-          <button type="button" class="btn btn-sm btn-primary d-flex align-items-center" id="printPatientsModal">
-            <i class="bi bi-printer me-1"></i> Print
-          </button>
-          <button type="button" 
-        class="btn btn-sm btn-danger d-flex align-items-center" 
-        data-bs-dismiss="modal" 
-        aria-label="Close" 
-        id="closePatientsModal">
-  <i class="bi bi-x-circle me-1"></i> Close
-</button>
-
-        </div>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-body bg-white">
-        <div id="patientsModalContent" class="text-center py-4">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="mt-2 text-muted">Loading...</p>
-        </div>
-      </div>
-
-      <!-- Optional Footer (for future actions) -->
-      <!--
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-      -->
-
-    </div>
-  </div>
-</div>
-
 </section>
+
+<style>
+    .bg-success-light { background-color: #e1f6e1; }
+    .bg-warning-light { background-color: #fff8e1; }
+    .bg-danger-light { background-color: #ffebee; }
+    .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    .breadcrumb-item + .breadcrumb-item::before { content: "›"; }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
@@ -191,36 +195,25 @@
     data: data,
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { position: "top" } },
       scales: {
         y: { beginAtZero: true }
       }
     }
   });
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+
+  document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('patientsModal');
     const modal = new bootstrap.Modal(modalEl);
 
-    // When user clicks to view patients
     $(document).on('click', '.view-patients', function (e) {
         e.preventDefault();
-
         const url = $(this).data('url');
         const title = $(this).data('title');
-
         $('#patientsModalLabel').text(title);
-        $('#patientsModalContent').html(`
-            <div class="text-center py-3">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Loading...</p>
-            </div>
-        `);
-
+        $('#patientsModalContent').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>');
         modal.show();
-
-        // Load content via AJAX
         $.get(url, function (data) {
             $('#patientsModalContent').html(data);
         }).fail(function () {
@@ -228,40 +221,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 🖨️ Print button
     $('#printPatientsModal').on('click', function () {
         const content = document.getElementById('patientsModalContent').innerHTML;
         const printWindow = window.open('', '_blank', 'width=900,height=600');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>${document.getElementById('patientsModalLabel').textContent}</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        body { padding: 20px; font-family: sans-serif; }
-                        table { width: 100%; border-collapse: collapse; }
-                        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-                        th { background-color: #f8f9fa; }
-                    </style>
-                </head>
-                <body>
-                    <h5>${document.getElementById('patientsModalLabel').textContent}</h5>
-                    ${content}
-                </body>
-            </html>
-        `);
+        printWindow.document.write(`<html><head><title>Print</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>${content}</body></html>`);
         printWindow.document.close();
         printWindow.focus();
-        printWindow.print();
+        setTimeout(() => { printWindow.print(); }, 500);
     });
-
-    // 🧹 Clean up modal backdrop and unlock page after closing
-    modalEl.addEventListener('hidden.bs.modal', function () {
-        document.body.classList.remove('modal-open');
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        backdrops.forEach(b => b.remove());
-    });
-});
+  });
 </script>
 
 {% endblock %}

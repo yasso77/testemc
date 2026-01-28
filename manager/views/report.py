@@ -428,26 +428,35 @@ class ReportView(ListView):
     })
         
     def patients_by_type(request, doctor_id, patient_type, from_date, to_date):
-        visits = PatientVisits.objects.filter(
-            doctorid=doctor_id,
-            visittype="D",
-            visitdate__range=[from_date, to_date]
-        )
-
-        if patient_type == "surgery":
-            visits = visits.filter(evaluationeegree="Surgery")
-            title = "Surgery Patients"
-        elif patient_type == "loss":
-            visits = visits.filter(evaluationeegree="Bad")
-            title = "Lost Patients"
+        
+        if from_date == "null" or to_date == "null":
+            return render(request, "reports/_patientsTable.html", {
+                "visits": [],
+                "title": "No Date Range Specified",
+            })
         else:
-            visits = []
-            title = "Invalid Type"
+            visits = PatientVisits.objects.filter(
+                doctorid=doctor_id,
+                visittype="D",
+                visitdate__range=[from_date, to_date]
+            )
 
-        # Return only the patient table, not the full layout
-        return render(request, "reports/_patientsTable.html", {
-            "visits": visits,
-            "title": title,
+            if patient_type == "surgery":
+                visits = visits.filter(evaluationeegree="Surgery")
+                title = "Surgery Patients"
+            elif patient_type == "loss":
+                visits = visits.filter(evaluationeegree="Bad")
+                title = "Lost Patients"
+            else:
+                visits = []
+                title = "Invalid Type"
+
+            # Return only the patient table, not the full layout
+            return render(request, "reports/_patientsTable.html", {
+                "visits": visits,
+                "title": title,
+                "from_date": from_date,
+                "to_date": to_date,
         })
 
 

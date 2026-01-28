@@ -2,108 +2,116 @@
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
-    /* 1. Global Table Styling */
+    :root {
+        --primary-blue: #4154f1;
+        --dark-navy: #012970;
+        --bg-light-blue: #f6f9ff;
+        --border-soft: #e0eaff;
+    }
+
+    /* Global Card Styling */
     .section-card {
         background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+        padding: 25px;
+        position: relative;
+        border: 1px solid var(--border-soft);
+    }
+
+    /* AJAX Loader Overlay */
+    #ajax-loader-overlay {
+        display: none;
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.75);
+        z-index: 1000;
+        border-radius: 15px;
+        backdrop-filter: blur(2px);
+    }
+
+    /* Compact Filter Design */
+    .filter-box {
+        background: var(--bg-light-blue);
+        border: 1px solid var(--border-soft);
         border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         padding: 20px;
+        margin-bottom: 30px;
     }
 
-    #patientsTable {
-        border: none !important;
-        margin-top: 15px !important;
+    .form-label {
+        color: var(--dark-navy);
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
     }
 
-    /* 2. Alternating Row Style (Zebra) */
-    #patientsTable tbody tr:nth-child(even) {
-        background-color: #fcfdfe !important;
-    }
-    
-    #patientsTable tbody tr:hover {
-        background-color: #f1f4f9 !important;
-        transition: 0.2s ease;
-    }
-
-    /* 3. Header Styling */
-    #patientsTable thead th {
-        background-color: #ffffff;
-        color: #899bbd;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        border-bottom: 2px solid #f1f4f9 !important;
-        padding: 15px 10px;
-    }
-
-    /* 4. High-Visibility Search Customization */
-    .dataTables_filter {
-        float: none !important;
-        text-align: left !important;
-        margin-bottom: 25px;
-        background: #f6f9ff;
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #d0d9ff;
-    }
-
-    .dataTables_filter label {
-        font-weight: 700;
-        color: #012970;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
-
-    .dataTables_filter input {
-        margin-left: 15px !important;
-        flex-grow: 1;
-        height: 45px;
-        border-radius: 8px !important;
-        border: 1px solid #ced4da !important;
-        padding: 10px 20px !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        font-size: 1rem;
-    }
-
-    .dataTables_filter input:focus {
-        border-color: #4154f1 !important;
-        outline: none;
-        box-shadow: 0 0 0 0.25rem rgba(65, 84, 241, 0.1) !important;
-    }
-
-    /* 5. Utility Classes */
-    .res-code {
-        color: #4154f1;
-        font-weight: 700;
-        background: #f0f2ff;
-        padding: 4px 8px;
-        border-radius: 5px;
-    }
-
-    .outcome-pill {
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .outcome-confirmed { background: #e7faf3; color: #198754; }
-    .outcome-canceled { background: #ffeef0; color: #dc3545; }
-    .outcome-pending { background: #fff8e6; color: #ffc107; }
-
-    .action-btn-group .btn {
+    .form-control, .form-select {
+        border: 1px solid #ced4da;
         border-radius: 8px;
-        margin: 0 2px;
-        transition: 0.3s;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(65, 84, 241, 0.15);
+    }
+
+    /* Table Customization */
+    #patientsTable {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    #patientsTable thead th {
+        background-color: var(--bg-light-blue);
+        color: #899bbd;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border: none;
+        padding: 12px 15px;
+    }
+
+    #patientsTable tbody tr {
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
+
+    #patientsTable tbody tr:hover {
+        background-color: #fbfcfe !important;
+        transform: scale(1.002);
+    }
+
+    #patientsTable td {
+        padding: 15px;
+        border-top: 1px solid #f1f4f9;
+        border-bottom: 1px solid #f1f4f9;
+        font-size: 14px;
+    }
+
+    /* Status & Codes */
+    .res-code { 
+        color: var(--primary-blue); 
+        font-weight: 700; 
+        background: #f0f2ff; 
+        padding: 4px 10px; 
+        border-radius: 6px;
+        font-family: 'Monaco', 'Consolas', monospace;
+    }
+
+    .pagetitle h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--dark-navy);
     }
 </style>
 
-<div class="pagetitle">
-    <h1>Workspace: <span style="color: #4154f1;">{{viewScope}}</span></h1>
+<div class="pagetitle mb-4">
+    <h1>Workspace: <span class="text-primary">{{viewScope}}</span></h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
@@ -114,110 +122,223 @@
 
 <section class="section">
     <div class="section-card">
-        
-        <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-            <div>
-                <i class="bi bi-person-check text-primary me-2"></i>
-                <span class="text-muted">Agent:</span> <strong>{{ request.user.username }}</strong>
-            </div>
-            <div class="text-muted small">
-                <i class="bi bi-calendar3 me-1"></i> Scope: 30 Days Ago
+        <div id="ajax-loader-overlay">
+            <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <span class="fw-bold text-primary">Updating Records...</span>
             </div>
         </div>
 
-        <table id="patientsTable" class="display nowrap" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID Code</th>
-                    <th>Patient Name</th> 
-                    <th>Contact</th>
-                    <th>Case Type</th>        
-                    <th>Created At</th>
-                    <th>Expected</th> 
-                    <th>Status Summary</th>   
-                    <th class="text-center">Operations</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for patient in patients %}
-                    <tr>
-                        <td><span class="res-code">{{ patient.reservationCode }}</span></td>
-                        <td>
-                            <div class="fw-bold">{{ patient.fullname }}</div>
-                            <div class="small text-muted">Age: {{ patient.age }}</div>
-                        </td>
-                        <td>
-                            <div><i class="bi bi-phone me-1 text-primary"></i> {{ patient.mobile }}</div>
-                        </td>
-                        <td>
-                            <span class="text-dark">{{ patient.sufferedcase__caseName }}</span>
-                        </td>
-                        <td data-order="{{ patient.createdDate|date:'Y-m-d H:i:s' }}">
-                            <div class="small">{{ patient.createdDate|date:'M d, Y' }}</div>
-                            <div class="text-muted" style="font-size: 10px;">{{ patient.createdDate|date:'g:i a' }}</div>
-                        </td>
-                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">
-                            <span class="badge bg-light text-primary border-primary-light">{{ patient.expectedDate }}</span>
-                        </td>
-                        <td>
-                            <div class="small mb-1">Calls: <strong>{{ patient.call_count }}</strong></div>
-                            {% if patient.last_call_outcome %}
-                                <span class="outcome-pill {% if patient.last_call_outcome == 'Confirmed' %}outcome-confirmed{% elif patient.last_call_outcome == 'Canceled' %}outcome-canceled{% else %}outcome-pending{% endif %}">
-                                    {{ patient.last_call_outcome }}
-                                </span>
-                            {% else %}
-                                <span class="outcome-pill" style="background: #f8f9fa; color: #abb5be;">No Activity</span>
-                            {% endif %}
-                        </td>
-                        
-                        <td class="text-center">
-                            <div class="action-btn-group">
-                                {% if patient.attendanceDate %}
-                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-light text-success border" title="Attended">
-                                        <i class="bi bi-calendar-check-fill"></i>
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'follow_reservation' patient.patientid %}" class="btn btn-sm btn-outline-warning" title="Follow-Up">
-                                        <i class="bi bi-telephone-outbound"></i>
-                                    </a>
+        <div class="filter-box shadow-sm border-0 rounded-4 p-4 mb-4" style="background: #ffffff;">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h5 class="m-0 fw-bold d-flex align-items-center" style="color: #012970; letter-spacing: -0.5px;">
+            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                <i class="bi bi-sliders2 text-primary"></i>
+            </div>
+            Search & Filter
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="small text-muted fw-semibold">Active User:</span>
+            <div class="badge bg-light text-primary border border-primary border-opacity-10 px-3 py-2 rounded-pill shadow-none">
+                <i class="bi bi-person-circle me-1"></i> {{ request.user.username }}
+            </div>
+        </div>
+    </div>
+    
+    <form id="ajax-filter-form" method="get" class="row g-3">
+        <div class="col-md-5">
+            <label class="form-label fw-bold small text-secondary">Patient Information</label>
+            <div class="input-group input-group-lg shadow-none">
+                <span class="input-group-text bg-light border-0"><i class="bi bi-search text-primary"></i></span>
+                <input type="text" name="txtSearch" value="{{ txtSearch }}" 
+                       class="form-control bg-light border-0 fs-6" 
+                       placeholder="Search Name, Phone, or ID..." 
+                       style="padding: 0.75rem 1rem;">
+            </div>
+        </div>
 
-                                    <a href="{% url 'edit_reservation' patient.patientid %}" class="btn btn-sm btn-outline-primary" title="Edit Profile">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
+        <div class="col-md-7">
+            <label class="form-label fw-bold small text-secondary">Date Range (Created At)</label>
+            <div class="input-group input-group-lg">
+                <input type="date" name="date_from" value="{{ date_from }}" class="form-control bg-light border-0 fs-6">
+                <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-arrow-right-short"></i></span>
+                <input type="date" name="date_to" value="{{ date_to }}" class="form-control bg-light border-0 fs-6">
+            </div>
+        </div>
 
-                                    <form action="{% url 'delete_patient' patient.patientid %}" method="post" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Archived" 
-                                            onclick="return confirm('Archive this record?');">
-                                            <i class="bi bi-archive"></i>
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-secondary">City</label>
+            <select name="city" class="form-select border-0 bg-light py-2">
+                <option value="">All Cities</option>
+                {% for city in cities %}
+                <option value="{{ city.pk }}" {% if city_id == city.pk|stringformat:"s" %}selected{% endif %}>{{ city.cityName }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold small text-secondary">Assigned Agent</label>
+            <select name="agentID" class="form-select border-0 bg-light py-2">
+                <option value="">All Agents</option>
+                {% for agent in agents %}
+                <option value="{{ agent.pk }}" {% if agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.AgentCompany }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-5 d-flex align-items-end justify-content-md-end gap-2">
+            <button type="submit" class="btn btn-primary btn-lg px-4 rounded-3 d-flex align-items-center shadow-sm">
+                <i class="bi bi-funnel-fill me-2"></i> 
+                <span>Apply Filter</span>
+            </button>
+            <button type="submit" name="export" value="excel" class="btn btn-light btn-lg px-4 rounded-3 border d-flex align-items-center text-success fw-semibold">
+                <i class="bi bi-file-earmark-excel-fill me-2"></i> 
+                <span>Export</span>
+            </button>
+        </div>
+    </form>
+</div>
+<div id="countpatients">
+    <h5 class="mb-4 fw-bold" style="color: #012970;">
+        Total Reservations: <span id="totalCount" class="text-primary">{{ total_count }}</span>
+    </h5>
+</div>
+        <div class="table-responsive">
+            <table id="patientsTable" class="table w-100">
+                <thead>
+                    <tr>
+                        <th>ID Code</th>
+                        <th>Patient Name</th> 
+                        <th>Contact</th>
+                        <th>Case Type</th>        
+                        <th>Created At</th>
+                        <th>Created By</th>
+                        <th>Expected</th> 
+                        <th>Status</th>   
+                        <th class="text-center">Ops</th>
+                    </tr>
+                </thead>
+                <tbody id="patient-body">
+                    {% include 'callcenter/patient_rows.html' %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="scroll-loader" class="text-center p-4" style="display: none;">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span class="ms-2 small text-muted fw-bold">Fetching more records...</span>
+        </div>
     </div>
 </section>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#patientsTable').DataTable({
-            "order": [],
-            "searching": true,
-            "paging": true,
-            "lengthChange": false,
-            "pageLength": 25,
-            "language": {
-                "search": "<i class='bi bi-search me-2'></i> SEARCH PATIENT:",
-                "searchPlaceholder": "Enter Name, Phone, or Code..."
-            }
-        });
+/* ===============================
+   GLOBAL STATE
+================================ */
+let page = 1;
+let loading = false;
+let hasNext = true;
+
+/* ===============================
+   HELPERS
+================================ */
+function getQueryParams() {
+    return window.location.search.replace('?', '');
+}
+
+function resetList() {
+    page = 1;
+    hasNext = true;
+    loading = false;
+    $('#patient-body').html('');
+}
+
+/* ===============================
+   FILTER FORM (AJAX)
+================================ */
+$('#ajax-filter-form').on('submit', function (e) {
+
+    // Allow Excel export to submit normally
+    if (e.originalEvent && e.originalEvent.submitter.value === 'excel') {
+        return;
+    }
+
+    e.preventDefault();
+
+    const formData = $(this).serialize();
+
+    resetList();
+    $('#ajax-loader-overlay').fadeIn(200);
+
+    $.ajax({
+        url: window.location.pathname + "?" + formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        success: function (res) {
+
+            // Replace rows
+            $('#patient-body').html(res.html);
+
+            // Update total count
+            $('#totalCount').text(res.total_count);
+
+            // Update pagination state
+            hasNext = res.has_next;
+
+            // Update URL
+            window.history.pushState({}, '', "?" + formData);
+
+            $('#ajax-loader-overlay').fadeOut(200);
+        },
+        error: function () {
+            $('#ajax-loader-overlay').fadeOut(200);
+            alert("Error filtering records.");
+        }
     });
+});
+
+/* ===============================
+   INFINITE SCROLL
+================================ */
+$(window).on('scroll', function () {
+    if (!hasNext || loading) return;
+
+    if ($(window).scrollTop() + $(window).height() + 200 >= $(document).height()) {
+        loadMore();
+    }
+});
+
+function loadMore() {
+    loading = true;
+    page++;
+    $('#scroll-loader').show();
+
+    let query = getQueryParams();
+    let url = "?page=" + page + (query ? "&" + query : "");
+
+    $.ajax({
+        url: url,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        success: function (res) {
+
+            // Append rows
+            $('#patient-body').append(res.html);
+
+            // Keep total count synced
+            $('#totalCount').text(res.total_count);
+
+            hasNext = res.has_next;
+            loading = false;
+            $('#scroll-loader').hide();
+        },
+        error: function () {
+            loading = false;
+            $('#scroll-loader').hide();
+        }
+    });
+}
 </script>
+
 {% endblock %}

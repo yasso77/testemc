@@ -85,8 +85,8 @@
       </li>
 
 
-
-      {% if request.user|in_group:"Call Center" or request.user|in_group:"Admin" or request.user|in_group:"Marketing" %}
+{% comment %} call center links {% endcomment %}
+      {% if request.user|in_group:"Call Center" %}
 
       <li class="nav-item">
 
@@ -125,8 +125,8 @@
       {% endif %}
 
 
-
-      {% if request.user|in_group:"Reception" or request.user|in_group:"Admin" %}
+{% comment %} center links {% endcomment %}
+      {% if request.user|in_group:"Reception"%}
 
       <li class="nav-item">
 
@@ -140,13 +140,13 @@
 
           <li><a href="{% url 'centerNewreservation' %}"><i class="bi bi-plus-lg"></i><span>New Reservation</span></a></li>
 
-          <li><a href="{% url 'centerPatients' 'Attendance-Today' %}"><i class="bi bi-calendar-check"></i><span>Attendance Today</span></a></li>
+         <li><a href="{% url 'centerPatients' 'Attendance-Today' %}"><i class="bi bi-calendar-check"></i><span>Attendance Today</span></a></li>
 
-          <li><a href="{% url 'centerPatients' 'All-List' %}"><i class="bi bi-people"></i><span>Reservations List</span></a></li>
+          {% comment %}  <li><a href="{% url 'centerPatients' 'All-List' %}"><i class="bi bi-people"></i><span>Reservations List</span></a></li>
 
           <li><a href="{% url 'centerPatients' 'Follow-Up' %}"><i class="bi bi-arrow-repeat"></i><span>Follow Up List</span></a></li>
 
-          <li><a href="{% url 'centerPatients' 'Missed-Reservations' %}"><i class="bi bi-person-x"></i><span>Missed List</span></a></li>
+          <li><a href="{% url 'centerPatients' 'Missed-Reservations' %}"><i class="bi bi-person-x"></i><span>Missed List</span></a></li> {% endcomment %}
 
           <li><a href="{% url 'dashSearchOnPatient' %}"><i class="bi bi-search"></i><span>Search Reservation</span></a></li>
 
@@ -158,29 +158,29 @@
 
 
 
-      {% if request.user|in_group:"Doctors" or request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
+      {% if request.user|in_group:"Doctors" %}
 
       <li class="nav-item">
 
         <a class="nav-link" data-bs-target="#doctor-nav" data-bs-toggle="collapse" href="#">
 
-          <i class="bi bi-stethoscope"></i><span>Audit / Doctor</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-stethoscope"></i><span> Doctors</span><i class="bi bi-chevron-down ms-auto"></i>
 
         </a>
 
         <ul id="doctor-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
 
-          {% if request.user|in_group:"Doctors" or request.user|in_group:"Admin" %}
+          
 
           <li><a href="{% url 'DoctorOp' %}"><i class="bi bi-clipboard-pulse"></i><span>Doctor Examination</span></a></li>
 
           <li><a href="{% url 'VisitstList' 'D' 'None' %}"><i class="bi bi-person-badge"></i><span>D/Patients List</span></a></li>
 
-          {% endif %}
+         {%endif%}
 
 
 
-          {% if request.user|in_group:"DoctorAudit" or request.user|in_group:"Admin" %}
+          {% if request.user|in_group:"DoctorAudit" %}
 
           <li><a href="{% url 'AuditEvaluation' %}"><i class="bi bi-shield-check"></i><span>Audit Examination</span></a></li>
 
@@ -192,7 +192,7 @@
 
       </li>
 
-      {% endif %}
+     
 
 
 

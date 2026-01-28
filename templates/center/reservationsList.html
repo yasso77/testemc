@@ -97,7 +97,7 @@
                             </td>
                             <td>
                                 <div class="fw-bold mb-0" style="font-size: 1rem; color: #012970;">{{ patient.fullname }}</div>
-                                <div class="text-muted small"><i class="bi bi-phone me-1"></i>{{ patient.mobile }}</div>
+                                {% comment %} <div class="text-muted small"><i class="bi bi-phone me-1"></i>{{ patient.mobile }}</div> {% endcomment %}
                             </td>
                             <td>
                                 <div class="d-flex flex-column gap-1">
@@ -128,12 +128,12 @@
           
                             <td>
                                 <div class="action-stack">
-                                    <a href="{% url 'followup' patient.patientid %}" 
+                                    {% comment %} <a href="{% url 'followup' patient.patientid %}" 
                                        class="btn-circle bg-warning text-dark" 
                                        data-bs-toggle="tooltip" title="Add Follow-up">
                                         <i class="bi bi-arrow-repeat fs-5"></i>
                                     </a>
-                                    
+                                     {% endcomment %}
                                     <a target="_blank" href="{% url 'patientForm' patient.patientid %}" 
                                        class="btn-circle bg-info text-white" 
                                        data-bs-toggle="tooltip" title="Print Medical Form"

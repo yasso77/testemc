@@ -84,14 +84,14 @@
                         </div>
                     </div>
 
-                    <div class="form-group row">
+                    {% comment %} <div class="form-group row">
                         <label for="id_mobile" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
                         <div class="col-sm-8">
                             {{ form.mobile }}
                             <div id="mobile-validation-message" class="alert alert-warning mt-2" style="display: none;"></div>
                             {% if form.mobile.errors %}<div class="text-danger">{{ form.mobile.errors }}</div>{% endif %}
                         </div>
-                    </div>
+                    </div> {% endcomment %}
 
                     <div class="form-group row">
                         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name <span class="text-danger">*</span></label>
