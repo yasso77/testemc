@@ -66,7 +66,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group row" id="reservationTypeDiv">
+                    {% comment %} <div class="form-group row" id="reservationTypeDiv">
                         <label for="{{ form.reservationType.id_for_label }}" class="col-sm-3 col-form-label">
                             Reservation Type <span class="text-danger">*</span>
                         </label>
@@ -82,7 +82,7 @@
                             {{ form.referral }}
                             {% if form.referral.errors %}<div class="text-danger">{{ form.referral.errors }}</div>{% endif %}
                         </div>
-                    </div>
+                    </div> {% endcomment %}
 
                     {% comment %} <div class="form-group row">
                         <label for="id_mobile" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
@@ -286,33 +286,6 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const mobileField = document.getElementById('id_mobile');
-        const messageSpan = document.getElementById('mobile-validation-message');
-        mobileField.addEventListener('blur', function () {
-            const mobile = mobileField.value;
-            if (mobile) {
-                fetch(`/validate-mobile/?mobile=${mobile}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.exists) {
-                            messageSpan.innerHTML = `A patient with this Mobile Number already exists. <a href="/centerReservationByMobile/${mobile}" target="_blank" class="fw-bold">View Record</a>`;
-                            messageSpan.style.display = 'block';
-                        } else {
-                            messageSpan.style.display = 'none';
-                        }
-                    }).catch(error => console.error('Error:', error));
-            }
-        });
-
-        // Lead Source Logic
-        var leadSource = "{{ patient.leadSource }}";
-        var reservationDiv = document.getElementById("reservationTypeDiv");
-        var referaalDiv = document.getElementById("referaalDiv");
-        if (leadSource != "Center") {
-            if(reservationDiv) reservationDiv.style.display = "none";
-            if(referaalDiv) referaalDiv.style.display = "none";
-        }
-    });
+   
 </script>
 {% endblock %}

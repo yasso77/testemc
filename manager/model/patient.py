@@ -71,7 +71,7 @@ class AgentCompany(models.Model):
         verbose_name_plural = "Agent-Company"  
         
 class Organizations(models.Model):    
-    orgID=models.BigAutoField(primary_key=True)
+    orgID=models.AutoField(primary_key=True)
     orgName=models.CharField(max_length=200, blank=True, null=True,verbose_name='Organization Name')
     orPrefix=models.CharField(max_length=3, blank=True, null=True,verbose_name='orPrefix')
     isVisible=models.BooleanField(blank=True,null=True,verbose_name='Visible')
@@ -162,8 +162,29 @@ class Patient(models.Model):
     
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     image=models.ImageField(upload_to='patients/photos/%y/%m/%d',null=True,default='photos/patient.png')
-    mobile = models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=False, blank=False,default=000)  # Field name made lowercase.
-    otherMobile= models.CharField(max_length=15, validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True, blank=True) 
+    mobile = models.CharField(
+    max_length=16,
+    validators=[
+        RegexValidator(
+            regex=r'^\+?\d{10,15}$',
+            message='Enter a valid mobile number (e.g. +201001711441).'
+        )
+    ],
+    null=False,
+    blank=False
+    )
+     # Field name made lowercase.
+    otherMobile= models.CharField(
+    max_length=16,
+    validators=[
+        RegexValidator(
+            regex=r'^\+?\d{10,15}$',
+            message='Enter a valid mobile number (e.g. +201001711441).'
+        )
+    ],
+    null=True,
+    blank=False
+    )
     address = models.CharField(max_length=1000, blank=True, null=True,verbose_name='Address')  # Field name made lowercase.
     city = models.ForeignKey(City,blank=True, null=True,on_delete=models.SET_NULL,verbose_name='City Name')  # Field name made lowercase.
     email = models.CharField(max_length=150, blank=True, null=True,verbose_name='Email')  # Field name made lowercase.  
@@ -206,7 +227,7 @@ class Patient(models.Model):
     createdDate = models.DateTimeField(auto_now_add=True)
 
     latestupdate = models.DateField( blank=True, null=True)  # Field name made lowercase.
-    updatedby = models.IntegerField( blank=True, null=True)  # Field name made lowercase.
+    updatedby = models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='updated_patients')  # Field name made lowercase.
     isDeleted = models.BooleanField(default=False)
     formPrinted = models.BooleanField(default=False)
     

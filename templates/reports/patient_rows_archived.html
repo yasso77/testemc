@@ -1,0 +1,58 @@
+{% for p in patients %}
+<tr class="align-middle">
+  <th class="text-center">{{ p.patientid }}</th>
+  <td class="text-center" >
+    <span class="res-code">{{ p.reservationCode }}</span>
+  </td>
+
+  <td class="fw-bold text-dark">
+    {{ p.fullname }}
+  </td>
+
+  <td >
+    <span class="badge bg-light text-secondary border">
+        {{ p.sufferedcase.caseName|default:"—" }}
+    </span>
+  </td>
+
+  <td class="text-center text-muted small">
+    {{ p.createdDate|date:"Y-m-d" }}
+  </td>
+
+  <td >
+    <div class="d-flex align-items-left ">
+        <i class="bi bi-person-circle me-1 text-primary opacity-50"></i>
+        <span>{{ p.createdBy.username|default:"—" }}</span>
+    </div>
+  </td>
+ <td class="text-center">
+          {{ p.latestupdate|date:"Y-m-d" }}
+        </td>
+      
+        <td >
+          {% if p.updatedby %}
+            {{ p.updatedby.username }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+  <td >
+    <a href="{% url 'reactivate_patient' p.pk %}" 
+       class="btn btn-reanimate mx-auto" 
+       title="Restore Patient"
+       onclick="return confirm('Restore this patient record to the active list?');">
+        <i class="bi bi-arrow-counterclockwise"></i>
+    </a>
+  </td>
+  
+</tr>
+{% empty %}
+<tr>
+  <td colspan="9" class="text-center text-muted py-5">
+    <div class="d-flex flex-column align-items-center">
+        <i class="bi bi-inbox fs-1 opacity-20 mb-2"></i>
+        <p class="mb-0">No archived patients found matching your criteria.</p>
+    </div>
+  </td>
+</tr>
+{% endfor %}

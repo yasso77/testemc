@@ -114,7 +114,7 @@
                   <th>Code</th>
                   <th>Serial</th>
                   <th>Patient Name</th>
-                  <th>Mobile</th>
+                  {% comment %} <th>Mobile</th> {% endcomment %}
                   <th>Source</th>
                   <th>Agent</th>
                   <th>Case</th>
@@ -122,6 +122,7 @@
                   <th>Created By</th>
                   <th>Date Created</th>
                   <th>Attendance</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -130,7 +131,7 @@
                   <td><span class="fw-bold text-primary">{{ patient.reservationCode }}</span></td>
                   <td>{{ patient.fileserial }}</td>
                   <td class="fw-bold">{{ patient.fullname }}</td>
-                  <td>{{ patient.mobile }}</td>
+                  {% comment %} <td>{{ patient.mobile }}</td> {% endcomment %}
                   <td><span class="badge bg-secondary">{{ patient.leadSource }}</span></td>
                   <td>{{ patient.agentID.AgentCompany }}</td>
                   <td>{{ patient.sufferedcase }}</td>
@@ -144,6 +145,7 @@
                       <span class="text-muted small">N/A</span>
                     {% endif %}
                   </td>
+                 
                 </tr>
                 {% empty %}
                 <tr>

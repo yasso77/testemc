@@ -111,7 +111,7 @@
 </style>
 
 <div class="pagetitle mb-4">
-    <h1>Patients List: <span class="text-primary">{{viewScope}}</span></h1>
+    <h1>Workspace: <span class="text-primary">{{viewScope}}</span></h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
@@ -200,7 +200,7 @@
 </div>
 <div id="countpatients">
     <h5 class="mb-4 fw-bold" style="color: #012970;">
-        Total Reservations: <span id="totalCount" class="text-primary">{{ total_count }}</span>
+        Total found: <span id="totalCount" class="text-primary">{{ total_count }}</span>
     </h5>
 </div>
         <div class="table-responsive">
@@ -209,17 +209,20 @@
                     <tr>
                         <th>ID Code</th>
                         <th>Patient Name</th> 
-                        <th>Contact</th>
+                        {% comment %} <th>Contact</th> {% endcomment %}
                         <th>Case Type</th>        
                         <th>Created At</th>
                         <th>Created By</th>
                         <th>Expected</th> 
+                         
                         <th>Status</th>   
+                         <th class="text-center">Update Date</th>
+        <th>Updated By</th>
                         <th class="text-center">Ops</th>
                     </tr>
                 </thead>
                 <tbody id="patient-body">
-                    {% include 'callcenter/patient_rows.html' %}
+                    {% include 'reports/patient_rows.html' %}
                 </tbody>
             </table>
         </div>

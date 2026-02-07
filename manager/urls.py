@@ -25,7 +25,7 @@ urlpatterns = [
     
     # ReportView
     path('showPatientData', ReportView.showPatientData, name='showPatientData'),
-    path('getattendedpatient', ReportView.showPatientDataAttendedToday, name='getattendedpatient'),
+    # path('getattendedpatient', ReportView.showPatientDataAttendedToday, name='getattendedpatient'),
     path('PatientsList', ReportView.uploadedPatientDataList, name='PatientsList'),
     path('liveReportDegree', ReportView.LiveDegreeReport, name='liveReportDegree'),
     path('LiveEvulationReport', ReportView.ajaxReportChartEvlDegree, name='LiveEvulationReport'),
@@ -37,9 +37,23 @@ urlpatterns = [
     path('api/reserve/', ReservePatientAPIView.as_view(), name='reserve-patient'),
     
     path('doctorStats', ReportView.doctors_stats, name='doctorStats'),
-    
+    path('auditStats', ReportView.audit_stats, name='auditStats'),
+    path('callCenterStats', ReportView.doctors_stats, name='callCenterStats'),
     path("reports/patients/<int:doctor_id>/<str:patient_type>/<str:from_date>/<str:to_date>/", ReportView.patients_by_type, name="patients_by_type",),
-
+    
+    path('delete_patient/<int:patientid>/', ReportView.delete_patient, name='delete_patient'),
+    
+    path('delete_patientDuplicated/<int:patientid>/<str:date_from>/<str:date_to>/', ReportView.delete_patientDuplicated, name='delete_patientDuplicated'),
+    
+    # path('delete_duplicatedpatient/<int:patientid>/<str:date_from>/<str:date_to>/', ReportView.delete_duplicatedpatient, name='delete_duplicatedpatient'),
+    
+    path('adminSearchOnPatinet/',ReportView.SearchOnPatient,name='adminSearchOnPatinet'),
+    path('SearchOnPatientResult/',ReportView.SearchOnPatientResult,name='SearchOnPatientResult'),
+    path("confirm/<str:patientName>/<str:fileserial>/<str:returnrl>/", ReportView.confirm_page,name="confirm_pageAdmin"),
+    
+    path('archivedPatient/',ReportView.archivedPatientList,name='archivedPatient'),
+    path('duplicatedPatients/',ReportView.duplicatedPatientList,name='duplicatedPatients'),
+    path('reactivate_patient/<int:patientid>/', ReportView.reactivate_patient, name='reactivate_patient'),
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),
@@ -75,7 +89,7 @@ urlpatterns = [
      path('reservationListName/<str:strname>/', CallCenterView.reservationsListviewName, name='reservationListName'),
     path('edit_reservation/<int:patientid>/', CallCenterView.edit_reservation, name='edit_reservation'),
     path('follow_reservation/<int:patientid>/', CallCenterView.follow_reservation, name='follow_reservation'),
-    path('delete_patient/<int:patientid>/', CallCenterView.delete_patient, name='delete_patient'),
+
     path('check_reservationCode/', CallCenterView.check_reservationCode, name='check_reservationCode'),
     path('reservation-data/', CallCenterView.get_reservation_data, name='reservation_data'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),

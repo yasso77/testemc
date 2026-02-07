@@ -1,0 +1,141 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<style>
+    /* Hero Search Styling */
+    .search-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border: none;
+        border-radius: 15px;
+    }
+    .search-input-group {
+        position: relative;
+    }
+    .search-input-group i {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        color: #4154f1;
+        z-index: 10;
+    }
+    .search-control {
+        padding: 1.2rem 1.2rem 1.2rem 3.5rem !important;
+        border-radius: 50px !important;
+        border: 2px solid #e0e6ed;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    .search-control:focus {
+        border-color: #4154f1;
+        box-shadow: 0 10px 20px rgba(65, 84, 241, 0.1);
+    }
+    .btn-search {
+        padding: 10px 35px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Action Card Styling */
+    .action-card {
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        display: block;
+        height: 100%;
+    }
+    .action-card:hover {
+        transform: translateY(-5px);
+    }
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.8rem;
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Search Console</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item">Admin</li>
+            <li class="breadcrumb-item active">Search</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            
+            <div class="card search-card shadow-sm mb-5">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-dark">Patient Lookup</h3>
+                        <p class="text-muted">Search the database by any patient identifier</p>
+                    </div>
+
+                    <form method="GET" id="followUpForm" action="{% url 'SearchOnPatientResult' %}">
+                        {% csrf_token %}
+                        <div class="search-input-group mb-4">
+                            <i class="bi bi-search"></i>
+                            <input type="text" 
+                                   id="searchInput" 
+                                   name="strText" 
+                                   class="form-control search-control" 
+                                   placeholder="Name, Mobile, File #, or Reservation #"
+                                   required>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-search shadow-sm">
+                                <i class="bi bi-person-check me-2"></i> Find Patient
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+           <div class="row g-4">
+    <div class="col-md-4">
+        <a href="{% url 'attendance_report' %}" class="card action-card shadow-sm border-0 text-center p-4">
+            <div class="icon-box bg-primary-light text-primary">
+                <i class="bi bi-person-check-fill fs-3"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">Attended Patients</h6>
+            <p class="small text-muted mb-0">Attendance in center</p>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'archivedPatient' %}" class="card action-card shadow-sm border-0 text-center p-4">
+            <div class="icon-box bg-secondary-light text-secondary"> <i class="bi bi-archive-fill fs-3"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">Archived Patients</h6>
+            <p class="small text-muted mb-0">Patients with archived status</p>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'duplicatedPatients' %}" class="card action-card shadow-sm border-0 text-center p-4">
+            <div class="icon-box bg-warning-light text-warning">
+                <i class="bi bi-copy fs-3"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">Duplicated Patients</h6>
+            <p class="small text-muted mb-0">Record conflicts (Name/Mobile)</p>
+        </a>
+    </div>
+</div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

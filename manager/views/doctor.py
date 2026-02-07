@@ -86,7 +86,7 @@ class DoctorView(ListView):
         # print(fileserial)
       
 
-        return render(request, "ConfirmMsgDoctor.html", {
+        return render(request, "doctor/ConfirmMsgDoctor.html", {
             "fileserial": fileserial,
             #"patientName": patientName,
             ##"show_print": True,
@@ -99,7 +99,7 @@ class DoctorView(ListView):
         # use fileserial safely
        
 
-        return render(request, "ConfirmMsgAudit.html", {
+        return render(request, "doctor/ConfirmMsgAudit.html", {
             "fileserial": fileserial,
             #"patientName": patientName,
             
@@ -158,7 +158,7 @@ class DoctorView(ListView):
 
         return render(
             request,
-            'center/auditPatientVisit_SEC.html',
+            'doctor/auditPatientVisit_SEC.html',
             {
                 'patients': patientList,
                 'Total': patientcount,
@@ -215,7 +215,7 @@ class DoctorView(ListView):
 
         return render(
             request,
-            'center/auditPatientsList.html',
+            'doctor/auditPatientsList.html',
             {
                 'patients': patientList,
                 'classfications_options': classfications_options,
@@ -425,7 +425,7 @@ class DoctorView(ListView):
 
         return render(
             request,
-            'center/auditPatientVisit.html',
+            'doctor/auditPatientVisit.html',
             {
                 'patients': patientList,
                 'Total': patientcount,

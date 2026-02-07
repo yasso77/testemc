@@ -1,0 +1,245 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+    /* ... existing styles ... */
+
+    /* Action Button Refinement */
+    .btn-reanimate {
+        border: 2px solid #e0eaff;
+        background: #fff;
+        color: #198754; /* Success Green */
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+    }
+
+    .btn-reanimate:hover {
+        background-color: #198754;
+        color: #fff;
+        border-color: #198754;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(25, 135, 84, 0.2);
+    }
+
+    .btn-reanimate i {
+        font-size: 1.25rem; /* Larger icon */
+        line-height: 1;
+    }
+
+    /* Filter Box Improvements */
+    .filter-box {
+        border: 1px solid var(--border-soft) !important;
+        box-shadow: 0 10px 30px rgba(65, 84, 241, 0.05) !important;
+    }
+
+    /* Input focus effects */
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(65, 84, 241, 0.1);
+        border-radius: 8px;
+    }
+</style>
+<div class="pagetitle mb-4">
+    <h1>Archived Patients: <span class="text-primary">{{viewScope}}</span></h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Archived Patients</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="section-card">
+     
+        <div class="filter-box shadow-sm border-0 rounded-4 p-4 mb-4" style="background: #ffffff;">
+    <div class="filter-box rounded-4 p-4 mb-4" style="background: #ffffff;">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h5 class="m-0 fw-bold d-flex align-items-center" style="color: #012970; letter-spacing: -0.5px;">
+            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                <i class="bi bi-filter-right text-primary"></i>
+            </div>
+            Data Filter
+        </h5>
+        <span class="badge bg-light text-dark border fw-normal">Archived Records Only</span>
+    </div>
+    
+    <form id="ajax-filter-form" method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label fw-bold small text-secondary">Patient Information</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="txtSearch" value="{{ txtSearch }}" 
+                       class="form-control bg-light border-start-0 fs-6" 
+                       placeholder="Name, Phone, or ID...">
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label fw-bold small text-secondary">Archive Date Range</label>
+            <div class="input-group">
+                <input type="date" name="date_from" value="{{ date_from }}" class="form-control bg-light fs-6">
+                <span class="input-group-text bg-light text-muted border-start-0 border-end-0"><i class="bi bi-arrow-right"></i></span>
+                <input type="date" name="date_to" value="{{ date_to }}" class="form-control bg-light fs-6">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center" style="padding: 0.7rem;">
+                <i class="bi bi-funnel me-2"></i> Apply Filters
+            </button>
+        </div>
+    </form>
+</div>
+</div>
+<div id="countpatients">
+    <h5 class="mb-4 fw-bold" style="color: #012970;">
+        Total Reservations: <span id="totalCount" class="text-primary">{{ total_count }}</span>
+    </h5>
+</div>
+        <div class="table-responsive">
+  <table id="patientsTable" class="table table-bordered table-hover table-sm w-100 align-middle">
+    <thead class="table-light">
+      <tr>
+         <th class="text-center">ID </th>
+        <th class="text-center">ID Code</th>
+        <th>Patient Name</th>
+        <th>Case Type</th>
+        <th class="text-center">Created At</th>
+        <th>Created By</th>
+        <th class="text-center">Update Date</th>
+        <th>Updated By</th>
+        <th class="text-center">Ops</th>
+      </tr>
+    </thead>
+
+    <tbody id="patient-body">
+      {% include 'reports/patient_rows_archived.html' %}
+    </tbody>
+  </table>
+</div>
+
+
+        <div id="scroll-loader" class="text-center p-4" style="display: none;">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span class="ms-2 small text-muted fw-bold">Fetching more records...</span>
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<script>
+/* ===============================
+   GLOBAL STATE
+================================ */
+let page = 1;
+let loading = false;
+let hasNext = true;
+
+/* ===============================
+   HELPERS
+================================ */
+function getQueryParams() {
+    return window.location.search.replace('?', '');
+}
+
+function resetList() {
+    page = 1;
+    hasNext = true;
+    loading = false;
+    $('#patient-body').html('');
+}
+
+/* ===============================
+   FILTER FORM (AJAX)
+================================ */
+$('#ajax-filter-form').on('submit', function (e) {
+
+    // Allow Excel export to submit normally
+    if (e.originalEvent && e.originalEvent.submitter.value === 'excel') {
+        return;
+    }
+
+    e.preventDefault();
+
+    const formData = $(this).serialize();
+
+    resetList();
+    $('#ajax-loader-overlay').fadeIn(200);
+
+    $.ajax({
+        url: window.location.pathname + "?" + formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        success: function (res) {
+
+            // Replace rows
+            $('#patient-body').html(res.html);
+
+            // Update total count
+            $('#totalCount').text(res.total_count);
+
+            // Update pagination state
+            hasNext = res.has_next;
+
+            // Update URL
+            window.history.pushState({}, '', "?" + formData);
+
+            $('#ajax-loader-overlay').fadeOut(200);
+        },
+        error: function () {
+            $('#ajax-loader-overlay').fadeOut(200);
+            alert("Error filtering records.");
+        }
+    });
+});
+
+/* ===============================
+   INFINITE SCROLL
+================================ */
+$(window).on('scroll', function () {
+    if (!hasNext || loading) return;
+
+    if ($(window).scrollTop() + $(window).height() + 200 >= $(document).height()) {
+        loadMore();
+    }
+});
+
+function loadMore() {
+    loading = true;
+    page++;
+    $('#scroll-loader').show();
+
+    let query = getQueryParams();
+    let url = "?page=" + page + (query ? "&" + query : "");
+
+    $.ajax({
+        url: url,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        success: function (res) {
+
+            // Append rows
+            $('#patient-body').append(res.html);
+
+            // Keep total count synced
+            $('#totalCount').text(res.total_count);
+
+            hasNext = res.has_next;
+            loading = false;
+            $('#scroll-loader').hide();
+        },
+        error: function () {
+            loading = false;
+            $('#scroll-loader').hide();
+        }
+    });
+}
+</script>
+
+{% endblock %}

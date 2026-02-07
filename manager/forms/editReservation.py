@@ -16,13 +16,13 @@ class editReservationForm(forms.ModelForm):
     checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
     class Meta:
         model = Patient
-        exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = [ 'reservationCode','mobile', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID','organizationID']
+        exclude = ['createdDate', 'createdby','mobile']  # Exclude non-editable fields
+        fields = [ 'reservationCode', 'city','age','gender','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID','organizationID']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
-            'fullname': forms.TextInput(attrs={'class': 'form-control'}),           
-            'mobile': forms.TextInput(attrs={'class': 'form-control' }),           
+            'fullname': forms.TextInput(attrs={'class': 'form-control'}),          
+             
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'age': forms.NumberInput(attrs={
             'class': 'form-control',
@@ -46,9 +46,7 @@ class editReservationForm(forms.ModelForm):
                 'required': 'Full name is required.',
             },
            
-            'mobile': {
-                'required': 'Mobile number is required.',
-            },
+          
             'city': {
                 'required': 'City is required.',
             },
@@ -89,15 +87,13 @@ class editReservationForm(forms.ModelForm):
             raise forms.ValidationError('Age must be a number between 1 and 99.')
         return age
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Remove the empty choice for gender field
-        self.fields['gender'].choices = [
-            choice for choice in self.fields['gender'].choices if choice[0] != ''
-        ]
+          
         
     def __init__(self, *args, existing_serial=False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['gender'].choices = [
+            choice for choice in self.fields['gender'].choices if choice[0] != ''
+        ]
 
         if existing_serial:
             self.fields["organizationID"].disabled = True

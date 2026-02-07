@@ -1,0 +1,264 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --primary-blue: #4154f1;
+        --dark-navy: #012970;
+        --bg-light-blue: #f6f9ff;
+        --border-soft: #e0eaff;
+    }
+
+    /* Global Card Styling */
+    .section-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+        padding: 25px;
+        position: relative;
+        border: 1px solid var(--border-soft);
+    }
+
+    /* AJAX Loader Overlay */
+    #ajax-loader-overlay {
+        display: none;
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.75);
+        z-index: 1000;
+        border-radius: 15px;
+        backdrop-filter: blur(2px);
+    }
+
+    /* Compact Filter Design */
+    .filter-box {
+        background: var(--bg-light-blue);
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .form-label {
+        color: var(--dark-navy);
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(65, 84, 241, 0.15);
+    }
+
+    /* Table Customization */
+    #patientsTable {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    #patientsTable thead th {
+        background-color: var(--bg-light-blue);
+        color: #899bbd;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border: none;
+        padding: 12px 15px;
+    }
+
+    #patientsTable tbody tr {
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
+
+    #patientsTable tbody tr:hover {
+        background-color: #fbfcfe !important;
+        transform: scale(1.002);
+    }
+
+    #patientsTable td {
+        padding: 15px;
+        border-top: 1px solid #f1f4f9;
+        border-bottom: 1px solid #f1f4f9;
+        font-size: 14px;
+    }
+
+    /* Status & Codes */
+    .res-code { 
+        color: var(--primary-blue); 
+        font-weight: 700; 
+        background: #f0f2ff; 
+        padding: 4px 10px; 
+        border-radius: 6px;
+        font-family: 'Monaco', 'Consolas', monospace;
+    }
+
+    .pagetitle h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--dark-navy);
+    }
+</style>
+
+<div class="pagetitle mb-4">
+    <h1>Duplicated Patients: <span class="text-primary">{{viewScope}}</span></h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Duplicated Patients</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="section-card">
+        <div id="ajax-loader-overlay">
+            <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <span class="fw-bold text-primary">Updating Records...</span>
+            </div>
+        </div>
+
+        <div class="filter-box shadow-sm border-0 rounded-4 p-4 mb-4" style="background: #ffffff;">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h5 class="m-0 fw-bold d-flex align-items-center" style="color: #012970; letter-spacing: -0.5px;">
+            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                <i class="bi bi-sliders2 text-primary"></i>
+            </div>
+            Search & Filter
+        </h5>
+       
+    </div>
+    
+    <form id="ajax-filter-form" method="get" class="row g-3">
+        
+
+        <div class="col-md-7">
+    <label class="form-label fw-bold small text-secondary">
+        Date Range (Created At)
+    </label>
+
+    <div class="input-group input-group-lg">
+        <input
+            type="date"
+            name="date_from"
+            class="form-control bg-light border-0 fs-6"
+            value="{{ date_from|date:'Y-m-d' }}"
+        >
+
+        <span class="input-group-text bg-light border-0 text-muted">
+            <i class="bi bi-arrow-right-short"></i>
+        </span>
+
+        <input
+            type="date"
+            name="date_to"
+            class="form-control bg-light border-0 fs-6"
+            value="{{ date_to|date:'Y-m-d' }}"
+        >
+    </div>
+</div>
+
+
+       
+        
+        <div class="col-md-5 d-flex align-items-end justify-content-md-end gap-2">
+            <button type="submit" class="btn btn-primary btn-lg px-4 rounded-3 d-flex align-items-center shadow-sm">
+                <i class="bi bi-funnel-fill me-2"></i> 
+                <span>Apply Filter</span>
+            </button>
+           
+        </div>
+    </form>
+</div>
+<div id="countpatients">
+    <h5 class="mb-4 fw-bold" style="color: #012970;">
+        Total Duplicated: <span id="totalCount" class="text-primary">{{ total_count }}</span>
+    </h5>
+</div>
+        <div class="table-responsive">
+  <table class="table table-bordered table-hover table-sm align-middle">
+    <thead class="table-dark text-center">
+      <tr>
+        <th>#</th>
+        <th>Patient ID</th>
+        <th>Reservation Code</th>
+        <th>File Serial</th>
+        <th>Full Name</th>
+        <th>Attendance Date</th>
+        <th>Created By</th>
+        <th>Created Date</th>
+        <th class="text-center">Update Date</th>
+        <th>L.Updated By</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td class="text-center">{{ forloop.counter }}</td>
+        <td class="text-center">{{ p.patientid }}</td>
+        <td class="text-center">{{ p.reservationcode }}</td>
+        <td class="text-center">{{ p.fileserial }}</td>
+        <td>{{ p.fullname }}</td>
+        <td class="text-center">
+          {{ p.attendanceDate|date:"Y-m-d" }}
+        </td>
+        <td class="text-center">
+          {% if p.createdBy %}
+            {{ p.createdBy.username }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td class="text-center">
+          {{ p.createdDate|date:"Y-m-d" }}
+        </td>
+         <td class="text-center">
+          {{ p.latestupdate|date:"Y-m-d" }}
+        </td>
+      
+        <td class="text-center">
+          {% if p.updatedby %}
+            {{ p.updatedby.username }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td class="text-center">
+         <form method="GET" action="{% url 'delete_patientDuplicated' p.patientid date_from|date:'Y-m-d' date_to|date:'Y-m-d' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="bi bi-trash-fill"></i> Delete
+            </button>
+          </form>    
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="10" class="text-center text-muted py-3">
+          No duplicated patients found for selected period
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+
+{% endblock %}

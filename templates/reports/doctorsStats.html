@@ -9,7 +9,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-            <li class="breadcrumb-item">Managers</li>
+            <li class="breadcrumb-item">Admin</li>
             <li class="breadcrumb-item active">Doctors Stats</li>
         </ol>
     </nav>
@@ -25,12 +25,12 @@
                     <div class="col-md-3">
                         <label for="from_date" class="form-label small fw-bold">From Date</label>
                         <input type="date" id="from_date" name="from_date" class="form-control form-control-sm" 
-                               value="{{ request.GET.from_date }}" required>
+                               value="{{ from_date|date:'Y-m-d' }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="to_date" class="form-label small fw-bold">To Date</label>
                         <input type="date" id="to_date" name="to_date" class="form-control form-control-sm" 
-                               value="{{ request.GET.to_date }}" required>
+                               value="{{ to_date|date:'Y-m-d' }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="doctor" class="form-label small fw-bold">Doctor</label>

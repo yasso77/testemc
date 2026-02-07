@@ -426,6 +426,8 @@ class CenterView(ListView):
         patientData = get_object_or_404(Patient, patientid=patientid)
         medical_history = PatientMedicalHistory.objects.filter(patient=patientData)
         patientData.formPrinted = True
+        patientData.attendanceDate = datetime.date.today()
+        patientData.attendanceTime = datetime.datetime.now().time()
         patientData.save()
         
         # Convert queryset to dictionary with condition names as keys
@@ -660,6 +662,7 @@ class CenterView(ListView):
 
         if request.method == 'POST':
             form = CenterEditReservationForm(request.POST, instance=patient_obj)
+         
             
             # Ensure form doesn't block due to missing fileserial
             if 'fileserial' in form.fields:

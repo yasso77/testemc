@@ -256,7 +256,11 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            messageSpan.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> This Name already exists. <a href="/reservationListName/${fullname}" target="_blank" class="fw-bold">View History</a>`;
+                            messageSpan.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> This Name already exists. <a href="/reservationListName/${encodeURIComponent(fullname)}/"
+     target="_blank"
+     class="fw-bold">
+     View History
+  </a>`;
                             messageSpan.style.display = 'block';
                         } else {
                             messageSpan.style.display = 'none';

@@ -95,7 +95,7 @@ class CallCenterView(ListView):
     def confirm_page_call(request, patientid, reservationCode):
         return render(
             request,
-            "ConfirmMsgCallCenter.html",
+            "callcenter/ConfirmMsgCallCenter.html",
             {
                 "message": "The Reservation is Added Successfully.",
                 "patientid": patientid,
@@ -305,8 +305,8 @@ class CallCenterView(ListView):
                 str(p.sufferedcase) if p.sufferedcase else '',
                
                 p.leadSource,
-                p.createdDate.strftime('%Y-%m-%d'),
-                p.attendanceDate.strftime('%Y-%m-%d'),
+                p.createdDate.strftime('%Y-%m-%d') if p.createdDate else '',
+                p.attendanceDate.strftime('%Y-%m-%d') if p.attendanceDate else '',
             ])
 
         response = HttpResponse(
@@ -453,8 +453,8 @@ class CallCenterView(ListView):
             .filter(
                 
                 reservedBy=request.user,
-                mobile=strmobile,
-                #isDeleted=False
+                mobile=strmobile
+                
             )
             .select_related('sufferedcase')
             .annotate(
@@ -480,6 +480,8 @@ class CallCenterView(ListView):
         # Pass the data to the template      
         
             return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':strmobile})
+        
+        
     @login_required
     def reservationsListviewName(request,strname):
             
@@ -556,14 +558,7 @@ class CallCenterView(ListView):
         return render(request, 'callcenter/editReservation.html', {'form': form, 'patient': patient})
 
     
-    def delete_patient(request, patientid):
-        patient = get_object_or_404(Patient, patientid=patientid)
-        if request.method == 'POST':
-            # Perform a soft delete by setting isDeleted to True
-            patient.isDeleted = True
-            patient.save()
-            return redirect('reservationList')  # Redirect to the list view
-        #return render(request, 'patients/confirm_delete.html', {'patient': patient})
+   
     
     @login_required
     def follow_reservation(request, patientid):
@@ -591,7 +586,7 @@ class CallCenterView(ListView):
                 # Return confirmation message
                 return render(
                     request,
-                    "ConfirmMsgCallCenter.html",
+                    "callcenter/ConfirmMsgCallCenter.html",
                     {
                         'message': 'Follow-UP is added successfully.',
                         'returnUrl': reverse('reservationList'),
@@ -723,7 +718,7 @@ class CallCenterView(ListView):
     def validate_mobile(request):
         mobile = request.GET.get('mobile', None)
         if mobile:
-            if Patient.objects.filter(mobile=mobile).exists():
+            if Patient.objects.filter(mobile=mobile, isDeleted=False).exists():
                 return JsonResponse({'exists': True, 'message': 'A patient with this Mobile Number already exists.'})
         return JsonResponse({'exists': False})
     
@@ -731,7 +726,7 @@ class CallCenterView(ListView):
     def validate_fullname(request):
         name = request.GET.get('fullname', None)
         if name:
-            if Patient.objects.filter(fullname=name).exists():
+            if Patient.objects.filter(fullname=name, isDeleted=False).exists():
                 return JsonResponse({'exists': True, 'message': 'A patient with this Name Number already exists.'})
         return JsonResponse({'exists': False})
 
