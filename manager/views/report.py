@@ -1,5 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
+from django.db.models.functions import Cast, TruncDate
+from django.utils.dateparse import parse_date
 from urllib.parse import urlencode
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -526,7 +528,7 @@ class ReportView(ListView):
     @require_POST       
     def delete_patient(request, patientid):
         patient = get_object_or_404(Patient, patientid=patientid)
-        patient.updatedby = request.user.id
+        patient.updatedby = request.user
         patient.latestupdate = timezone.now()
         patient.isDeleted = True
         patient.save()
@@ -899,4 +901,124 @@ class ReportView(ListView):
 
         return render(request, 'reports/duplicatedPatients.html', context)
 
+    def weekly_calendar_report(request):
+
+        today = datetime.today().date()
+
+        # offset week (0 = current, -1 = previous, +1 = next)
+        week_offset = int(request.GET.get("week", 0))
+
+        # calculate start of week
+        # Make week start on Saturday
+        start_week = today - timedelta(days=(today.weekday() + 2) % 7)
+        start_week = start_week + timedelta(weeks=week_offset)
+        end_week = start_week + timedelta(days=6)
         
+        # Convert week dates to timezone-aware datetimes
+        tz = timezone.get_current_timezone()
+
+        start_dt = timezone.make_aware(
+            datetime.combine(start_week, datetime.min.time()),
+            tz
+        )
+
+        end_dt = timezone.make_aware(
+            datetime.combine(end_week + timedelta(days=1), datetime.min.time()),
+            tz
+        )
+
+    
+
+        created_qs = (
+        Patient.objects.filter(
+            createdDate__gte=start_dt,
+            createdDate__lt=end_dt,
+            isDeleted=False
+        )
+        .annotate(day=Cast('createdDate', DateField()))
+        .values('day')
+        .annotate(total=Count('patientid'))
+    )
+        attendance_qs = (
+            Patient.objects.filter(
+                attendanceDate__gte=start_week,
+                attendanceDate__lte=end_week,
+                isDeleted=False
+            )
+            .values('attendanceDate')
+            .annotate(total=Count('patientid'))
+        )
+        
+        expected_qs = (
+            Patient.objects.filter(
+                expectedDate__gte=start_week,
+                expectedDate__lte=end_week,
+                isDeleted=False
+            )
+            .values('expectedDate')
+            .annotate(total=Count('patientid'))
+        )
+        created_dict = {
+            c['day']: c['total']
+            for c in created_qs if c['day']
+        }
+
+        attendance_dict = {
+            a['attendanceDate']: a['total']
+            for a in attendance_qs if a['attendanceDate']
+        }
+        
+        expected_dict = {
+            e['expectedDate']: e['total']
+            for e in expected_qs if e['expectedDate']
+        }
+       
+
+        week_days = []
+
+        for i in range(7):
+
+            day = start_week + timedelta(days=i)
+
+            week_days.append({
+                'date': day,
+                'day_name': day.strftime("%A"),
+                'created': created_dict.get(day, 0),
+                'attendance': attendance_dict.get(day, 0),
+                'expected': expected_dict.get(day, 0),   # ⭐ NEW
+                'is_today': day == today
+            })
+                
+           
+
+        return render(request, 'reports/weekly_calendar.html', {
+            'week_days': week_days,
+            'start_week': start_week,
+            'end_week': end_week,
+            'week_offset': week_offset
+        })  
+        
+   
+
+  
+    def attendance_patients_by_day(request, day):
+
+        selected_date = parse_date(day)
+
+        patients = Patient.objects.filter(
+            attendanceDate=selected_date,
+            isDeleted=False
+        ).select_related('city','reservedBy')
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(
+                request,
+                'reports/attendance_patients.html',
+                {'patients': patients, 'selected_date': selected_date}
+            )
+
+        return render(
+            request,
+            'reports/attendance_patients.html',
+            {'patients': patients, 'selected_date': selected_date}
+        )

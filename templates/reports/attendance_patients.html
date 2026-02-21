@@ -1,0 +1,25 @@
+<h3>Attendance Patients - {{ selected_date }}</h3>
+
+<table class="table table-striped">
+    <tr>
+        <th>File No</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>City</th>
+        <th>Reserved By</th>
+    </tr>
+
+    {% for p in patients %}
+    <tr>
+        <td>{{ p.fileserial }}</td>
+        <td>{{ p.fullname }}</td>
+        <td>{{ p.mobile }}</td>
+        <td>{{ p.city }}</td>
+        <td>{{ p.reservedBy }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No patients found</td>
+    </tr>
+    {% endfor %}
+</table>

@@ -595,7 +595,7 @@ class CenterView(ListView):
             )
         )  
         
-        return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
+        return render(request, 'callcenter/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
     
     @login_required
     def follow_reservation(request, patientid):
@@ -905,4 +905,6 @@ class CenterView(ListView):
         
         return render(request, 'center/reservationsList.html', {'patients': recent_patients,'viewScope':strText})
         
-      
+
+
+   

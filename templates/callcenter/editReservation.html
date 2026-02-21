@@ -103,7 +103,17 @@
                     <div class="section-header">
                         <i class="bi bi-person-lines-fill"></i> Patient Profile
                     </div>
-
+ <div class="form-group row">
+    <label for="{{ form.slotNumber.id_for_label }}" class="col-sm-3 col-form-label">
+       Slot Number<span class="text-danger">*</span> 
+    </label>
+    <div class="col-sm-8">
+        {{ form.slotNumber }}
+        {% if form.slotNumber.errors %}
+            <div class="text-danger">{{ form.slotNumber.errors }}</div>
+        {% endif %}
+    </div>
+</div>
                     <div class="form-group row">
                         <label for="{{ form.fullname.id_for_label }}" class="col-sm-3 col-form-label">Patient Name <span class="text-danger">*</span></label>
                         <div class="col-sm-8">

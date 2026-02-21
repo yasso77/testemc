@@ -1,7 +1,7 @@
 # forms.py
 from datetime import date
 from django import forms
-from manager.model.patient import  AgentCompany, CheckUpPrice, City, Offers, Patient, SufferedCases
+from manager.model.patient import  AgentCompany, CheckUpPrice, City, Offers, Organizations, Patient, SufferedCases
 
 
 class CCFormAddReservation(forms.ModelForm):
@@ -11,6 +11,11 @@ class CCFormAddReservation(forms.ModelForm):
         error_messages={'required': 'Full Name is required!'},
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'})
     )
+    slotNumber = forms.ChoiceField(
+    choices=[],
+    required=False,
+    widget=forms.Select(attrs={'class': 'form-select'})
+)
     mobile=forms.CharField(required=True, error_messages={'required': 'Mobile is required!'},widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Mobile'}))
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
     sufferedcase = forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))    
@@ -23,12 +28,20 @@ class CCFormAddReservation(forms.ModelForm):
     choices=[('', 'Select Lead Source')] + filtered_choices,
     required=True,
     error_messages={'required': 'Lead Source is required!'},
+    widget=forms.Select(attrs={'class': 'form-select'})) 
+    organizationID = forms.ModelChoiceField(
+    queryset=Organizations.objects.active(),
+    required=True,
+    label="Organization",
+    error_messages={'required': 'Organization is required!'},
     widget=forms.Select(attrs={'class': 'form-select'})
-)    
+)
+
+      
 
     class Meta:
         model = Patient
-        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks','expectedDate', 'callDirection', 'checkUpprice', 'agentID','organizationID' 
+        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks','expectedDate', 'callDirection', 'checkUpprice', 'agentID','organizationID' ,'slotNumber'
                  ]
         widgets = {
            
@@ -55,6 +68,24 @@ class CCFormAddReservation(forms.ModelForm):
         # Explicitly enforce required validation and error messages
         self.fields['mobile'].required = True
         self.fields['mobile'].error_messages = {'required': 'mobile  is required!'}
+        
+                # -----------------------------
+        # Dynamic Slot Dropdown A-1 A-2 A-3
+        # -----------------------------
+        self.fields['slotNumber'].choices = [('', 'Select')]
+
+        if self.request:
+            extra = getattr(self.request.user, 'extra', None)
+
+            if extra and extra.character and extra.tiny_number:
+
+                char = extra.character.upper()
+                max_num = extra.tiny_number
+
+                self.fields['slotNumber'].choices += [
+                    (f"{char}-{i}", f"{char}-{i}")
+                    for i in range(1, max_num + 1)
+                ]
         
 
        

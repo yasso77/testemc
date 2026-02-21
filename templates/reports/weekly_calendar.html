@@ -1,0 +1,212 @@
+{% extends 'master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    :root {
+        --accent-blue: #4154f1;
+        --accent-pink: #d63384;
+        --accent-purple: #6f42c1;
+        --accent-green: #198754;
+        --soft-gray: #99a5b5;
+        --card-shadow: 0px 10px 30px rgba(1, 41, 112, 0.07);
+        --overlay-width: 700px;
+    }
+
+    /* Navigation Pill */
+    .nav-wrapper {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+    }
+
+    .nav-btn {
+        padding: 8px 18px;
+        color: var(--accent-blue);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: 0.2s;
+    }
+
+    .nav-btn:hover { background: #f0f4ff; }
+    .nav-date-range { padding: 0 20px; font-weight: 700; border-left: 1px solid #eee; border-right: 1px solid #eee; color: #444; font-size: 0.9rem; }
+
+    /* 4-Column Grid */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 20px;
+    }
+
+    .day-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px 15px;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .day-card:hover { transform: translateY(-5px); }
+
+    .day-card.is-today {
+        background: linear-gradient(135deg, #ffffff 0%, #fff9e6 100%);
+        border: 1px solid #ffda6a;
+    }
+
+    /* Stat Styling */
+    .stat-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--soft-gray);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #012970;
+        line-height: 1.2;
+    }
+
+    /* Horizontal Alignment Container */
+    .stats-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f1f1;
+    }
+
+    .attendance-link { color: var(--accent-blue); text-decoration: none; }
+
+    /* Overlay Styling */
+    #overlayPage {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: var(--overlay-width);
+        height: 100vh;
+        background: #fff;
+        z-index: 1060;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -15px 0 40px rgba(0,0,0,0.15);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #overlayPage.active { right: 0; }
+    .overlay-header { padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .overlay-body { flex: 1; overflow-y: auto; padding: 30px; background-color: #f8f9fa; }
+
+    @media (max-width: 1200px) {
+        .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+        #overlayPage { width: 100%; }
+    }
+</style>
+
+<div class="pagetitle mb-4">
+    <h1 class="fw-bold h3">Audit Performance Report</h1>
+</div>
+
+<section class="section dashboard">
+    <div class="card p-4 border-0 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0">Weekly Patient Calendar</h4>
+            
+            <div class="nav-wrapper">
+                <a class="nav-btn" href="?week={{ week_offset|add:'-1' }}">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+                <span class="nav-date-range">{{ start_week }} — {{ end_week }}</span>
+                <a class="nav-btn" href="?week={{ week_offset|add:'1' }}">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            {% for d in week_days %}
+            <div class="day-card {% if d.is_today %}is-today{% endif %}">
+                <h5 class="fw-bold mb-0 text-dark">{{ d.day_name }}</h5>
+                <p class="text-muted small mb-0">{{ d.date }}</p>
+
+                <hr class="my-3 opacity-25">
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <i class="bi bi-telephone-inbound-fill" style="color: var(--accent-pink);"></i> Created
+                    </div>
+                    <div class="stat-value">{{ d.created }}</div>
+                </div>
+
+                <div class="stats-split">
+                    <div class="stat-item border-end">
+                        <div class="stat-label">
+                            <i class="bi bi-clipboard2-check-fill" style="color: var(--accent-purple);"></i> Expected
+                        </div>
+                        <div class="stat-value" style="font-size: 1.4rem;">
+                             {{ d.expected }}
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <i class="bi bi-calendar-check-fill" style="color: var(--accent-green);"></i> Attendance
+                        </div>
+                        <div class="stat-value" style="font-size: 1.4rem;">
+                            <a href="#" class="attendance-link" data-url="{% url 'attendance_patients_by_day' d.date|date:'Y-m-d' %}">
+                                {{ d.attendance }}
+                            </a>
+                           </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<div id="overlayPage">
+    <div class="overlay-header">
+        <div>
+            <h5 class="fw-bold m-0 text-primary">Patient Records</h5>
+            <small class="text-muted">Viewing attendance details</small>
+        </div>
+        <button onclick="closeOverlay()" class="btn-close shadow-none"></button>
+    </div>
+    <div id="overlayContent" class="overlay-body"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.querySelectorAll('.attendance-link').forEach(link => {
+        link.addEventListener('click', function(e){
+            e.preventDefault();
+            let url = this.dataset.url;
+            document.getElementById('overlayContent').innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>';
+            document.getElementById('overlayPage').classList.add('active');
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => { document.getElementById('overlayContent').innerHTML = html; });
+        });
+    });
+
+    function closeOverlay(){ document.getElementById('overlayPage').classList.remove('active'); }
+</script>
+{% endblock %}

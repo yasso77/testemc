@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now
 
 
+
 class CityManager(models.Manager):
         def active(self):
             return self.filter(isVisible=True)
@@ -183,7 +184,7 @@ class Patient(models.Model):
         )
     ],
     null=True,
-    blank=False
+    blank=True
     )
     address = models.CharField(max_length=1000, blank=True, null=True,verbose_name='Address')  # Field name made lowercase.
     city = models.ForeignKey(City,blank=True, null=True,on_delete=models.SET_NULL,verbose_name='City Name')  # Field name made lowercase.
@@ -193,7 +194,7 @@ class Patient(models.Model):
     offerID = models.ForeignKey(Offers,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='offers_related')  
     agentID=models.ForeignKey(AgentCompany,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='agent_related',verbose_name='Agent/Company') 
     
-    organizationID=models.ForeignKey(Organizations,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='organization_related',verbose_name='Organiztaions',default=2)  
+    organizationID=models.ForeignKey(Organizations,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='organization_related',verbose_name='Organiztaions')  
     
     sufferedcase = models.ForeignKey(
         SufferedCases,
@@ -230,6 +231,7 @@ class Patient(models.Model):
     updatedby = models.ForeignKey(User,blank=True, null=True,on_delete=models.DO_NOTHING,related_name='updated_patients')  # Field name made lowercase.
     isDeleted = models.BooleanField(default=False)
     formPrinted = models.BooleanField(default=False)
+    slotNumber = models.CharField(max_length=10, null=True, blank=True)
     
     objects = PatientManager()
     

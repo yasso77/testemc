@@ -193,6 +193,7 @@
             <th>Attendance</th>
             <th>Steps Inside</th>
             <th>Officer</th>
+            <th>Agent</th>
             <th>Created At</th>
           </tr>
         </thead>
@@ -243,7 +244,10 @@
                 <i class="bi bi-shield-check text-success me-1"></i> {{ p.createdBy.username }}
               </span>
             </td>
-
+<td>  <span class="step-pill" style="background: #fff3e0; color: #D14578;">
+                   <i class="bi bi-person-workspace"></i>
+ {{ p.agentID }}
+                  </span></td>
             <td class="small text-muted">
               {{ p.createdDate|date:"M d, Y" }}<br>
               <span style="font-size: 0.7rem;">{{ p.createdDate|date:"H:i" }}</span>

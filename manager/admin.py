@@ -3,6 +3,11 @@ from manager.model.doctor import Doctor, Specialties
 from manager.model.patient import AgentCompany, CheckUpPrice, MedicalConditionData, Offers, Patient,City, SufferedCases,Organizations
 from manager.model.visit import ClassficationsOptions
 
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+
+from .model.userExtra import UserExtra
+
 
 # Register your models here.
 
@@ -185,6 +190,17 @@ class OrganizationAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 # Register your models here.
 admin.site.register(Organizations,OrganizationAdmin)
-    
 
+
+
+class UserExtraInline(admin.StackedInline):
+    model = UserExtra
+    can_delete = False
+    verbose_name_plural = "Extra Info"
+    
+class CustomUserAdmin(UserAdmin):
+    inlines = (UserExtraInline,)
+    
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 

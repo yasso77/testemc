@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from django.utils import timezone
 from manager.forms.addFollowUp import insertCallTrackForm
+from manager.forms.callCenterEditReservation import CallCenterEditReservationForm
 from manager.forms.editReservation import editReservationForm
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,permission_required
@@ -63,7 +64,7 @@ class CallCenterView(ListView):
             # Pass request to the form for message handling
             
             callCenterform = CCFormAddReservation(request=request, data=request.POST)
-            
+           
             if callCenterform.is_valid():
                 patient = callCenterform.save(commit=False)
                 patient.reservationCode = reservationCode
@@ -539,7 +540,13 @@ class CallCenterView(ListView):
         
         if request.method == 'POST':
             # Bind form data to the existing patient instance
-            form = editReservationForm(request.POST, instance=patient)
+            
+        # ⭐ ADD request=request
+            form = CallCenterEditReservationForm(
+                request.POST,
+                instance=patient,
+                request=request
+            )
             if form.is_valid():
                 form.save()  # Save the updated instance
                 return redirect(reverse("confirm_page_call", kwargs={
@@ -552,7 +559,7 @@ class CallCenterView(ListView):
                 print(form.errors)
         else:
             # Display the form pre-filled with patient data
-            form = editReservationForm(instance=patient)
+            form = CallCenterEditReservationForm(instance=patient, request=request)
         
         # Render the edit page with the form and patient data
         return render(request, 'callcenter/editReservation.html', {'form': form, 'patient': patient})

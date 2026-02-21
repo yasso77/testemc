@@ -111,6 +111,10 @@
        
         <li><a href="{% url 'attendance_report' %}"><i class="bi bi-files"></i><span>Attended-Patients</span></a></li>
 
+         <li><a href="{% url 'weekly_calendar' %}"><i class="bi bi-calendar-week"></i><span>Weekly Calendar</span></a></li>
+         <li><a href="{% url 'centerPatients' 'Attendance-Today' %}"><i class="bi bi-calendar-check"></i><span>Attendance Today</span></a></li>
+        
+
          <li><a href="{% url 'archivedPatient' %}"><i class="bi bi-files"></i><span>Archived-Patients</span></a></li>
            <li><a href="{% url 'duplicatedPatients' %}"><i class="bi bi-graph-up-arrow"></i><span>Duplicated Patients</span></a></li>
         {% comment %} <li><a href="{% url 'doctorStats' %}"><i class="bi bi-graph-up-arrow"></i><span>Call Center Stats</span></a></li> {% endcomment %}

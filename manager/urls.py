@@ -1,4 +1,5 @@
 from django.urls import include, path
+from manager import views
 from manager.api.api import ReservePatientAPIView
 from manager.views.barcode import generate_barcode
 from manager.views.center import CenterView
@@ -54,6 +55,9 @@ urlpatterns = [
     path('archivedPatient/',ReportView.archivedPatientList,name='archivedPatient'),
     path('duplicatedPatients/',ReportView.duplicatedPatientList,name='duplicatedPatients'),
     path('reactivate_patient/<int:patientid>/', ReportView.reactivate_patient, name='reactivate_patient'),
+    path('reports/weekly-calendar/', ReportView.weekly_calendar_report, name='weekly_calendar'),
+    path('reports/attendance/<str:day>/',ReportView.attendance_patients_by_day,
+    name='attendance_patients_by_day'),
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),
@@ -78,6 +82,8 @@ urlpatterns = [
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
     path('validate-fullname/', CallCenterView.validate_fullname, name='validate-fullname'),
     path("confirm/<int:patientid>/<str:fileserial>/", CenterView.confirm_page,name="confirm_page"),
+    
+    
 
     
 
