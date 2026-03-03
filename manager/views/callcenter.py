@@ -166,7 +166,8 @@ class CallCenterView(ListView):
         if txtSearch:
             patients_qs = patients_qs.filter(
                 Q(fullname__icontains=txtSearch) |
-                Q(mobile__icontains=txtSearch)
+                Q(mobile__icontains=txtSearch) |
+                Q(fileserial__icontains=txtSearch)|Q(reservationCode__icontains=txtSearch)
             )
         if city_id:
             patients_qs = patients_qs.filter(city_id=city_id)

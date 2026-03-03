@@ -58,6 +58,9 @@ urlpatterns = [
     path('reports/weekly-calendar/', ReportView.weekly_calendar_report, name='weekly_calendar'),
     path('reports/attendance/<str:day>/',ReportView.attendance_patients_by_day,
     name='attendance_patients_by_day'),
+    
+    path('reports/expected/<str:day>/',ReportView.expected_patients_by_day,
+    name='expected_patients_by_day'),
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),

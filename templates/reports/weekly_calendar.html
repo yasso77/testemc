@@ -161,7 +161,7 @@
                             <i class="bi bi-clipboard2-check-fill" style="color: var(--accent-purple);"></i> Expected
                         </div>
                         <div class="stat-value" style="font-size: 1.4rem;">
-                             {{ d.expected }}
+                             <a href="#" class="attendance-link" data-url="{% url 'expected_patients_by_day' d.date|date:'Y-m-d' %}"> {{ d.expected }}</a>
                         </div>
                     </div>
                     <div class="stat-item">

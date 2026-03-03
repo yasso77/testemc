@@ -81,7 +81,7 @@
                             <th>Medical Case</th>
                             <th>Timeline</th>
                             <th>Fee</th>
-                            <th>Call Status</th>
+                            {% comment %} <th>Call Status</th> {% endcomment %}
                             <th>Created by</th>
                             <th>Created Date</th>
                             <th class="text-center">Quick Actions</th>
@@ -106,13 +106,31 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="small"><span class="text-muted small fw-bold">ATT:</span> {{ patient.attendanceDate|date:"d M" }}</div>
-                                <div class="small"><span class="text-muted small fw-bold">EXP:</span> {{ patient.expectedDate|date:"d M" }}</div>
-                            </td>
+    <div class="small">
+        <span class="text-muted small fw-bold">ATT:</span>
+        {% if patient.attendanceDate %}
+            {{ patient.attendanceDate|date:"d M Y" }}
+            {% if patient.attendanceTime %}
+                {{ patient.attendanceTime|time:"h:i A" }}
+            {% endif %}
+        {% else %}
+            <span class="text-danger">—</span>
+        {% endif %}
+    </div>
+
+    <div class="small">
+        <span class="text-muted small fw-bold">EXP:</span>
+        {% if patient.expectedDate %}
+            {{ patient.expectedDate|date:"d M Y" }}
+        {% else %}
+            <span class="text-danger">—</span>
+        {% endif %}
+    </div>
+</td>
                             <td>
                                 <span class="fw-bold text-dark">{{ patient.checkUpprice__checkupPriceName }}</span>
                             </td>
-                            <td>
+                            {% comment %} <td>
                                 <div class="d-flex align-items-center mb-1">
                                     <span class="badge bg-primary me-2">{{ patient.call_count }}</span>
                                     <span class="text-muted small">Attempts</span>
@@ -122,7 +140,7 @@
                                         {{ patient.last_call_outcome }}
                                     </div>
                                 {% endif %}
-                            </td>
+                            </td> {% endcomment %}
                               <td>{{ patient.createdBy__username }}</td>
             <td>{{ patient.createdDate|date:"Y-m-d H:i" }}</td>
           

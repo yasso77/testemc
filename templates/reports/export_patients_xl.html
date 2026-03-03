@@ -112,9 +112,10 @@
               <thead class="table-light">
                 <tr>
                   <th>Code</th>
+                  <th>Slot</th>
                   <th>Serial</th>
                   <th>Patient Name</th>
-                  {% comment %} <th>Mobile</th> {% endcomment %}
+                  <th>Age</th> 
                   <th>Source</th>
                   <th>Agent</th>
                   <th>Case</th>
@@ -129,21 +130,32 @@
                 {% for patient in page_obj %}
                 <tr>
                   <td><span class="fw-bold text-primary">{{ patient.reservationCode }}</span></td>
+                  <td>{{ patient.slotNumber }}</td>
                   <td>{{ patient.fileserial }}</td>
                   <td class="fw-bold">{{ patient.fullname }}</td>
+                  <td>{{ patient.age }}</td>
                   {% comment %} <td>{{ patient.mobile }}</td> {% endcomment %}
                   <td><span class="badge bg-secondary">{{ patient.leadSource }}</span></td>
                   <td>{{ patient.agentID.AgentCompany }}</td>
-                  <td>{{ patient.sufferedcase }}</td>
+                  <td>
+    {% if patient.sufferedcase %}
+        {{ patient.sufferedcase }}
+    {% elif patient.sufferedcaseByPatient %}
+        {{ patient.sufferedcaseByPatient }}
+    {% endif %}
+</td>
                   <td>{{ patient.city }}</td>
                   <td>{{ patient.createdBy }}</td>
                   <td class="text-muted">{{ patient.createdDate|date:"Y-m-d H:i" }}</td>
                   <td>
                     {% if patient.attendanceDate %}
-                      <span class="text-success">{{ patient.attendanceDate }}</span>
-                    {% else %}
-                      <span class="text-muted small">N/A</span>
-                    {% endif %}
+    <span class="text-success">
+      {{ patient.attendanceDate|date:"d M Y" }}
+      {% if patient.attendanceTime %}
+        {{ patient.attendanceTime|time:"h:i A" }}
+      {% endif %}
+    </span>
+  {% endif %}
                   </td>
                  
                 </tr>

@@ -1,11 +1,11 @@
-<h3>Attendance Patients - {{ selected_date }}</h3>
+<h3>Expected Patients - {{ selected_date }}</h3>
 
 <table class="table table-striped">
     <tr>
         <th>File No</th>
          <th>Reservation Code</th>
         <th>Name</th>
-         <th>Suffered Case</th>
+        <th>Suffered Case</th>
         <th>City</th>
         <th>Reserved By</th>
     </tr>
@@ -15,7 +15,7 @@
         <td>{{ p.fileserial }}</td>
         <td>{{ p.reservationCode }}</td>
         <td>{{ p.fullname }}</td>
-        <td> {% if patient.sufferedcase %}
+        <td> {% if p.sufferedcase %}
         {{ p.sufferedcase }}
     {% elif p.sufferedcaseByPatient %}
         {{ p.sufferedcaseByPatient }}
@@ -25,7 +25,7 @@
     </tr>
     {% empty %}
     <tr>
-        <td colspan="6">No patients found</td>
+        <td colspan="5">No patients found</td>
     </tr>
     {% endfor %}
 </table>

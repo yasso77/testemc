@@ -238,7 +238,7 @@ class ReportView(ListView):
             ws.title = "Patients Report"
 
             headers = [
-                'Code', 'File Serial', 'Name',                 'Lead Source', 'Agent', 'Suffered Case',
+                'Code','slotNumber', 'File Serial', 'Name', 'Lead Source', 'Agent', 'Suffered Case',
                 'City', 'Created By', 'Created Date', 'Attendance Date'
             ]
             ws.append(headers)
@@ -246,16 +246,21 @@ class ReportView(ListView):
             for p in patients:
                 ws.append([
                     p.reservationCode,
+                    p.slotNumber if hasattr(p, 'slotNumber') else '',  # Handle potential missing field
                     p.fileserial,
                     p.fullname,
                   
                     p.leadSource,
                     p.agentID.AgentCompany if p.agentID else '',
-                    str(p.sufferedcase),
+                    p.sufferedcase or p.sufferedcaseByPatient or '',
                     p.city.cityName if p.city else '',
                     str(p.createdBy),
                     localtime(p.createdDate).strftime('%Y-%m-%d %H:%M') if p.createdDate else '',
-                    p.attendanceDate.strftime('%Y-%m-%d') if p.attendanceDate else '',
+                    datetime.combine(p.attendanceDate, p.attendanceTime).strftime('%d-%m-%Y %I:%M %p')if p.attendanceDate and p.attendanceTime
+                    else (
+                        p.attendanceDate.strftime('%d-%m-%Y')
+                        if p.attendanceDate else ''
+                    )
                 ])
 
             for col in ws.columns:
@@ -1014,6 +1019,28 @@ class ReportView(ListView):
             return render(
                 request,
                 'reports/attendance_patients.html',
+                {'patients': patients, 'selected_date': selected_date}
+            )
+
+        return render(
+            request,
+            'reports/attendance_patients.html',
+            {'patients': patients, 'selected_date': selected_date}
+        )
+        
+    def expected_patients_by_day(request, day):
+
+        selected_date = parse_date(day)
+
+        patients = Patient.objects.filter(
+            expectedDate=selected_date,
+            isDeleted=False
+        ).select_related('city','reservedBy')
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(
+                request,
+                'reports/expected_patients.html',
                 {'patients': patients, 'selected_date': selected_date}
             )
 

@@ -14,7 +14,7 @@ class CCFormAddReservation(forms.ModelForm):
     slotNumber = forms.ChoiceField(
     choices=[],
     required=False,
-    widget=forms.Select(attrs={'class': 'form-select'})
+    widget=forms.Select(attrs={'class': 'form-select', 'required': 'required'})  # ⭐ HTML validation
 )
     mobile=forms.CharField(required=True, error_messages={'required': 'Mobile is required!'},widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Mobile'}))
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))

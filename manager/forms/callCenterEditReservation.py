@@ -12,7 +12,7 @@ class CallCenterEditReservationForm(forms.ModelForm):
     slotNumber = forms.ChoiceField(
     choices=[],
     required=False,
-    widget=forms.Select(attrs={'class': 'form-select'})
+    widget=forms.Select(attrs={'class': 'form-select', 'required': 'required'})  # ⭐ HTML validation
 )
     city = forms.ModelChoiceField(queryset=City.objects.active(), required=True, label="City", widget=forms.Select(attrs={'class': 'form-select'}))
     sufferedcase= forms.ModelChoiceField(queryset=SufferedCases.objects.active(), required=True, label="Suffered Case", widget=forms.Select(attrs={'class': 'form-select'}))

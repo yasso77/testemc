@@ -282,4 +282,28 @@
         });
     });
 </script>
+
+<script>
+document.querySelector("form").addEventListener("submit", function(e){
+
+    let slot = document.getElementById("id_slotNumber");
+
+    if(!slot.value){
+
+        e.preventDefault();
+
+        slot.classList.add("is-invalid");
+
+        if(!document.getElementById("slot-validation-message")){
+            let msg = document.createElement("div");
+            msg.id = "slot-validation-message";
+            msg.className = "text-danger mt-2";
+            msg.innerText = "Please select Slot Number.";
+            slot.parentNode.appendChild(msg);
+        }
+
+    }
+
+});
+</script>
 {% endblock %}
