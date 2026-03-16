@@ -219,49 +219,30 @@ class CenterView(ListView):
         next_3_days = today_date + timedelta(days=3)
             # Determine filtering condition based on scopeView
             # get all patients who should attend today (attendance today - expected date - confirmation date is =today and printform=false)
-        if ScopeView == 'Attendance-Today':  
-            # ✅ Ensure today_date is a proper date object
-            today_date = datetime.date.today() # Ensures it matches expectedDate format
-            
-            # Get a fallback old date
-            FALLBACK_DATE = datetime.date(1900, 1, 1)
-            
-            # Subquery to check if a patient's confirmation date in CallTrack is today
-            confirmed_today = CallTrack.objects.filter(
-                patientID=OuterRef('pk'),  # OuterRef links to the Patient model
-                confirmationDate=today_date
-            ).values('patientID')[:1]  # Ensures the query returns at most one match per patient
-            #print(confirmed_today)
-            
-             # Subquery to fetch the latest confirmationDate for each patient
-            reschadule_date = CallTrack.objects.filter(
+        if ScopeView == 'Attendance-Today':
+
+            today_date = datetime.date.today()
+
+            # Patients with follow-up today in CallTrack
+            follow_today = CallTrack.objects.filter(
                 patientID=OuterRef('pk'),
                 nextFollow=today_date
-            ).order_by('-nextFollow').values('nextFollow')[:1]
+            )
 
             recent_patients = Patient.objects.annotate(
-                        is_confirmed_today=Case(
-                            When(Exists(confirmed_today), then=Value(1)),
-                            default=Value(0),
-                            output_field=IntegerField()
-                        ),
-                        reschadule_data=Subquery(reschadule_date, output_field=models.DateField()),
-                        has_medical_history=Exists(
-                            PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
-                        ),
-                        # ✅ Ensure consistent date format for filtering
-                        safe_expectedDate=Coalesce("expectedDate", Value(FALLBACK_DATE, output_field=DateField())),  
-                        safe_attendanceDate=Coalesce("attendanceDate", Value(FALLBACK_DATE, output_field=DateField()))  
-                    ).filter(
-                        # ✅ Ensures at least one date is present (excludes records where both are NULL)
-                        ~Q(safe_expectedDate=FALLBACK_DATE) | ~Q(safe_attendanceDate=FALLBACK_DATE),
 
-                        # ✅ Include cases where attendanceDate is today even if expectedDate is NULL
-                        Q(safe_attendanceDate=today_date) | Q(safe_expectedDate=today_date),
-                        isDeleted=False
-                    ).distinct()
-            
-           
+                has_follow_today=Exists(follow_today)
+
+            ).filter(
+
+                isDeleted=False
+
+            ).filter(
+
+                Q(expectedDate=today_date) | Q(has_follow_today=True)
+
+            ).distinct()     
+                
 
         elif ScopeView == 'All-List':
              # ✅ Ensure today_date is a proper date object
@@ -394,7 +375,7 @@ class CenterView(ListView):
             'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
             'createdDate', 'createdBy__username', 'city', 'mobile', 'sufferedcase__caseName',
             'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate','attendanceTime','birthdate','checkUpprice__checkupPriceName',
-            'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','reschadule_data'  # Add annotated fields
+            'call_count', 'last_call_date', 'last_call_outcome','has_medical_history' # Add annotated fields
         )
     )
         

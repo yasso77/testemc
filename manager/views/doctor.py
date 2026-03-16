@@ -188,7 +188,13 @@ class DoctorView(ListView):
             filter_criteria["evaluationeegree"] = scopeview
 
         # Apply the filters to the queryset
-        patientList = PatientVisits.objects.filter(**filter_criteria).select_related('patientid', 'classifiedID')
+        #patientList = PatientVisits.objects.filter(**filter_criteria).select_related('patientid', 'classifiedID')
+        patientList = (
+            PatientVisits.objects
+            .filter(**filter_criteria)
+            .select_related('patientid', 'classifiedID')
+            .order_by('-createdate')[:50]
+)
         
         
                 # Example categories you want to exclude

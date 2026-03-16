@@ -93,7 +93,7 @@
         {% endif %}
 
         {% if request.user|in_group:"DoctorAudit" %}
-          <li><a href="{% url 'AuditEvaluation' %}"><i class="bi bi-shield-check"></i><span>Audit Examination</span></a></li>
+          <li><a href="{% url 'DoctorEvaluation' %}"><i class="bi bi-shield-check"></i><span>Audit Examination</span></a></li>
           <li><a href="{% url 'VisitstList' 'A' 'None' %}"><i class="bi bi-journal-text"></i><span>Audit Patients </span></a></li>
         {% endif %}
       </ul>

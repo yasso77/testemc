@@ -220,6 +220,16 @@ class Patient(models.Model):
     callDirection=models.CharField(max_length=5,choices=CallDirection_CHOICES,verbose_name='Call Direction',default=CallDirection_CHOICES[1][0],null=True)
     expectedDate = models.DateField( blank=True, null=True,verbose_name='Expected Date')  # Field name made lowercase.
       # Field name made lowercase.
+    def get_expected_date(self):
+
+        reschedule = self.call_patients.filter(
+            outcome='Rescheduled'
+        ).order_by('-callTrackID').first()
+
+        if reschedule and reschedule.nextFollow:
+            return reschedule.nextFollow
+
+        return self.expectedDate
     attendanceDate = models.DateField(blank=True, null=True,verbose_name='Attendance Date')
     attendanceTime = models.TimeField(blank=True, null=True,verbose_name='Attendance Time')
     rideglass = models.CharField(max_length=1, choices=YesNo_CHOICES, null=True, blank=True,verbose_name='Ride Of Glass')
@@ -249,7 +259,7 @@ class CallTrack(models.Model):
     outcomeStatus= [
             ('Canceled', 'Canceled'),
             ('Rescheduled', 'Rescheduled'),
-            ('Confirmed','Confirmed'),
+            #('Confirmed','Confirmed'),
             ('Re-examination','Re-examination'),
             ('Eye surgery','Eye surgery'),
             ('After surgery','After surgery')

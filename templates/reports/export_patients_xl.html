@@ -116,12 +116,13 @@
                   <th>Serial</th>
                   <th>Patient Name</th>
                   <th>Age</th> 
+                  <th>Platform</th>
                   <th>Source</th>
-                  <th>Agent</th>
                   <th>Case</th>
                   <th>City</th>
-                  <th>Created By</th>
-                  <th>Date Created</th>
+                  <th>Agent</th>
+                  <th>Created</th>
+                  <th>Expected</th>
                   <th>Attendance</th>
                   <th></th>
                 </tr>
@@ -146,7 +147,8 @@
 </td>
                   <td>{{ patient.city }}</td>
                   <td>{{ patient.createdBy }}</td>
-                  <td class="text-muted">{{ patient.createdDate|date:"Y-m-d H:i" }}</td>
+                  <td class="text-muted">{{ patient.createdDate|date:"d M Y H:i" }}</td>
+                  <td class="text-muted">{{ patient.get_expected_date|date:"d M Y" }}</td>
                   <td>
                     {% if patient.attendanceDate %}
     <span class="text-success">

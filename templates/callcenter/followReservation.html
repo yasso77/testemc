@@ -146,53 +146,96 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <span class="form-section-label">SUBMIT LOG ENTRY</span>
-                    <form method="post" id="followUpForm">
-                        {% csrf_token %}
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-secondary">CALL OUTCOME</label>
-                            <div id="outcomeGroup" class="d-flex flex-wrap gap-2">
-                                {% for radio in form.outcome %}
-                                    <div class="flex-fill">
-                                        {{ radio.tag }}
-                                        <label class="btn btn-outline-light text-dark border w-100 py-2 small" for="{{ radio.id_for_label }}">
-                                            {{ radio.choice_label }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-secondary">REMARKS / NOTES</label>
-                            {{ form.remarks }}
-                        </div>
-
-                        <div class="custom-form-group mb-4">
-                            <div class="row">
-                                <div class="col-6">
-                                    <label class="form-label fw-bold small text-secondary">NEXT CONTACT</label>
-                                    {{ form.nextFollow }}
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label fw-bold small text-secondary">CONFIRM DATE</label>
-                                    {{ form.confirmationDate }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-save">Update Track</button>
-                            <a href="{% url 'reservationList' %}" class="btn btn-link text-muted btn-sm">Return to List</a>
-                        </div>
-                    </form>
-                </div>
+      <div class="col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <div class="mb-4">
+                <h6 class="text-uppercase text-muted fw-bold mb-0" style="letter-spacing: 1px; font-size: 0.75rem;">
+                    Submit Log Entry
+                </h6>
+                <hr class="mt-2 mb-0 opacity-10">
             </div>
+
+            <form method="post" id="followUpForm">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-dark">CALL OUTCOME</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" name="outcome" value="Canceled" class="btn-check" id="id_outcome_0" autocomplete="off">
+                            <label class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="id_outcome_0">
+                                <i class="bi bi-x-circle"></i> Canceled
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" name="outcome" value="Rescheduled" class="btn-check" id="id_outcome_1" autocomplete="off">
+                            <label class="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="id_outcome_1">
+                                <i class="bi bi-calendar-event"></i> Rescheduled
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-dark">REMARKS / NOTES</label>
+                    {{ form.remarks }}
+                </div>
+
+                <div class="mb-4" id="dateInputContainer">
+                    <label class="form-label fw-semibold small text-dark">
+                        NEW EXPECTED DATE <span id="requiredStar" class="text-danger d-none">*</span>
+                    </label>
+                    <div class="position-relative">
+                        {{ form.nextFollow }}
+                    </div>
+                    <div class="form-text small d-none text-danger" id="dateWarning">
+                        Date is required for rescheduling.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3 pt-2">
+                    <button type="submit" class="btn btn-primary btn-lg fs-6 fw-bold shadow-sm">Update Track</button>
+                    <a href="{% url 'reservationList' %}" class="btn btn-link text-decoration-none text-muted small">Return to List</a>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radioCanceled = document.getElementById('id_outcome_0');
+    const radioRescheduled = document.getElementById('id_outcome_1');
+    const dateInput = document.querySelector('[name="nextFollow"]'); // Adjust selector if needed
+    const container = document.getElementById('dateInputContainer');
+    const star = document.getElementById('requiredStar');
+
+    function toggleDateField() {
+        if (radioRescheduled.checked) {
+            // Enable and make required
+            dateInput.disabled = false;
+            dateInput.required = true;
+            container.style.opacity = "1";
+            star.classList.remove('d-none');
+        } else if (radioCanceled.checked) {
+            // Disable and clear value
+            dateInput.disabled = true;
+            dateInput.required = false;
+            dateInput.value = ""; // Clear date if they previously picked one
+            container.style.opacity = "0.5";
+            star.classList.add('d-none');
+        }
+    }
+
+    // Listen for changes
+    radioCanceled.addEventListener('change', toggleDateField);
+    radioRescheduled.addEventListener('change', toggleDateField);
+
+    // Run on page load in case of form validation errors/reloads
+    toggleDateField();
+});
+</script>
 
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm">
@@ -256,9 +299,9 @@
     document.addEventListener("DOMContentLoaded", function () {
         const outcomeRadios = document.querySelectorAll('#outcomeGroup input[type="radio"]');
         const nextFollowInput = document.querySelector("input[name='nextFollow']");
-        const confirmationInput = document.querySelector("input[name='confirmationDate']");
+        
     
-        if (!nextFollowInput || !confirmationInput || outcomeRadios.length === 0) {
+        if (!nextFollowInput || outcomeRadios.length === 0) {
             return;
         }
     
@@ -266,29 +309,19 @@
             const selectedOutcome = Array.from(outcomeRadios).find(radio => radio.checked)?.value;
     
             if (selectedOutcome === "Rescheduled") {
-                confirmationInput.disabled = true;
-                confirmationInput.required = false;
-                confirmationInput.value = "";
+                
                 nextFollowInput.disabled = false;
                 nextFollowInput.required = true;
-            } else if (selectedOutcome === "Confirmed") {
-                nextFollowInput.disabled = true;
-                nextFollowInput.required = false;
-                nextFollowInput.value = "";
-                confirmationInput.disabled = false;
-                confirmationInput.required = true;
+            } 
             } else if (selectedOutcome === "Canceled") {
                 nextFollowInput.disabled = true;
                 nextFollowInput.required = false;
                 nextFollowInput.value = "";
-                confirmationInput.value = "";
-                confirmationInput.disabled = true;
-                confirmationInput.required = false;
+                
             } else {
                 nextFollowInput.disabled = false;
                 nextFollowInput.required = false;
-                confirmationInput.disabled = false;
-                confirmationInput.required = false;
+                
             }
         }
     

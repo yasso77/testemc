@@ -232,37 +232,43 @@ class ReportView(ListView):
         # =========================
         # Excel Export (only if filtered)
         # =========================
+        
+    
         if export == 'excel' and has_filters:
             wb = Workbook()
             ws = wb.active
             ws.title = "Patients Report"
 
             headers = [
-                'Code','slotNumber', 'File Serial', 'Name', 'Lead Source', 'Agent', 'Suffered Case',
-                'City', 'Created By', 'Created Date', 'Attendance Date'
+                'Code','slotNumber', 'File Serial', 'Name','Age', 'Platform', 'Source', 'Suffered Case',
+                'City', 'Agent', 'Created Date','Expected Date', 'Attendance Date'
             ]
             ws.append(headers)
 
             for p in patients:
-                ws.append([
-                    p.reservationCode,
-                    p.slotNumber if hasattr(p, 'slotNumber') else '',  # Handle potential missing field
-                    p.fileserial,
-                    p.fullname,
-                  
-                    p.leadSource,
-                    p.agentID.AgentCompany if p.agentID else '',
-                    p.sufferedcase or p.sufferedcaseByPatient or '',
-                    p.city.cityName if p.city else '',
-                    str(p.createdBy),
-                    localtime(p.createdDate).strftime('%Y-%m-%d %H:%M') if p.createdDate else '',
-                    datetime.combine(p.attendanceDate, p.attendanceTime).strftime('%d-%m-%Y %I:%M %p')if p.attendanceDate and p.attendanceTime
-                    else (
-                        p.attendanceDate.strftime('%d-%m-%Y')
-                        if p.attendanceDate else ''
-                    )
-                ])
+                        ws.append([
+                p.reservationCode or '',
+                p.slotNumber if hasattr(p, 'slotNumber') else '',
+                p.fileserial or '',
+                p.fullname or '',
+                p.age,
 
+                str(p.leadSource) if p.leadSource else '',
+                p.agentID.AgentCompany if p.agentID else '',
+                    p.sufferedcase.caseName if p.sufferedcase else (p.sufferedcaseByPatient.caseName if p.sufferedcaseByPatient else ''),
+                p.city.cityName if p.city else '',
+                str(p.createdBy) if p.createdBy else '',
+                localtime(p.createdDate).strftime('%d-%m-%Y %I:%M %p') if p.createdDate else '',
+                (localtime(p.get_expected_date()).strftime('%d-%m-%Y')
+ if isinstance(p.get_expected_date(), datetime)
+ else p.get_expected_date().strftime('%d-%m-%Y') if p.get_expected_date() else ''),
+                datetime.combine(p.attendanceDate, p.attendanceTime).strftime('%d-%m-%Y %I:%M %p')
+                if p.attendanceDate and p.attendanceTime
+                else (
+                    p.attendanceDate.strftime('%d-%m-%Y')
+                    if p.attendanceDate else ''
+                )
+            ])
             for col in ws.columns:
                 max_length = max(len(str(cell.value)) if cell.value else 0 for cell in col)
                 ws.column_dimensions[get_column_letter(col[0].column)].width = max_length + 2
@@ -331,8 +337,10 @@ class ReportView(ListView):
 
         return render(request, 'reports/export_patients_xl.html', context)
 
-    
-   
+        
+    @property
+    def suffered_case_display(self):
+        return str(self.sufferedcase) if self.sufferedcase else (self.sufferedcaseByPatient or '')   
     
     def showPatientDataAttendedToday(request):
         
@@ -953,16 +961,6 @@ class ReportView(ListView):
             .values('attendanceDate')
             .annotate(total=Count('patientid'))
         )
-        
-        expected_qs = (
-            Patient.objects.filter(
-                expectedDate__gte=start_week,
-                expectedDate__lte=end_week,
-                isDeleted=False
-            )
-            .values('expectedDate')
-            .annotate(total=Count('patientid'))
-        )
         created_dict = {
             c['day']: c['total']
             for c in created_qs if c['day']
@@ -972,13 +970,44 @@ class ReportView(ListView):
             a['attendanceDate']: a['total']
             for a in attendance_qs if a['attendanceDate']
         }
-        
-        expected_dict = {
-            e['expectedDate']: e['total']
-            for e in expected_qs if e['expectedDate']
-        }
-       
+                
+                # Get patient IDs instead of aggregated counts
+        expected_qs = (
+            Patient.objects.filter(
+                expectedDate__range=[start_week, end_week],
+                isDeleted=False
+            )
+            .values('expectedDate', 'patientid')
+        )
 
+        calltrack_qs = (
+            CallTrack.objects.filter(
+                nextFollow__range=[start_week, end_week],
+                patientID__isDeleted=False
+            )
+            .values('nextFollow', 'patientID')
+        )
+
+        combined = {}
+
+        # Expected patients
+        for e in expected_qs:
+            date = e['expectedDate']
+            pid = e['patientid']
+
+            if date:
+                combined.setdefault(date, set()).add(pid)
+
+        # Calltrack patients
+        for c in calltrack_qs:
+            date = c['nextFollow']
+            pid = c['patientID']
+
+            if date:
+                combined.setdefault(date, set()).add(pid)
+
+        # Final dictionary (date -> unique patient count)
+        combined_expected = {date: len(patients) for date, patients in combined.items()}
         week_days = []
 
         for i in range(7):
@@ -990,7 +1019,7 @@ class ReportView(ListView):
                 'day_name': day.strftime("%A"),
                 'created': created_dict.get(day, 0),
                 'attendance': attendance_dict.get(day, 0),
-                'expected': expected_dict.get(day, 0),   # ⭐ NEW
+                'expected': combined_expected.get(day, 0),   # ⭐ NEW
                 'is_today': day == today
             })
                 
@@ -1032,10 +1061,21 @@ class ReportView(ListView):
 
         selected_date = parse_date(day)
 
-        patients = Patient.objects.filter(
-            expectedDate=selected_date,
-            isDeleted=False
-        ).select_related('city','reservedBy')
+        follow_today = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            nextFollow=selected_date, patientID__isDeleted=False
+        )
+
+        patients = (
+            Patient.objects
+            .annotate(has_follow_today=Exists(follow_today))
+            .filter(
+                Q(expectedDate=selected_date) | Q(has_follow_today=True),
+                isDeleted=False
+            )
+            .select_related('city', 'reservedBy')
+            .distinct()
+        )
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return render(

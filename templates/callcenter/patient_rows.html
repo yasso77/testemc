@@ -18,8 +18,8 @@
                         </td>
                         <td>{{ patient.createdBy.username }}</td>
 
-                        <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">
-                            <span class="badge bg-light text-primary border-primary-light">{{ patient.expectedDate }}</span>
+                        <td data-order="{{ patient.get_expected_date|date:'Y-m-d' }}">
+                            <span class="badge bg-light text-primary border-primary-light">{{ patient.get_expected_date }}</span>
                         </td>
                         <td>
                             <div class="small mb-1">Calls: <strong>{{ patient.call_count }}</strong></div>
