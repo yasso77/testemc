@@ -49,6 +49,7 @@ urlpatterns = [
     # path('delete_duplicatedpatient/<int:patientid>/<str:date_from>/<str:date_to>/', ReportView.delete_duplicatedpatient, name='delete_duplicatedpatient'),
     
     path('adminSearchOnPatinet/',ReportView.SearchOnPatient,name='adminSearchOnPatinet'),
+    path('patient-calls-modal/<int:patientid>/', ReportView.patient_calls_modal, name='patient_calls_modal'),
     path('SearchOnPatientResult/',ReportView.SearchOnPatientResult,name='SearchOnPatientResult'),
     path("confirm/<str:patientName>/<str:fileserial>/<str:returnrl>/", ReportView.confirm_page,name="confirm_pageAdmin"),
     
@@ -81,6 +82,8 @@ urlpatterns = [
     path('dashSearchOnPatient/',CenterView.dashSearchOnPatient,name='dashSearchOnPatient'),
     path('followup/<int:patientid>/', CenterView.follow_reservation, name='followup'),
     path('patientForm/<int:patientid>/', CenterView.patientForm, name='patientForm'),
+    path('rePrintPatientForm/<int:patientid>/', CenterView.rePrintPatientForm, name='rePrintPatientForm'),
+    
     path('centeredit_reservation/<int:patientid>', CenterView.edit_reservation, name='centeredit_reservation'),
     path('validate-mobile/', CallCenterView.validate_mobile, name='validate_mobile'),
     path('validate-fullname/', CallCenterView.validate_fullname, name='validate-fullname'),

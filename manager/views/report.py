@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from urllib import request
 from django.db.models.functions import Cast, TruncDate
 from django.utils.dateparse import parse_date
 from urllib.parse import urlencode
@@ -650,16 +651,24 @@ class ReportView(ListView):
                  PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
             )  
             )
-            .values(
-                'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
-                'createdDate','createdBy__username', 'city', 'mobile', 'age', 'sufferedcase__caseName',
-                'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
-                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history'  # Add annotated fields
-            )
+            .order_by('-createdDate')
         )  
         
         return render(request, 'reports/SearchResult.html', {'patients': recent_patients,'viewScope':strText,'total_count':recent_patients.count()})
     
+    def patient_calls_modal(request, patientid):
+        patient = Patient.objects.select_related(
+            'city', 'sufferedcase', 'createdBy'
+        ).get(pk=patientid)
+
+        calls = CallTrack.objects.filter(
+            patientID=patient
+        ).select_related('createdBy').order_by('-createdDate')
+
+        return render(request, 'reports/patient_calls_modal.html', {
+            'patient': patient,
+            'calls': calls
+        }) 
     @login_required  
     def archivedPatientList(request):    
 
@@ -947,7 +956,7 @@ class ReportView(ListView):
             createdDate__gte=start_dt,
             createdDate__lt=end_dt,
             isDeleted=False
-        )
+        ).exclude(leadsource='Center') 
         .annotate(day=Cast('createdDate', DateField()))
         .values('day')
         .annotate(total=Count('patientid'))
@@ -971,21 +980,26 @@ class ReportView(ListView):
             for a in attendance_qs if a['attendanceDate']
         }
                 
-                # Get patient IDs instead of aggregated counts
-        expected_qs = (
-            Patient.objects.filter(
-                expectedDate__range=[start_week, end_week],
-                isDeleted=False
-            )
-            .values('expectedDate', 'patientid')
-        )
-
+            # Get patients who have rescheduled (calltrack)
         calltrack_qs = (
             CallTrack.objects.filter(
                 nextFollow__range=[start_week, end_week],
                 patientID__isDeleted=False
             )
             .values('nextFollow', 'patientID')
+        )
+
+        # Get list of patient IDs who rescheduled
+        rescheduled_patients = set(c['patientID'] for c in calltrack_qs)
+
+        # Expected patients EXCLUDING rescheduled ones
+        expected_qs = (
+            Patient.objects.filter(
+                expectedDate__range=[start_week, end_week],
+                isDeleted=False
+            )
+            .exclude(patientid__in=rescheduled_patients,leadsource='Center')
+            .values('expectedDate', 'patientid')
         )
 
         combined = {}
@@ -1006,7 +1020,7 @@ class ReportView(ListView):
             if date:
                 combined.setdefault(date, set()).add(pid)
 
-        # Final dictionary (date -> unique patient count)
+        # Final dictionary
         combined_expected = {date: len(patients) for date, patients in combined.items()}
         week_days = []
 
@@ -1061,17 +1075,29 @@ class ReportView(ListView):
 
         selected_date = parse_date(day)
 
+        # Has follow on this exact day
         follow_today = CallTrack.objects.filter(
             patientID=OuterRef('pk'),
-            nextFollow=selected_date, patientID__isDeleted=False
+            nextFollow=selected_date,
+            patientID__isDeleted=False
         )
+
+        # Has follow on ANY other day (rescheduled)
+        follow_any = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            patientID__isDeleted=False
+        ).exclude(nextFollow=selected_date)
 
         patients = (
             Patient.objects
-            .annotate(has_follow_today=Exists(follow_today))
+            .annotate(
+                has_follow_today=Exists(follow_today),
+                has_other_follow=Exists(follow_any)
+            )
+            .filter(isDeleted=False)
             .filter(
-                Q(expectedDate=selected_date) | Q(has_follow_today=True),
-                isDeleted=False
+                Q(has_follow_today=True) |
+                Q(expectedDate=selected_date, has_other_follow=False)
             )
             .select_related('city', 'reservedBy')
             .distinct()
@@ -1083,9 +1109,8 @@ class ReportView(ListView):
                 'reports/expected_patients.html',
                 {'patients': patients, 'selected_date': selected_date}
             )
-
-        return render(
-            request,
-            'reports/attendance_patients.html',
-            {'patients': patients, 'selected_date': selected_date}
-        )
+            # return render(
+            #     request,
+            #     'reports/expected_patients.html',
+            #     {'patients': patients, 'selected_date': selected_date}
+            # )

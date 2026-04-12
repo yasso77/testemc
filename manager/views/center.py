@@ -143,7 +143,9 @@ class CenterView(ListView):
                 patient.createdBy = request.user  # Assign logged-in user
                 patient.reservedBy = request.user  # Assign logged-in user
                 patient.callDirection = None
-                patient.leadSource='Center'  
+                patient.leadSource='Center'
+                patient.expectedDate =datetime.date.today()  #
+                #Ensure expectedDate is set from form  
                  # 👇 selected organization from form
                 organization = patient.organizationID
 
@@ -409,6 +411,8 @@ class CenterView(ListView):
         patientData.formPrinted = True
         patientData.attendanceDate = datetime.date.today()
         patientData.attendanceTime = datetime.datetime.now().time()
+        patientData.latestupdate = timezone.now()
+        patientData.updatedby = request.user
         patientData.save()
         
         # Convert queryset to dictionary with condition names as keys
@@ -425,6 +429,26 @@ class CenterView(ListView):
             'conditions_list': CONDITIONS_LIST,  # Pass list from view
             'barcode_data': barcode_data  # Pass barcode data to template
         })
+
+    def rePrintPatientForm(request, patientid):
+            CONDITIONS_LIST = MedicalConditionData.objects.active()
+            patientData = get_object_or_404(Patient, patientid=patientid)
+            medical_history = PatientMedicalHistory.objects.filter(patient=patientData)
+            
+            # Convert queryset to dictionary with condition names as keys
+            history_dict = {entry.condition.conditionName: entry.relation for entry in medical_history}
+
+            # Debugging:
+            #print(f"Medical History: {history_dict}")  
+            # Generate barcode based on patient's file serial number
+            barcode_data = CenterView.generate_barcode(patientData.fileserial)
+
+            return render(request, 'center/patientForm.html',  {
+                'patientData': patientData,
+                'medical_history': history_dict,  # Dictionary now uses condition names as keys
+                'conditions_list': CONDITIONS_LIST,  # Pass list from view
+                'barcode_data': barcode_data  # Pass barcode data to template
+            })
 
 
     @login_required

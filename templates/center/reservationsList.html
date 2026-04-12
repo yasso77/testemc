@@ -152,7 +152,7 @@
                                         <i class="bi bi-arrow-repeat fs-5"></i>
                                     </a>
                                      {% endcomment %}
-                                    <a target="_blank" href="{% url 'patientForm' patient.patientid %}" 
+                                    <a target="_blank" href="{% url 'rePrintPatientForm' patient.patientid %}" 
                                        class="btn-circle bg-info text-white" 
                                        data-bs-toggle="tooltip" title="Print Medical Form"
                                        onclick="return checkMedicalRecords('{{ patient.fileserial }}')">

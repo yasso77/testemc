@@ -21,17 +21,35 @@
                         <td>{{ patient.createdBy__username }}</td>
 
                         <td data-order="{{ patient.expectedDate|date:'Y-m-d' }}">
-                            <span class="badge bg-light text-primary border-primary-light">{{ patient.expectedDate }}</span>
+                            <span class="badge bg-light text-primary border-primary-light">{{ patient.get_expected_date }}</span>
                         </td>
                         <td>
-                            <div class="small mb-1">Calls: <strong>{{ patient.call_count }}</strong></div>
-                            {% if patient.last_call_outcome %}
-                                <span class="outcome-pill {% if patient.last_call_outcome == 'Confirmed' %}outcome-confirmed{% elif patient.last_call_outcome == 'Canceled' %}outcome-canceled{% else %}outcome-pending{% endif %}">
-                                    {{ patient.last_call_outcome }}
-                                </span>
-                            {% else %}
-                                <span class="outcome-pill" style="background: #f8f9fa; color: #abb5be;">No Activity</span>
-                            {% endif %}
+                           <td>
+    <div class="small mb-1">
+        Calls:
+        <a href="#" 
+           class="fw-bold text-primary open-calls-modal"
+           data-patient-id="{{ patient.patientid }}">
+            {{ patient.call_count }}
+        </a>
+    </div>
+
+    {% if patient.last_call_outcome %}
+        <span class="outcome-pill 
+            
+            {% if patient.last_call_outcome == 'Canceled' %}
+                outcome-canceled
+            {% else %}
+                outcome-pending
+            {% endif %}">
+            {{ patient.last_call_outcome }}
+        </span>
+    {% else %}
+        <span class="outcome-pill" style="background: #f8f9fa; color: #abb5be;">
+            No Activity
+        </span>
+    {% endif %}
+</td>
                         </td>
                          <td class="text-center">
           {{ p.latestupdate|date:"Y-m-d" }}
@@ -70,3 +88,35 @@
                         </td>
                     </tr>
                 {% endfor %} 
+    <div class="modal fade" id="callsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Patient Calls</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="callsModalBody">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".open-calls-modal").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            e.preventDefault();
+            let patientId = this.getAttribute("data-patient-id");
+
+            fetch("/patient-calls-modal/" + patientId + "/")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("callsModalBody").innerHTML = data;
+                    var myModal = new bootstrap.Modal(document.getElementById('callsModal'));
+                    myModal.show();
+                });
+        });
+    });
+});
+</script>

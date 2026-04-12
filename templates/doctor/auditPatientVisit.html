@@ -41,7 +41,7 @@
                   <th style="width:25%;">File #</th>
                   <th style="width:40%;">Patient Name</th>
                   <th style="width:40%;">Suffered Case</th>
-                  <th style="width:40%;">Patient Mobile</th>
+                 
                   <th></th>
                 </tr>
                 {%for patient in patients%}
@@ -50,7 +50,7 @@
                   <td>{{patient.fileserial}}</td>
                   <td>{{patient.fullname}} </td>
                   <td>{{patient.sufferedcaseByPatient}}</td>
-                  <td>{{patient.mobile}}</td>
+                
 
                   <td><button type="button" title="Select" class="btn btn-outline-primary"
                       onclick="return bindPatientData('{{ patient.patientid }}', '{{ patient.fullname }}','{{ patient.fileserial }}')">Select</button> </td>

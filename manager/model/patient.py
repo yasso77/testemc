@@ -1,6 +1,9 @@
+from datetime import date
+
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 from django.utils.timezone import now
 
 
@@ -246,7 +249,13 @@ class Patient(models.Model):
     objects = PatientManager()
     
     
+    # def clean(self):
+    #     if not self.expectedDate:
+    #         raise ValidationError("Expected date is required")
 
+    #     if self.expectedDate < date.today():
+    #         raise ValidationError("Expected date cannot be in the past")
+        
     def __str__(self):
         return self.fullname
     class Meta:

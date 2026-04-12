@@ -7,6 +7,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
 from .model.userExtra import UserExtra
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from .models import UserExtra
 
 
 # Register your models here.
@@ -192,15 +196,69 @@ class OrganizationAdmin(admin.ModelAdmin):
 admin.site.register(Organizations,OrganizationAdmin)
 
 
-
 class UserExtraInline(admin.StackedInline):
     model = UserExtra
     can_delete = False
     verbose_name_plural = "Extra Info"
-    
+    extra = 0
+    max_num = 1
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.groups.filter(name='Can Edit User Extra').exists() or request.user.is_superuser
+
+    def has_add_permission(self, request, obj=None):
+        return request.user.groups.filter(name='Can Edit User Extra').exists() or request.user.is_superuser
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.groups.filter(name='Can Edit User Extra').exists() or request.user.is_superuser:
+            return []
+        return [f.name for f in self.model._meta.fields]
 class CustomUserAdmin(UserAdmin):
     inlines = (UserExtraInline,)
-    
+    add_fieldsets = UserAdmin.add_fieldsets
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and request.user.groups.filter(name='Can Edit User Extra').exists():
+            return [field.name for field in self.model._meta.fields]
+        return super().get_readonly_fields(request, obj)
+
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+
+        fieldsets = super().get_fieldsets(request, obj)
+
+        if request.user.groups.filter(name='Can Edit User Extra').exists():
+            filtered = []
+            for name, data in fieldsets:
+                if name in ['Permissions', 'Important dates']:
+                    continue
+                filtered.append((name, data))
+            return filtered
+
+        return fieldsets
+
+    def get_fieldsets(self, request, obj=None):
+        # لو Add user → لا نغير شيء
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+
+        fieldsets = super().get_fieldsets(request, obj)
+
+        # إخفاء Permissions و Important dates لمجموعة Extra
+        if request.user.groups.filter(name='Can Edit User Extra').exists():
+            filtered = []
+            for name, data in fieldsets:
+                if name in ['Permissions', 'Important dates']:
+                    continue
+                filtered.append((name, data))
+            return filtered
+
+        return fieldsets
+
+
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
-

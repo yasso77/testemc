@@ -1,0 +1,88 @@
+<style>
+    .info-label { font-size: 0.85rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .info-value { font-weight: 600; color: #212529; }
+    .detail-section { background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    .table-custom thead { background-color: #e9ecef; }
+</style>
+
+<div class="detail-section">
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Reservation Code</div>
+            <div class="info-value text-primary">#{{ patient.reservationCode }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Name</div>
+            <div class="info-value">{{ patient.fullname }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Mobile</div>
+            <div class="info-value">{{ patient.mobile }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">City</div>
+            <div class="info-value">{{ patient.city }}</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Expected Date</div>
+            <div class="info-value"><i class="far fa-calendar-alt me-1"></i> {{ patient.get_expected_date }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Suffered Case</div>
+            <div class="info-value"><span class="badge bg-info text-dark">{{ patient.sufferedcase }}</span></div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Lead Source</div>
+            <div class="info-value">{{ patient.leadSource }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-label">Created By</div>
+            <div class="info-value text-muted small">{{ patient.createdBy }}</div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex align-items-center mb-3">
+    <h6 class="mb-0"><i class="fas fa-phone-alt me-2 text-success"></i>Call History</h6>
+    <span class="badge rounded-pill bg-secondary ms-2">{{ calls|length }}</span>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-custom align-middle">
+        <thead>
+            <tr>
+                <th>CreatedDate</th>
+                <th>Out come</th>
+                <th>Next Date</th>
+                <th>Notes</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for call in calls %}
+            <tr>
+                <td class="text-nowrap small">{{ call.createdDate }}</td>
+                <td>
+                    <span class="badge {% if 'Success' in call.outcome %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                        {{ call.outcome }}
+                    </span>
+                </td>
+                <td><span class="text-muted small">{{ call.nextFollow}}</span></td>
+                <td class="text-muted small">{{ call.notes }}</td>
+                <td><span class="small font-monospace">{{ call.createdBy }}</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center py-4 text-muted italic">
+                    <i class="fas fa-inbox d-block mb-2"></i> No call history found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

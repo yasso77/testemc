@@ -34,14 +34,22 @@ class CCFormAddReservation(forms.ModelForm):
     required=True,
     label="Organization",
     error_messages={'required': 'Organization is required!'},
-    widget=forms.Select(attrs={'class': 'form-select'})
+    widget=forms.Select(attrs={'class': 'form-select'}),    
+)
+    expectedDate = forms.DateField(
+    required=True,
+    widget=forms.DateInput(attrs={
+        'type': 'date',
+        'class': 'form-control',
+    })
 )
 
       
 
     class Meta:
         model = Patient
-        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks','expectedDate', 'callDirection', 'checkUpprice', 'agentID','organizationID' ,'slotNumber'
+        exclude = ['createdDate', 'createdby']
+        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks', 'callDirection', 'checkUpprice', 'agentID','organizationID' ,'slotNumber'
                  ]
         widgets = {
            
@@ -51,7 +59,7 @@ class CCFormAddReservation(forms.ModelForm):
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'organizationID': forms.Select(attrs={'class': 'form-select'}),
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
-            'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),   
+            'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'required': 'required'}),   
         }
 
     def __init__(self, *args, **kwargs):
@@ -92,8 +100,13 @@ class CCFormAddReservation(forms.ModelForm):
 
     def clean_expectedDate(self):
         expected_date = self.cleaned_data.get('expectedDate')
-        if expected_date is not None and expected_date < date.today():
+
+        if expected_date in [None, ""]:
+            raise forms.ValidationError("Expected date is required.")
+
+        if expected_date < date.today():
             raise forms.ValidationError("Expected Date cannot be earlier than today.")
+
         return expected_date
     
     def clean_fullname(self):

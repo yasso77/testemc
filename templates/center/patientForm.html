@@ -366,7 +366,11 @@
 
             <tr>
                 <th colspan="2">
-                    Attendance Date/Time:{% now "d-M-y : H:i" %}
+                    Attendance Date/Time:{% if patientData.attendanceDate and patientData.attendanceTime %}
+    {{ patientData.attendanceDate|date:"d-F-Y" }} {{ patientData.attendanceTime|time:"h:i A" }}
+{% else %}
+   <div style="color: red;">N/A-Edit the patient</div>
+{% endif %}
                 </th>
                 
                

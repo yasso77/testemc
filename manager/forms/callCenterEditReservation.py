@@ -21,8 +21,8 @@ class CallCenterEditReservationForm(forms.ModelForm):
     checkUpprice= forms.ModelChoiceField(queryset=CheckUpPrice.objects.active(),required=False,  label="Check-Up price", widget=forms.Select(attrs={'class': 'form-select'}))
     class Meta:
         model = Patient
-        exclude = ['createdDate', 'createdby']  # Exclude non-editable fields
-        fields = [ 'reservationCode', 'city','age','gender','mobile','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID','organizationID','expectedDate','slotNumber']
+        exclude = ['createdDate', 'createdby','expectedDate']  # Exclude non-editable fields
+        fields = [ 'reservationCode', 'city','age','gender','mobile','sufferedcase','leadSource','remarks','offerID','callDirection','fullname','checkUpprice','agentID','organizationID','slotNumber']
         
         widgets = {
             #'reservationCode': forms.HiddenInput(),  # Make this field hidden
@@ -41,7 +41,7 @@ class CallCenterEditReservationForm(forms.ModelForm):
             'leadSource': forms.Select(attrs={'class': 'form-select'}),            
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
-            'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+            #'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
            
              
     
