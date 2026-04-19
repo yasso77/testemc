@@ -956,7 +956,8 @@ class ReportView(ListView):
             createdDate__gte=start_dt,
             createdDate__lt=end_dt,
             isDeleted=False
-        ).exclude(leadsource='Center') 
+        )
+        .exclude(leadSource='Center') 
         .annotate(day=Cast('createdDate', DateField()))
         .values('day')
         .annotate(total=Count('patientid'))
@@ -998,7 +999,7 @@ class ReportView(ListView):
                 expectedDate__range=[start_week, end_week],
                 isDeleted=False
             )
-            .exclude(patientid__in=rescheduled_patients,leadsource='Center')
+            .exclude(patientid__in=rescheduled_patients,leadSource='Center')
             .values('expectedDate', 'patientid')
         )
 
@@ -1098,7 +1099,7 @@ class ReportView(ListView):
             .filter(
                 Q(has_follow_today=True) |
                 Q(expectedDate=selected_date, has_other_follow=False)
-            )
+            ).exclude(leadSource='Center')
             .select_related('city', 'reservedBy')
             .distinct()
         )
