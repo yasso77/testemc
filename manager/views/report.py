@@ -242,7 +242,7 @@ class ReportView(ListView):
 
             headers = [
                 'Code','slotNumber', 'File Serial', 'Name','Age', 'Platform', 'Source', 'Suffered Case',
-                'City', 'Agent', 'Created Date','Expected Date', 'Attendance Date'
+                'City', 'Agent','Remarks', 'Created Date','Expected Date', 'Attendance Date'
             ]
             ws.append(headers)
 
@@ -259,6 +259,7 @@ class ReportView(ListView):
                     p.sufferedcase.caseName if p.sufferedcase else (p.sufferedcaseByPatient.caseName if p.sufferedcaseByPatient else ''),
                 p.city.cityName if p.city else '',
                 str(p.createdBy) if p.createdBy else '',
+                p.remarks or '',
                 localtime(p.createdDate).strftime('%d-%m-%Y %I:%M %p') if p.createdDate else '',
                 (localtime(p.get_expected_date()).strftime('%d-%m-%Y')
  if isinstance(p.get_expected_date(), datetime)
@@ -338,7 +339,197 @@ class ReportView(ListView):
 
         return render(request, 'reports/export_patients_xl.html', context)
 
+    def patient_report_view_mobile(request):
+        # =========================
+        # Read filters from request
+        # =========================
+        date_field = request.GET.get('date_field', 'createdDate')
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
+        city_id = request.GET.get('city')
+        agent_id = request.GET.get('agentID')
+        lead_source = request.GET.get('leadSource')
+        user_id = request.GET.get('users')
+        export = request.GET.get('export')
+
+        # =========================
+        # Detect if any filter is applied
+        # =========================
+        has_filters = any([
+            date_from,
+            date_to,
+            city_id,
+            agent_id,
+            lead_source,
+            user_id,
+        ])
+
+        # =========================
+        # Start with EMPTY queryset
+        # =========================
+        patients = Patient.objects.none()
+
+        # =========================
+        # Apply filters only if user filtered
+        # =========================
+        if has_filters:
+            patients = Patient.objects.filter(isDeleted=False)
+
+            # ---- Date filtering
+            if date_from and date_to:
+                try:
+                    date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+                    date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+
+                    if date_field == 'createdDate':
+                        patients = patients.filter(
+                            createdDate__range=(
+                                date_from_obj,
+                                date_to_obj + timedelta(days=1)
+                            )
+                        )
+                    else:
+                        patients = patients.filter(
+                            **{
+                                f"{date_field}__range": (
+                                    date_from_obj.date(),
+                                    date_to_obj.date()
+                                )
+                            }
+                        )
+                except ValueError:
+                    pass
+
+            # ---- Other filters
+            if city_id:
+                patients = patients.filter(city_id=city_id)
+
+            if agent_id:
+                patients = patients.filter(agentID_id=agent_id)
+
+            if lead_source:
+                patients = patients.filter(leadSource=lead_source)
+
+            if user_id:
+                patients = patients.filter(createdBy_id=user_id)
+
+            # ---- Optimize FK loading
+            patients = patients.select_related(
+                'city',
+                'agentID',
+                'createdBy'
+            )
+
+        # =========================
+        # Excel Export (only if filtered)
+        # =========================
         
+    
+        if export == 'excel' and has_filters:
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Patients Report"
+
+            headers = [
+                'Code','slotNumber', 'File Serial', 'Name','Mobile','Age', 'Platform', 'Source', 'Suffered Case',
+                'City', 'Agent','Remarks', 'Created Date','Expected Date', 'Attendance Date'
+            ]
+            ws.append(headers)
+
+            for p in patients:
+                        ws.append([
+                p.reservationCode or '',
+                p.slotNumber if hasattr(p, 'slotNumber') else '',
+                p.fileserial or '',
+                p.fullname or '',
+                p.mobile or '',
+                p.age,
+
+                str(p.leadSource) if p.leadSource else '',
+                p.agentID.AgentCompany if p.agentID else '',
+                    p.sufferedcase.caseName if p.sufferedcase else (p.sufferedcaseByPatient.caseName if p.sufferedcaseByPatient else ''),
+                p.city.cityName if p.city else '',
+                str(p.createdBy) if p.createdBy else '',
+                p.remarks or '',
+                localtime(p.createdDate).strftime('%d-%m-%Y %I:%M %p') if p.createdDate else '',
+                (localtime(p.get_expected_date()).strftime('%d-%m-%Y')
+ if isinstance(p.get_expected_date(), datetime)
+ else p.get_expected_date().strftime('%d-%m-%Y') if p.get_expected_date() else ''),
+                datetime.combine(p.attendanceDate, p.attendanceTime).strftime('%d-%m-%Y %I:%M %p')
+                if p.attendanceDate and p.attendanceTime
+                else (
+                    p.attendanceDate.strftime('%d-%m-%Y')
+                    if p.attendanceDate else ''
+                )
+            ])
+            for col in ws.columns:
+                max_length = max(len(str(cell.value)) if cell.value else 0 for cell in col)
+                ws.column_dimensions[get_column_letter(col[0].column)].width = max_length + 2
+
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = 'attachment; filename=patients_report.xlsx'
+            wb.save(response)
+            return response
+
+        # =========================
+        # Pagination (safe & fast)
+        # =========================
+        paginator = Paginator(patients.order_by('-createdDate'), 50)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        # =========================
+        # Static choices
+        # =========================
+        leadSource_Choices = [
+            ('Facebook', 'Facebook'),
+            ('Whatsapp', 'Whatsapp'),
+            ('Youtube', 'Youtube'),
+            ('Newspaper', 'Newspaper'),
+            ('Friend', 'Friend'),
+            ('Call', 'Call'),
+            ('Instagram', 'Instagram'),
+            ('Center', 'Center'),
+        ]
+
+        # =========================
+        # Preserve query params
+        # =========================
+        get_params = request.GET.copy()
+        get_params.pop('page', None)
+        query_string = get_params.urlencode()
+
+        # =========================
+        # Context
+        # =========================
+        context = {
+            'page_obj': page_obj,
+            'total_count': paginator.count if has_filters else 0,
+            'has_filters': has_filters,
+
+            'cities': City.objects.all(),
+            'agents': AgentCompany.objects.all(),
+            'users': User.objects.filter(
+                Q(groups__name__iexact="Call Center") |
+                Q(groups__name__iexact="Reception")
+            ).distinct().order_by('username'),
+
+            'date_field': date_field,
+            'date_from': date_from,
+            'date_to': date_to,
+            'city_id': str(city_id) if city_id else '',
+            'agent_id': str(agent_id) if agent_id else '',
+            'user_id': str(user_id) if user_id else '',
+            'lead_source': lead_source or '',
+            'lead_sources': dict(leadSource_Choices),
+
+            'query_string': query_string,
+        }
+
+        return render(request, 'reports/export_patients_xl_mobile.html', context)
+    
     @property
     def suffered_case_display(self):
         return str(self.sufferedcase) if self.sufferedcase else (self.sufferedcaseByPatient or '')   
@@ -1049,32 +1240,54 @@ class ReportView(ListView):
         
    
 
-  
+    @staticmethod
+    def get_user_groups(user_id):
+        if not user_id:
+            return []
+        try:
+            user = User.objects.prefetch_related('groups').get(pk=user_id)
+            return list(user.groups.values_list('name', flat=True))
+        except User.DoesNotExist:
+            return []
+        
     def attendance_patients_by_day(request, day):
-
+        
+        user_id = request.GET.get('userid')
         selected_date = parse_date(day)
+        user_id = request.GET.get('userid')
+        user_groups = ReportView.get_user_groups(user_id)
+        is_call_center = 'Call Center' in user_groups
 
-        patients = Patient.objects.filter(
-            attendanceDate=selected_date,
-            isDeleted=False
-        ).select_related('city','reservedBy')
+        patients = (
+            Patient.objects
+            .filter(
+                attendanceDate=selected_date,
+                isDeleted=False
+            )
+        )
+
+        # ✅ optional filter
+        if is_call_center:
+            patients = patients.filter(createdBy=user_id)
+
+        patients = patients.select_related('city', 'reservedBy').order_by('-createdDate')
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return render(
                 request,
                 'reports/attendance_patients.html',
-                {'patients': patients, 'selected_date': selected_date}
+                {'patients': patients, 'selected_date': selected_date,'show_mobile': bool(is_call_center)}
             )
-
-        return render(
-            request,
-            'reports/attendance_patients.html',
-            {'patients': patients, 'selected_date': selected_date}
-        )
-        
+       
+   
+    @staticmethod      
     def expected_patients_by_day(request, day):
 
         selected_date = parse_date(day)
+        user_id = request.GET.get('userid')
+        user_groups = ReportView.get_user_groups(user_id)
+        is_call_center = 'Call Center' in user_groups
+        #print(user_groups)
 
         # Has follow on this exact day
         follow_today = CallTrack.objects.filter(
@@ -1089,6 +1302,7 @@ class ReportView(ListView):
             patientID__isDeleted=False
         ).exclude(nextFollow=selected_date)
 
+       
         patients = (
             Patient.objects
             .annotate(
@@ -1099,19 +1313,155 @@ class ReportView(ListView):
             .filter(
                 Q(has_follow_today=True) |
                 Q(expectedDate=selected_date, has_other_follow=False)
-            ).exclude(leadSource='Center')
+            )
+            .exclude(leadSource='Center')
+        )
+
+        # ✅ Apply optional filter here
+        if is_call_center:
+             patients = patients.filter(createdBy=user_id)
+
+        patients = (
+            patients
             .select_related('city', 'reservedBy')
             .distinct()
         )
+        
+        
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return render(
                 request,
                 'reports/expected_patients.html',
-                {'patients': patients, 'selected_date': selected_date}
+                {'patients': patients, 'selected_date': selected_date,'show_mobile': bool(is_call_center)}
             )
-            # return render(
-            #     request,
-            #     'reports/expected_patients.html',
-            #     {'patients': patients, 'selected_date': selected_date}
-            # )
+    
+            
+    def weekly_calendar_report_CallCenter(request):
+
+        today = datetime.today().date()
+
+        # offset week (0 = current, -1 = previous, +1 = next)
+        week_offset = int(request.GET.get("week", 0))
+
+        # calculate start of week
+        # Make week start on Saturday
+        start_week = today - timedelta(days=(today.weekday() + 2) % 7)
+        start_week = start_week + timedelta(weeks=week_offset)
+        end_week = start_week + timedelta(days=6)
+        
+        # Convert week dates to timezone-aware datetimes
+        tz = timezone.get_current_timezone()
+
+        start_dt = timezone.make_aware(
+            datetime.combine(start_week, datetime.min.time()),
+            tz
+        )
+
+        end_dt = timezone.make_aware(
+            datetime.combine(end_week + timedelta(days=1), datetime.min.time()),
+            tz
+        )
+
+    
+
+        created_qs = (
+        Patient.objects.filter(
+            createdDate__gte=start_dt,
+            createdDate__lt=end_dt,
+            isDeleted=False,
+            createdBy=request.user.id
+        )
+        .exclude(leadSource='Center') 
+        .annotate(day=Cast('createdDate', DateField()))
+        .values('day')
+        .annotate(total=Count('patientid'))
+    )
+        attendance_qs = (
+            Patient.objects.filter(
+                attendanceDate__gte=start_week,
+                attendanceDate__lte=end_week,
+                isDeleted=False,
+                createdBy=request.user.id
+            )
+            .values('attendanceDate')
+            .annotate(total=Count('patientid'))
+        )
+        created_dict = {
+            c['day']: c['total']
+            for c in created_qs if c['day']
+        }
+
+        attendance_dict = {
+            a['attendanceDate']: a['total']
+            for a in attendance_qs if a['attendanceDate']
+        }
+                
+            # Get patients who have rescheduled (calltrack)
+        calltrack_qs = (
+            CallTrack.objects.filter(
+                nextFollow__range=[start_week, end_week],
+                patientID__isDeleted=False,
+                patientID__createdBy=request.user.id
+            )
+            .values('nextFollow', 'patientID')
+        )
+
+        # Get list of patient IDs who rescheduled
+        rescheduled_patients = set(c['patientID'] for c in calltrack_qs)
+
+        # Expected patients EXCLUDING rescheduled ones
+        expected_qs = (
+            Patient.objects.filter(
+                expectedDate__range=[start_week, end_week],
+                isDeleted=False,
+                createdBy=request.user.id
+            )
+            .exclude(patientid__in=rescheduled_patients,leadSource='Center')
+            .values('expectedDate', 'patientid')
+        )
+
+        combined = {}
+
+        # Expected patients
+        for e in expected_qs:
+            date = e['expectedDate']
+            pid = e['patientid']
+
+            if date:
+                combined.setdefault(date, set()).add(pid)
+
+        # Calltrack patients
+        for c in calltrack_qs:
+            date = c['nextFollow']
+            pid = c['patientID']
+
+            if date:
+                combined.setdefault(date, set()).add(pid)
+
+        # Final dictionary
+        combined_expected = {date: len(patients) for date, patients in combined.items()}
+        week_days = []
+
+        for i in range(7):
+
+            day = start_week + timedelta(days=i)
+
+            week_days.append({
+                'date': day,
+                'day_name': day.strftime("%A"),
+                'created': created_dict.get(day, 0),
+                'attendance': attendance_dict.get(day, 0),
+                'expected': combined_expected.get(day, 0),   # ⭐ NEW
+                'is_today': day == today
+            })
+                
+           
+
+        return render(request, 'reports/weekly_calendar_callCenter.html', {
+            'week_days': week_days,
+            'start_week': start_week,
+            'end_week': end_week,
+            'week_offset': week_offset
+        })  
+        

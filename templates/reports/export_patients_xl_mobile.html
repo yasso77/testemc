@@ -1,0 +1,212 @@
+{% extends 'master.html' %}
+{% block content %}
+
+<div class="pagetitle">
+  <h1>Patient Report</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item active">Patient Report</li>
+    </ol>
+  </nav>
+</div><section class="section dashboard">
+  <div class="row">
+    <div class="col-12">
+      
+      <div class="card overflow-auto">
+        <div class="card-body pt-3">
+          <h5 class="card-title">Filter Records <span>| Search Criteria</span></h5>
+          
+          <form method="get" class="row g-3">
+            <div class="col-md-3">
+              <label for="date_from" class="form-label fw-bold">From</label>
+              <input type="date" name="date_from" id="date_from" value="{{ date_from }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+              <label for="date_to" class="form-label fw-bold">To</label>
+              <input type="date" name="date_to" id="date_to" value="{{ date_to }}" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+              <label for="date_field" class="form-label fw-bold">Date Category</label>
+              <select name="date_field" id="date_field" class="form-select form-select-sm">
+                <option value="createdDate" {% if date_field == "createdDate" %}selected{% endif %}>Created Date</option>
+                <option value="attendanceDate" {% if date_field == "attendanceDate" %}selected{% endif %}>Attendance Date</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="city" class="form-label fw-bold">City</label>
+              <select name="city" id="city" class="form-select form-select-sm">
+                <option value="">All Cities</option>
+                {% for city in cities %}
+                  <option value="{{ city.pk }}" {% if city_id == city.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ city.cityName }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="agent" class="form-label fw-bold">Agent</label>
+              <select name="agentID" id="agent" class="form-select form-select-sm">
+                <option value="">All Agents</option>
+                {% for agent in agents %}
+                  <option value="{{ agent.pk }}" {% if agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ agent.AgentCompany }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="lead_source" class="form-label fw-bold">Lead Source</label>
+              <select name="leadSource" id="lead_source" class="form-select form-select-sm">
+                <option value="">All Sources</option>
+                {% for key, label in lead_sources.items %}
+                  <option value="{{ key }}" {% if lead_source == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="users" class="form-label fw-bold">Call Center</label>
+              <select name="users" id="users" class="form-select form-select-sm">
+                <option value="">All Users</option>
+                {% for user in users %}
+                  <option value="{{ user.pk }}" {% if user_id == user.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ user.get_full_name|default:user.username }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end gap-2">
+              <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                <i class="bi bi-filter"></i> Filter
+              </button>
+              <button type="submit" name="export" value="excel" class="btn btn-success btn-sm flex-grow-1">
+                <i class="bi bi-file-earmark-excel"></i> Export
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <span class="badge bg-info-light text-dark border">
+          Showing <b>{{ page_obj.start_index }}-{{ page_obj.end_index }}</b> of <b>{{ total_count }}</b> Patients
+        </span>
+      </div>
+
+      {% if not page_obj and not request.GET.date_from %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          Please apply a filter to view patient records.
+        </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover table-borderless mt-3 align-middle" style="font-size: 0.85rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>Code</th>
+                  <th>Slot</th>
+                  <th>Serial</th>
+                  <th>Patient Name</th>
+                  <th>Age</th> 
+                  <th>Platform</th>
+                  <th>Source</th>
+                  <th>Case</th>
+                  <th>City</th>
+                  <th>Agent</th>
+                  <th>Created</th>
+                  <th>Expected</th>
+                  <th>Attendance</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for patient in page_obj %}
+                <tr>
+                  <td><span class="fw-bold text-primary">{{ patient.reservationCode }}</span></td>
+                  <td>{{ patient.slotNumber }}</td>
+                  <td>{{ patient.fileserial }}</td>
+                  <td class="fw-bold">{{ patient.fullname }}</td>
+                  <td>{{ patient.age }}</td>
+                  {% comment %} <td>{{ patient.mobile }}</td> {% endcomment %}
+                  <td><span class="badge bg-secondary">{{ patient.leadSource }}</span></td>
+                  <td>{{ patient.agentID.AgentCompany }}</td>
+                  <td>
+    {% if patient.sufferedcase %}
+        {{ patient.sufferedcase }}
+    {% elif patient.sufferedcaseByPatient %}
+        {{ patient.sufferedcaseByPatient }}
+    {% endif %}
+</td>
+                  <td>{{ patient.city }}</td>
+                  <td>{{ patient.createdBy }}</td>
+                  <td class="text-muted">{{ patient.createdDate|date:"d M Y H:i" }}</td>
+                  <td class="text-muted">{{ patient.get_expected_date|date:"d M Y" }}</td>
+                  <td>
+                    {% if patient.attendanceDate %}
+    <span class="text-success">
+      {{ patient.attendanceDate|date:"d M Y" }}
+      {% if patient.attendanceTime %}
+        {{ patient.attendanceTime|time:"h:i A" }}
+      {% endif %}
+    </span>
+  {% endif %}
+                  </td>
+                 
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="11" class="text-center py-4 text-muted">No patient records found for the selected criteria.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if page_obj.has_other_pages %}
+          <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination pagination-sm justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?{{ query_string }}&page=1">First</a></li>
+                <li class="page-item"><a class="page-link" href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                  <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                    <a class="page-link" href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
+
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Optional: Enhance look for modern dashboards */
+  .bg-info-light { background-color: #e7f6f8; }
+  .table thead th { text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+  .card-title { font-size: 18px; font-weight: 500; color: #012970; font-family: "Poppins", sans-serif; }
+  .form-label { color: #444; }
+</style>
+
+{% endblock %}

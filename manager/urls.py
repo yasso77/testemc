@@ -32,6 +32,7 @@ urlpatterns = [
     path('LiveEvulationReport', ReportView.ajaxReportChartEvlDegree, name='LiveEvulationReport'),
     path('compare-visits/', ReportView.compare_visits, name='compare_visits'),
     path('patient-report/', ReportView.patient_report_view, name='patient_report'),
+    path('patient-report/mobile/', ReportView.patient_report_view_mobile, name='patient_report_mobile'),
     #path('visit-report/', ReportView.visit_report_view, name='visit_report'),
     path('reports/attendance/', ReportView.showPatientDataAttendedToday, name='attendance_report'),
 
@@ -108,6 +109,8 @@ urlpatterns = [
     
     path('callCentersearchOnPatinet/',CenterView.CallcenterSearchOnPatient,name='callCentersearchOnPatinet'),
     path("confirm_page_call/<int:patientid>/<str:reservationCode>/", CallCenterView.confirm_page_call,name="confirm_page_call"),
+
+    path('reports/reservationCalander/', ReportView.weekly_calendar_report_CallCenter, name='reservationCalander'),
     
 
     # DoctorView

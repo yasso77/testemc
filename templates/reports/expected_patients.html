@@ -7,6 +7,9 @@
         <th>Name</th>
         <th>Suffered Case</th>
         <th>City</th>
+        {% if show_mobile %}
+            <th>Mobile</th>
+        {% endif %}
         <th>Reserved By</th>
     </tr>
 
@@ -21,11 +24,14 @@
         {{ p.sufferedcaseByPatient }}
     {% endif %}</td>
         <td>{{ p.city }}</td>
+         {% if show_mobile %}
+            <td>{{ p.mobile }}</td>
+        {% endif %}
         <td>{{ p.reservedBy }}</td>
     </tr>
     {% empty %}
     <tr>
-        <td colspan="5">No patients found</td>
+        <td colspan="7">No patients found</td>
     </tr>
     {% endfor %}
 </table>
