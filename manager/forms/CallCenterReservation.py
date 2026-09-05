@@ -49,12 +49,17 @@ class CCFormAddReservation(forms.ModelForm):
     class Meta:
         model = Patient
         exclude = ['createdDate', 'createdby']
-        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks', 'callDirection', 'checkUpprice', 'agentID','organizationID' ,'slotNumber'
+        fields = ['reservationCode', 'fullname', 'mobile', 'city', 'age', 'gender', 'sufferedcase', 'offerID', 'leadSource', 'remarks', 'discussionCallNotes', 'callDirection', 'checkUpprice', 'agentID','organizationID' ,'slotNumber', 'expectedDate'
                  ]
         widgets = {
            
             'age': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 99}),
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
+            'discussionCallNotes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Notes for the discussion team...',
+            }),
             'reservationCode': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control', 'style': 'background-color: yellow;font-weight:bold'}),
             'callDirection': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'organizationID': forms.Select(attrs={'class': 'form-select'}),

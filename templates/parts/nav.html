@@ -55,6 +55,11 @@
       </a>
       <ul id="call-center-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
         <li>
+          <a href="{% url 'callCenterPerformance' %}">
+            <i class="bi bi-graph-up"></i><span>My Performance</span>
+          </a>
+        </li>
+        <li>
           <a href="{% url 'newreservation' %}">
             <i class="bi bi-plus-circle"></i><span>New Reservation</span>
           </a>
@@ -106,6 +111,21 @@
     </li>
     {% endif %}
 
+    {% if request.user|in_group:"Admin" or request.user|in_group:"Discussion Group" or request.user.is_superuser %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-target="#discussion-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-chat-dots"></i><span>Discussion</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="discussion-nav" class="nav-content show" data-bs-parent="#sidebar-nav">
+        <li><a href="{% url 'Discussion' %}"><i class="bi bi-plus-circle"></i><span>New Discussion</span></a></li>
+        <li><a href="{% url 'DiscussionDashboard' %}"><i class="bi bi-clipboard-data"></i><span>Discussion Report</span></a></li>
+        <li><a href="{% url 'DiscussionCalendar' %}"><i class="bi bi-calendar-week"></i><span>Discussion Dates Report</span></a></li>
+        <li><a href="{% url 'OperationCalendar' %}"><i class="bi bi-calendar2-event"></i><span>Operation Dates Report</span></a></li>
+        <li><a href="{% url 'DiscussionManagement' %}"><i class="bi bi-graph-up-arrow"></i><span>Management Report</span></a></li>
+      </ul>
+    </li>
+    {% endif %}
+
     {% if request.user.is_staff %}
     <li class="nav-item">
       <a class="nav-link" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
@@ -116,6 +136,7 @@
          <li><a href="{% url 'adminSearchOnPatinet' %}"><i class="bi bi-search"></i><span>Search Reservation</span></a></li>
        
         <li><a href="{% url 'attendance_report' %}"><i class="bi bi-files"></i><span>Attended-Patients</span></a></li>
+        <li><a href="{% url 'marketingCallCenterPerformance' %}"><i class="bi bi-headset"></i><span>Call Center Performance</span></a></li>
 
          <li><a href="{% url 'weekly_calendar' %}"><i class="bi bi-calendar-week"></i><span>Weekly Calendar</span></a></li>
          <li><a href="{% url 'centerPatients' 'Attendance-Today' %}"><i class="bi bi-calendar-check"></i><span>Attendance Today</span></a></li>

@@ -111,7 +111,15 @@ class CenterEditReservationForm(forms.ModelForm):
     # =========================
     # CLEANERS
     # =========================
+    def clean(self):
+            cleaned_data = super().clean()
 
+            if self.instance and self.instance.pk:
+                # Preserve original value
+                cleaned_data['expectedDate'] = self.instance.expectedDate
+
+            return cleaned_data 
+            
     def clean_attendanceTime(self):
         value = self.cleaned_data.get("attendanceTime")
         return value or localtime().time()
@@ -132,3 +140,15 @@ class CenterEditReservationForm(forms.ModelForm):
         self.fields['gender'].choices = [
             c for c in self.fields['gender'].choices if c[0]
         ]
+        
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # Preserve expectedDate on edit
+        if self.instance and self.instance.pk:
+            instance.expectedDate = self.instance.expectedDate
+
+        if commit:
+            instance.save()
+
+        return instance

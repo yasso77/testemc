@@ -136,6 +136,36 @@
   /* Disabled */
   .btn-same:disabled,
   .btn-operation:disabled { cursor: not-allowed; opacity: 0.7; }
+
+  .op-fields {
+    display: none;
+    width: 100%;
+    background: white;
+    border-radius: 15px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: right;
+  }
+  .op-fields.show { display: block; }
+  .op-fields label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1e293b;
+  }
+  .op-fields select,
+  .op-fields textarea {
+    width: 100%;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .op-fields textarea { min-height: 90px; resize: vertical; }
+  .op-fields button {
+    margin-top: 6px;
+  }
 </style>
 
 
@@ -173,8 +203,25 @@
 
       <!-- Buttons -->
       <div class="bottom" >
-        <button name="btnOperation" disabled id="btnOperation" class="green btn-operation">عملية</button>
-        <button name="btnBad" style="width: 200px !important;" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
+        <button type="submit" name="btnOperation" disabled id="btnOperation" class="green btn-operation">عملية</button>
+        {% comment %}
+        Kept for later: extra fields shown after clicking عملية
+        <div class="op-fields" id="opFields">
+          <label for="operationType">نوع العملية</label>
+          <select id="operationType" name="operationType">
+            <option value="">-- اختر نوع العملية --</option>
+            {% for op in operation_types %}
+              <option value="{{ op.operationTypeID }}">{{ op.name }}</option>
+            {% endfor %}
+          </select>
+
+          <label for="discussionNotes">ملاحظات للديسكشن</label>
+          <textarea id="discussionNotes" name="discussionNotes" placeholder="اكتب ملاحظات الديسكشن..."></textarea>
+
+          <button type="submit" name="btnOperation" id="btnConfirmOperation" class="green">تأكيد العملية</button>
+        </div>
+        {% endcomment %}
+        <button type="submit" name="btnBad" style="width: 200px !important;" disabled id="btnBad" class="red btn-same">خسارة مريض</button>
       </div>
     </form>
   </div>
@@ -191,6 +238,11 @@
 
     btnOperation.disabled = true;
     btnBad.disabled = true;
+    btnBad.style.display = "";
+    // Kept for later with opFields section:
+    // document.getElementById("opFields").classList.remove("show");
+    // document.getElementById("operationType").value = "";
+    // document.getElementById("discussionNotes").value = "";
 
     if (!fileNumber) { alert("⚠️ الرجاء إدخال رقم الملف"); return; }
 
@@ -199,7 +251,10 @@
       patientInfoBox.innerHTML = "";
 
       const response = await fetch(`/get_patient_info/${encodeURIComponent(fileNumber)}/`);
-      if (!response.ok) throw new Error("لم يتم العثور على المريض");
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || "لم يتم العثور على المريض");
+      }
       const data = await response.json();
 
       if (data && Object.keys(data).length > 0) {
@@ -265,6 +320,7 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("fileNumber");
+    const form = document.querySelector("form");
     input.focus(); // cursor ready for scanning
 
     // listen for Enter after scanning
@@ -274,6 +330,28 @@
         searchPatient(); // run search automatically
       }
     });
+
+    // Kept for later: show operation type / discussion notes after clicking عملية
+    // const btnOperation = document.getElementById("btnOperation");
+    // btnOperation.addEventListener("click", function () {
+    //   if (btnOperation.disabled || !document.getElementById("hdfpatientid").value) return;
+    //   document.getElementById("opFields").classList.add("show");
+    //   document.getElementById("btnBad").style.display = "none";
+    //   document.getElementById("operationType").focus();
+    // });
+
+    // form.addEventListener("submit", function (event) {
+    //   const submitter = event.submitter;
+    //   if (submitter && submitter.name === "btnOperation") {
+    //     const operationType = document.getElementById("operationType").value;
+    //     if (!operationType) {
+    //       event.preventDefault();
+    //       alert("⚠️ الرجاء اختيار نوع العملية");
+    //       document.getElementById("opFields").classList.add("show");
+    //       document.getElementById("operationType").focus();
+    //     }
+    //   }
+    // });
   });
 </script>
 {% endblock %}

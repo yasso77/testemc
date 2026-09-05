@@ -148,32 +148,47 @@
 
                 <hr class="my-3 opacity-25">
 
-                <div class="stat-group">
-                    <div class="stat-label">
-                        <i class="bi bi-telephone-inbound-fill" style="color: var(--accent-pink);"></i> Created
-                    </div>
-                    <div class="stat-value">{{ d.created }}</div>
-                </div>
+                
 
-                <div class="stats-split">
+                 <div class="stats-split">
                     <div class="stat-item border-end">
-                        <div class="stat-label">
+                         <div class="stat-label">
+                        <i class="bi bi-telephone-inbound-fill" style="color: var(--accent-green);"></i> Created
+                    </div>   <div class="stat-value">{{ d.created }}</div>
+                    </div>
+                    <div class="stat-item">
+                       <div class="stat-label">
                             <i class="bi bi-clipboard2-check-fill" style="color: var(--accent-purple);"></i> Expected
                         </div>
                         <div class="stat-value" style="font-size: 1.4rem;">
                              <a href="#" class="attendance-link" data-url="{% url 'expected_patients_by_day' d.date|date:'Y-m-d' %}"> {{ d.expected }}</a>
                         </div>
                     </div>
-                    <div class="stat-item">
+
+                   
+                </div>
+
+                <div class="stats-split">
+                    <div class="stat-item border-end">
                         <div class="stat-label">
-                            <i class="bi bi-calendar-check-fill" style="color: var(--accent-green);"></i> Attendance
+                            <i class="bi bi-clipboard2-check-fill" style="color: var(--accent-purple);"></i> Attended
                         </div>
                         <div class="stat-value" style="font-size: 1.4rem;">
-                            <a href="#" class="attendance-link" data-url="{% url 'attendance_patients_by_day' d.date|date:'Y-m-d' %}">
-                                {{ d.attendance }}
+                             <a href="#" class="attendance-link" data-url="{% url 'expected_patients_by_day' d.date|date:'Y-m-d' %}">  {{ d.attendance }}</a>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                           <i class="bi bi-telephone-inbound-fill" style="color: var(--accent-pink);"></i> Missed
+                        </div>
+                        <div class="stat-value" style="font-size: 1.4rem;">
+                            <a href="#" class="attendance-link" data-url="{% url 'missed_patients_by_day' d.date|date:'Y-m-d' %}">
+                                {{ d.missed }}
                             </a>
                            </div>
                     </div>
+
+                   
                 </div>
             </div>
             {% endfor %}

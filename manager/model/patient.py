@@ -1,4 +1,5 @@
 from datetime import date
+import uuid
 
 from django.db import models
 from django.core.validators import RegexValidator
@@ -216,6 +217,11 @@ class Patient(models.Model):
     )
     arrivedOn = models.CharField(max_length=150, blank=True, null=True,)  # Field name made lowercase.
     remarks = models.CharField(max_length=2055, blank=True, null=True,verbose_name='Remarks')
+    discussionCallNotes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Call Notes for Discussion',
+    )
     
     age=models.IntegerField(validators=[RegexValidator(r'^\d{1,15}$', 'Enter a valid mobile number.')], null=True,  # Allows NULL values in the database
     blank=True,verbose_name='Age')  # Allows blank values in forms,verbose_name='Age')  # Field name made lowercase.
@@ -245,7 +251,9 @@ class Patient(models.Model):
     isDeleted = models.BooleanField(default=False)
     formPrinted = models.BooleanField(default=False)
     slotNumber = models.CharField(max_length=10, null=True, blank=True)
-    
+    #qr_code = models.ImageField(upload_to='patients/qr/', blank=True, null=True)
+    reservation_image = models.ImageField(upload_to='patients/reservations/', null=True, blank=True)
+    qr_token = models.UUIDField(default=uuid.uuid4, editable=False, null=True, blank=True)
     objects = PatientManager()
     
     
@@ -258,6 +266,28 @@ class Patient(models.Model):
         
     def __str__(self):
         return self.fullname
+    # def save(self, *args, **kwargs):
+    #     is_new = self._state.adding
+
+    #     super().save(*args, **kwargs)  # first save to get ID
+
+    #     if is_new and not self.qr_code:
+    #         import qrcode
+    #         from io import BytesIO
+    #         from django.core.files import File
+    #         from django.conf import settings
+
+    #         qr_data = f"{settings.BASE_URL}/reservation/{self.qr_token}/"
+
+    #         qr = qrcode.make(qr_data)
+
+    #         buffer = BytesIO()
+    #         qr.save(buffer, format='PNG')
+
+    #         file_name = f'patient_{self.patientid}.png'
+    #         self.qr_code.save(file_name, File(buffer), save=False)
+
+    #         super().save(update_fields=['qr_code'])
     class Meta:
         verbose_name='Patients'
         ordering=['-fullname']

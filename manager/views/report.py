@@ -790,7 +790,7 @@ class ReportView(ListView):
         if request.method == 'GET':
             # Perform a soft delete by setting isDeleted to True
             patient.isDeleted = False
-            patient.updatedby = request.user.id
+            patient.updatedby = request.user
             patient.latestupdate = timezone.now()
             patient.save()
            
@@ -1159,6 +1159,8 @@ class ReportView(ListView):
                 attendanceDate__lte=end_week,
                 isDeleted=False
             )
+            .exclude(leadSource='Center') 
+        
             .values('attendanceDate')
             .annotate(total=Count('patientid'))
         )
@@ -1219,6 +1221,10 @@ class ReportView(ListView):
         for i in range(7):
 
             day = start_week + timedelta(days=i)
+            expected = combined_expected.get(day) or 0
+            attendance = attendance_dict.get(day) or 0
+
+            missed = attendance - expected if expected > 0 else 0
 
             week_days.append({
                 'date': day,
@@ -1226,7 +1232,8 @@ class ReportView(ListView):
                 'created': created_dict.get(day, 0),
                 'attendance': attendance_dict.get(day, 0),
                 'expected': combined_expected.get(day, 0),   # ⭐ NEW
-                'is_today': day == today
+                'is_today': day == today,
+                'missed': missed
             })
                 
            
@@ -1264,6 +1271,7 @@ class ReportView(ListView):
                 attendanceDate=selected_date,
                 isDeleted=False
             )
+            .exclude(leadSource='Center')
         )
 
         # ✅ optional filter
@@ -1336,7 +1344,80 @@ class ReportView(ListView):
                 {'patients': patients, 'selected_date': selected_date,'show_mobile': bool(is_call_center)}
             )
     
+    
+    
+    @staticmethod      
+    
+    def missed_patients_by_day(request, day):
+
+        selected_date = parse_date(day)
+
+        user_id = request.GET.get('userid')
+        user_groups = ReportView.get_user_groups(user_id)
+        is_call_center = 'Call Center' in user_groups
+
+        # --- 1. Attendance (IDs only) ---
+        attendance_ids = Patient.objects.filter(
+            attendanceDate=selected_date,
+            isDeleted=False
+            ).exclude(
+                leadSource='Center'
+            ).values_list(
+                'patientid', flat=True
+            )
             
+
+        # --- 2. Expected (your SAME logic) ---
+        follow_today = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            nextFollow=selected_date,
+            patientID__isDeleted=False
+        )
+
+        follow_any = CallTrack.objects.filter(
+            patientID=OuterRef('pk'),
+            patientID__isDeleted=False
+        ).exclude(nextFollow=selected_date)
+
+        expected_qs = (
+            Patient.objects
+            .annotate(
+                has_follow_today=Exists(follow_today),
+                has_other_follow=Exists(follow_any)
+            )
+            .filter(isDeleted=False)
+            .filter(
+                Q(has_follow_today=True) |
+                Q(expectedDate=selected_date, has_other_follow=False)
+            )
+            .exclude(leadSource='Center')
+        )
+
+        # --- 3. MISSED = Expected - Attendance ---
+        patients = expected_qs.exclude(patientid__in=attendance_ids)
+
+        # --- Optional Call Center filter ---
+        if is_call_center:
+            patients = patients.filter(createdBy=user_id)
+
+        patients = (
+            patients
+            .select_related('city', 'reservedBy')
+            .distinct()
+            .exclude(leadSource='Center')
+            .order_by('-createdDate')
+        )
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(
+                request,
+                'reports/missed_patients.html',
+                {
+                    'patients': patients,
+                    'selected_date': selected_date,
+                    'show_mobile': bool(is_call_center)
+                }
+            )       
     def weekly_calendar_report_CallCenter(request):
 
         today = datetime.today().date()
@@ -1446,6 +1527,11 @@ class ReportView(ListView):
         for i in range(7):
 
             day = start_week + timedelta(days=i)
+            
+            expected = combined_expected.get(day) or 0
+            attendance = attendance_dict.get(day) or 0
+
+            missed = attendance - expected if expected > 0 else 0
 
             week_days.append({
                 'date': day,
@@ -1453,7 +1539,8 @@ class ReportView(ListView):
                 'created': created_dict.get(day, 0),
                 'attendance': attendance_dict.get(day, 0),
                 'expected': combined_expected.get(day, 0),   # ⭐ NEW
-                'is_today': day == today
+                'is_today': day == today,
+                'missed': missed
             })
                 
            

@@ -1,0 +1,39 @@
+<h3>Missed Patients - {{ selected_date }}</h3>
+
+<table class="table table-striped">
+    <tr>
+        <th>File No</th>
+         <th>Reservation Code</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Suffered Case</th>
+        <th>City</th>
+        {% if show_mobile %}
+            <th>Mobile</th>
+        {% endif %}
+        <th>Reserved By</th>
+    </tr>
+
+    {% for p in patients %}
+    <tr>
+        <td>{{ p.fileserial }}</td>
+        <td>{{ p.reservationCode }}</td>
+        <td>{{ p.fullname }}</td>
+        <td>{{ p.age }}</td>
+        <td> {% if p.sufferedcase %}
+        {{ p.sufferedcase }}
+    {% elif p.sufferedcaseByPatient %}
+        {{ p.sufferedcaseByPatient }}
+    {% endif %}</td>
+        <td>{{ p.city }}</td>
+         {% if show_mobile %}
+            <td>{{ p.mobile }}</td>
+        {% endif %}
+        <td>{{ p.reservedBy }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7">No patients found</td>
+    </tr>
+    {% endfor %}
+</table>

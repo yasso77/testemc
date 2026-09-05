@@ -38,6 +38,26 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
+    .btn-scan {
+        padding: 10px 28px;
+        border-radius: 50px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    #qr-reader {
+        width: 100%;
+        min-height: 240px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0b1220;
+    }
+    #qr-reader video {
+        width: 100% !important;
+        border-radius: 12px;
+    }
+    .qr-hint {
+        font-size: 0.9rem;
+    }
 
     /* Action Card Styling */
     .action-card {
@@ -80,7 +100,7 @@
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
                         <h3 class="fw-bold text-dark">Patient Lookup</h3>
-                        <p class="text-muted">Search the database by any patient identifier</p>
+                        <p class="text-muted">Search by name, mobile, file number, or scan the reservation QR</p>
                     </div>
 
                     <form method="GET" id="followUpForm" action="{% url 'centerSearchOnPatinet' %}">
@@ -91,16 +111,20 @@
                                    id="searchInput" 
                                    name="strText" 
                                    class="form-control search-control" 
-                                   placeholder="Name, Mobile, File #, or Reservation #"
+                                   placeholder="Name, Mobile, File #, Reservation #, or scan QR"
                                    required>
                         </div>
 
-                        <div class="text-center">
+                        <div class="text-center d-flex flex-column flex-sm-row justify-content-center gap-2">
                             <button type="submit" class="btn btn-primary btn-search shadow-sm">
                                 <i class="bi bi-person-check me-2"></i> Find Patient
                             </button>
+                            <button type="button" class="btn btn-outline-primary btn-scan" id="btnScanQr">
+                                <i class="bi bi-qr-code-scan me-2"></i> Scan QR
+                            </button>
                         </div>
                     </form>
+                    <p id="qrStatus" class="text-center text-muted qr-hint mt-3 mb-0"></p>
                 </div>
             </div>
 
@@ -139,4 +163,122 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="qrScanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-qr-code-scan me-2"></i>Scan reservation QR</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="qr-reader"></div>
+                <p class="text-muted small text-center mt-3 mb-2">Point the camera at the ticket QR code</p>
+                <div class="text-center">
+                    <label class="btn btn-outline-secondary btn-sm mb-0">
+                        <i class="bi bi-image me-1"></i> Upload QR image
+                        <input type="file" id="qrFileInput" accept="image/*" hidden>
+                    </label>
+                </div>
+                <p id="qrModalError" class="text-danger small text-center mt-2 mb-0"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+(function () {
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('followUpForm');
+    const statusEl = document.getElementById('qrStatus');
+    const modalError = document.getElementById('qrModalError');
+    const modalEl = document.getElementById('qrScanModal');
+    let scanner = null;
+    let scanning = false;
+
+    function setStatus(message, isError) {
+        statusEl.textContent = message || '';
+        statusEl.classList.toggle('text-danger', !!isError);
+        statusEl.classList.toggle('text-muted', !isError);
+    }
+
+    function parseQrPayload(text) {
+        const raw = (text || '').trim();
+        const match = raw.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+        return match ? match[0] : raw;
+    }
+
+    function submitScan(decodedText) {
+        const query = parseQrPayload(decodedText);
+        if (!query) {
+            setStatus('No data found on this QR code.', true);
+            return;
+        }
+        searchInput.value = query;
+        searchInput.removeAttribute('required');
+        searchForm.submit();
+    }
+
+    async function stopScanner() {
+        if (!scanner || !scanning) {
+            return;
+        }
+        scanning = false;
+        try {
+            await scanner.stop();
+        } catch (err) {}
+        try {
+            scanner.clear();
+        } catch (err) {}
+    }
+
+    async function startScanner() {
+        modalError.textContent = '';
+        setStatus('');
+        if (typeof Html5Qrcode === 'undefined') {
+            setStatus('QR scanner could not load. Check your internet connection.', true);
+            return;
+        }
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+        scanner = scanner || new Html5Qrcode('qr-reader');
+        try {
+            await scanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 220, height: 220 } },
+                function (decodedText) {
+                    stopScanner();
+                    bootstrap.Modal.getInstance(modalEl).hide();
+                    submitScan(decodedText);
+                }
+            );
+            scanning = true;
+        } catch (err) {
+            modalError.textContent = 'Camera could not start. Allow camera permission, or upload a QR image.';
+        }
+    }
+
+    document.getElementById('btnScanQr').addEventListener('click', startScanner);
+    modalEl.addEventListener('hidden.bs.modal', stopScanner);
+
+    document.getElementById('qrFileInput').addEventListener('change', async function (event) {
+        const file = event.target.files && event.target.files[0];
+        event.target.value = '';
+        if (!file) {
+            return;
+        }
+        modalError.textContent = '';
+        scanner = scanner || new Html5Qrcode('qr-reader');
+        try {
+            await stopScanner();
+            const decodedText = await scanner.scanFile(file, true);
+            bootstrap.Modal.getInstance(modalEl).hide();
+            submitScan(decodedText);
+        } catch (err) {
+            modalError.textContent = 'Could not read a QR code from that image.';
+        }
+    });
+})();
+</script>
 {% endblock %}

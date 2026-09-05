@@ -1,8 +1,10 @@
 from django.db.models import Q
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate, login, update_session_auth_hash
+from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect, render
-from django.contrib.auth import authenticate
-from django.contrib.auth import login
+from django.urls import reverse
+from manager.forms.forms import LoginForm, EmcAuthenticationForm, ForcedPasswordChangeForm
+from manager.model.userExtra import UserExtra
 
 import pandas as pd
 
@@ -11,7 +13,6 @@ from manager.decorators import permission_required_with_redirect
 from manager.forms.UploadForm import ExcelUploadForm
 
 from django.contrib.auth.decorators import login_required,permission_required
-from manager.forms.forms import LoginForm
 from manager.model.patient import CallTrack, Patient
 from manager.orm import ORMPatientsHandling
 from django.shortcuts import get_object_or_404
@@ -58,7 +59,10 @@ class MainView(ListView):
         elif request.user.groups.filter(name="Doctors").exists() or request.user.groups.filter(name="DoctorAudit").exists():
 
             stats = DoctorView.get_evaluation_degree_count(request.user.id)  # ✅ Pass request, not request.user
-            return render(request, 'dashboards/doctor.html', {'stats': stats})            
+            return render(request, 'dashboards/doctor.html', {'stats': stats})
+
+        elif request.user.groups.filter(name="Discussion Group").exists():
+            return redirect('DiscussionDashboard')
         else:
             return render(request,'index.html',{'name':'index'})
         
@@ -126,21 +130,51 @@ class MainView(ListView):
     def custom_logout_view(request):
         logout(request)
         return redirect('/custom-logout-page/')
-    
-    def login_view(request):
+
+    @login_required
+    def forced_password_change(request):
+        extra, _ = UserExtra.objects.get_or_create(
+            user=request.user,
+            defaults={'must_change_password': True},
+        )
+        if not extra.must_change_password or not request.session.get('password_change_pending'):
+            return redirect('index')
+
         if request.method == 'POST':
-            form = LoginForm(request.POST)
+            form = ForcedPasswordChangeForm(user=request.user, data=request.POST)
             if form.is_valid():
-                # Process the form data (authentication logic here)
-                # For example, authenticate user and log in
-                username = form.cleaned_data['username']
-                password = form.cleaned_data['password']
-                user = authenticate(request, username=username, password=password)
-                if user is not None:
-                    login(request, user)
-                    return redirect('some_view')
-                
+                form.save()
+                extra.must_change_password = False
+                extra.save(update_fields=['must_change_password'])
+                request.session.pop('password_change_pending', None)
+                update_session_auth_hash(request, request.user)
+                return redirect('index')
         else:
-            form = LoginForm()
-        
-        return render(request, 'registration/login.html', {'form': form})
+            form = ForcedPasswordChangeForm(user=request.user)
+
+        return render(request, 'registration/force_password_change.html', {
+            'form': form,
+        })
+
+
+class EmcLoginView(LoginView):
+    template_name = 'registration/login.html'
+    authentication_form = EmcAuthenticationForm
+    redirect_authenticated_user = False
+
+    def form_valid(self, form):
+        remember_me = form.cleaned_data.get('remember_me')
+        response = super().form_valid(form)
+        if remember_me:
+            self.request.session.set_expiry(60 * 60 * 24 * 14)
+        else:
+            self.request.session.set_expiry(0)
+        extra, _ = UserExtra.objects.get_or_create(
+            user=self.request.user,
+            defaults={'must_change_password': True},
+        )
+        if extra.must_change_password:
+            self.request.session['password_change_pending'] = True
+            return redirect('password_change_forced')
+        self.request.session.pop('password_change_pending', None)
+        return response

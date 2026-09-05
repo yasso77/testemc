@@ -1,0 +1,240 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<style>
+  :root {
+    --cc-teal: #0F4146;
+    --cc-muted: #64748B;
+    --cc-line: #eef2f7;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .kpi {
+    background: #fff;
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .kpi .lbl {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cc-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .kpi .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--cc-teal);
+    line-height: 1.1;
+    margin: 8px 0 4px;
+  }
+  .agent-card {
+    background: #fff;
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    padding: 18px;
+    height: 100%;
+  }
+  .agent-card.compare {
+    border-color: #c7d2fe;
+    background: #f8faff;
+  }
+  .row-selected { background: #ecfeff !important; }
+  .row-compare { background: #eef2ff !important; }
+  @media (max-width: 992px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<div class="pagetitle mb-4">
+  <h2 class="fw-bold">Call Center Performance</h2>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      <li class="breadcrumb-item">Marketing</li>
+      <li class="breadcrumb-item active">Call Center Performance</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body pt-3">
+      <h5 class="card-title border-bottom pb-2 mb-3">
+        <i class="bi bi-filter-left me-2"></i>Filter
+      </h5>
+      <form method="get" class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold" for="from_date">From</label>
+          <input type="date" id="from_date" name="from_date" class="form-control" value="{{ from_date|date:'Y-m-d' }}" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold" for="to_date">To</label>
+          <input type="date" id="to_date" name="to_date" class="form-control" value="{{ to_date|date:'Y-m-d' }}" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold" for="agent">Call Center User</label>
+          <select id="agent" name="agent" class="form-select">
+            <option value="">All agents</option>
+            {% for agent in agents %}
+              <option value="{{ agent.id }}" {% if selected_id|stringformat:"s" == agent.id|stringformat:"s" %}selected{% endif %}>
+                {{ agent.get_full_name|default:agent.username }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-bold" for="compare_agent">Compare with</label>
+          <select id="compare_agent" name="compare_agent" class="form-select">
+            <option value="">No comparison</option>
+            {% for agent in agents %}
+              <option value="{{ agent.id }}" {% if compare_id|stringformat:"s" == agent.id|stringformat:"s" %}selected{% endif %}>
+                {{ agent.get_full_name|default:agent.username }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search me-1"></i> Generate Report
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_stats or compare_stats %}
+  <div class="row g-3 mb-4">
+    {% if selected_stats %}
+    <div class="{% if compare_stats %}col-lg-6{% else %}col-12{% endif %}">
+      <div class="agent-card">
+        <h5 class="fw-bold mb-3" style="color:var(--cc-teal);">{{ selected_stats.name }}</h5>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="lbl">Reservations</div>
+            <div class="num">{{ selected_stats.reserved }}</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Attended</div>
+            <div class="num">{{ selected_stats.attended }}</div>
+            <div class="text-muted small">{{ selected_stats.attend_rate }}%</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Operations</div>
+            <div class="num">{{ selected_stats.operations }}</div>
+            <div class="text-muted small">{{ selected_stats.op_rate }}% of attended</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Conversion</div>
+            <div class="num">{{ selected_stats.attend_rate }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if compare_stats %}
+    <div class="col-lg-6">
+      <div class="agent-card compare">
+        <h5 class="fw-bold mb-3" style="color:#3730a3;">{{ compare_stats.name }}</h5>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="lbl">Reservations</div>
+            <div class="num">{{ compare_stats.reserved }}</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Attended</div>
+            <div class="num">{{ compare_stats.attended }}</div>
+            <div class="text-muted small">{{ compare_stats.attend_rate }}%</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Operations</div>
+            <div class="num">{{ compare_stats.operations }}</div>
+            <div class="text-muted small">{{ compare_stats.op_rate }}% of attended</div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Conversion</div>
+            <div class="num">{{ compare_stats.attend_rate }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body pt-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Compare call centers</h5>
+        <span class="badge bg-light text-dark border">{{ from_date|date:'Y-m-d' }} — {{ to_date|date:'Y-m-d' }}</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Rank</th>
+              <th>Call Center</th>
+              <th class="text-center">Reservations</th>
+              <th class="text-center">Attended</th>
+              <th class="text-center">Attendance %</th>
+              <th class="text-center">Operations</th>
+              <th class="text-center">Ops %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in comparison %}
+            <tr class="{% if row.user_id == selected_id %}row-selected{% elif row.user_id == compare_id %}row-compare{% endif %}">
+              <td class="fw-bold">{{ row.rank }}</td>
+              <td class="fw-semibold">{{ row.name }}</td>
+              <td class="text-center">{{ row.reserved }}</td>
+              <td class="text-center">{{ row.attended }}</td>
+              <td class="text-center">{{ row.attend_rate }}%</td>
+              <td class="text-center">{{ row.operations }}</td>
+              <td class="text-center">{{ row.op_rate }}%</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">No call center users found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body pt-3">
+      <h5 class="card-title">Reservations vs attendance vs operations</h5>
+      <canvas id="ccCompareChart" height="110"></canvas>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels = {{ chart_labels_json|safe }};
+  const reserved = {{ chart_reserved_json|safe }};
+  const attended = {{ chart_attended_json|safe }};
+  const operations = {{ chart_operations_json|safe }};
+  new Chart(document.getElementById('ccCompareChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Reservations', data: reserved, backgroundColor: '#1D4ED8' },
+        { label: 'Attended', data: attended, backgroundColor: '#047857' },
+        { label: 'Operations', data: operations, backgroundColor: '#B45309' },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+</script>
+{% endblock %}

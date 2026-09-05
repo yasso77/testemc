@@ -5,7 +5,7 @@ from manager.views.barcode import generate_barcode
 from manager.views.center import CenterView
 from manager.views.doctor import DoctorView
 from manager.views.patient import PatientView
-from manager.views.main import MainView
+from manager.views.main import MainView, EmcLoginView
 from manager.views.report import ReportView
 from manager.views.callcenter import CallCenterView
 from django.views.generic import TemplateView
@@ -19,7 +19,8 @@ urlpatterns = [
     path('Message', MainView.ConfirmMsg, name='MessageAlert'),
     path('logout/', MainView.custom_logout_view, name='logoutx'),
     path('custom-logout-page/', TemplateView.as_view(template_name='logout.html'), name='custom-logout-page'),
-    path('login/', MainView.login_view, name='loginView'),
+    path('login/', EmcLoginView.as_view(), name='loginView'),
+    path('password-change/', MainView.forced_password_change, name='password_change_forced'),
     
     
     
@@ -63,6 +64,9 @@ urlpatterns = [
     
     path('reports/expected/<str:day>/',ReportView.expected_patients_by_day,
     name='expected_patients_by_day'),
+    
+    path('reports/missed/<str:day>/',ReportView.missed_patients_by_day,
+    name='missed_patients_by_day'),
 
     # PatientView
     path('searchPatient', PatientView.get_patientData, name='searchP'),
@@ -111,6 +115,9 @@ urlpatterns = [
     path("confirm_page_call/<int:patientid>/<str:reservationCode>/", CallCenterView.confirm_page_call,name="confirm_page_call"),
 
     path('reports/reservationCalander/', ReportView.weekly_calendar_report_CallCenter, name='reservationCalander'),
+    path('callCenterPerformance/', CallCenterView.performance_dashboard, name='callCenterPerformance'),
+    path('reports/callCenterPerformance/', CallCenterView.marketing_performance_report, name='marketingCallCenterPerformance'),
+    path('reservation/<uuid:token>/', CallCenterView.reservation_qr_view, name='reservation_qr'),
     
 
     # DoctorView
@@ -127,6 +134,18 @@ urlpatterns = [
     #path('AuditEvaluation', DoctorView.doctorPatientvisit, name='AuditEvaluation'),
     
     path('DoctorOp', DoctorView.doctorOperation, name='DoctorOp'),
+    path('Discussion', DoctorView.doctorDiscussion, name='Discussion'),
+    path('discussion/week-counts/', DoctorView.discussion_week_counts, name='discussion_week_counts'),
+    path('discussion/save/', DoctorView.save_discussion, name='save_discussion'),
+    path('discussion/receipt/<int:discussion_id>/', DoctorView.discussion_receipt, name='discussion_receipt'),
+    path('discussion/authorization/<int:discussion_id>/', DoctorView.discussion_authorization, name='discussion_authorization'),
+    path('DiscussionDashboard', DoctorView.discussion_dashboard, name='DiscussionDashboard'),
+    path('DiscussionCalendar', DoctorView.discussion_weekly_calendar, name='DiscussionCalendar'),
+    path('OperationCalendar', DoctorView.discussion_operation_calendar, name='OperationCalendar'),
+    path('DiscussionManagement', DoctorView.discussion_management_report, name='DiscussionManagement'),  # management KPI report
+    path('discussion/day-list/', DoctorView.discussion_day_list, name='discussion_day_list'),
+    path('discussion/<int:discussion_id>/', DoctorView.discussion_detail, name='discussion_detail'),
+    path('discussion/<int:discussion_id>/edit/', DoctorView.discussion_edit, name='discussion_edit'),
     path("confirm_page_doctor/<str:fileserial>",DoctorView.confirm_page_doctor, name="confirm_page_doctor"),
     
     path("confirm_page_audit/<str:fileserial>",DoctorView.confirm_page_audit, name="confirm_page_audit"),
@@ -143,6 +162,7 @@ urlpatterns = [
 
 
     # Authentication
+    path('accounts/login/', EmcLoginView.as_view(), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
     # Password reset views
     path('password-reset/', PasswordResetView.as_view(template_name='registration/changepassword.html'), name='password_reset'),

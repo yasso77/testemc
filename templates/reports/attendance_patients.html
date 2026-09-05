@@ -5,6 +5,7 @@
         <th>File No</th>
          <th>Reservation Code</th>
         <th>Name</th>
+        <th>Age</th>
          <th>Suffered Case</th>
         <th>City</th>
             {% if show_mobile %}
@@ -18,6 +19,7 @@
         <td>{{ p.fileserial }}</td>
         <td>{{ p.reservationCode }}</td>
         <td>{{ p.fullname }}</td>
+        <td>{{ p.age }}</td>
         <td> {% if patient.sufferedcase %}
         {{ p.sufferedcase }}
     {% elif p.sufferedcaseByPatient %}

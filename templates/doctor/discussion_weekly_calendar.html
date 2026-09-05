@@ -1,0 +1,325 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<style>
+  .nav-wrapper {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+  }
+  .nav-btn {
+    padding: 8px 18px;
+    color: #4154f1;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .nav-btn:hover { background: #f0f4ff; }
+  .nav-date-range {
+    padding: 0 20px;
+    font-weight: 700;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    color: #444;
+    font-size: 0.9rem;
+  }
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .summary-row.one-col {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+  }
+  .summary-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+  .summary-card .label { color: #64748B; font-size: 13px; font-weight: 700; }
+  .summary-card .value { font-size: 30px; font-weight: 800; margin-top: 4px; }
+  .summary-card.total .value { color: #1D4ED8; }
+  .summary-card.done .value { color: #047857; }
+  .summary-card.pending .value { color: #B45309; }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 14px;
+  }
+  .day-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 10px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(1, 41, 112, 0.07);
+    border: 1px solid rgba(0,0,0,0.02);
+  }
+  .day-card.is-today {
+    background: linear-gradient(135deg, #ffffff 0%, #fff9e6 100%);
+    border: 1px solid #ffda6a;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #99a5b5;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .stat-value a {
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .stat-value a.total { color: #1D4ED8; }
+  .stat-value a.done { color: #047857; }
+  .stat-value a.pending { color: #B45309; }
+  .stat-value a:hover { text-decoration: underline; }
+  .stats-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f1f1;
+  }
+  .stats-split.one-col {
+    grid-template-columns: 1fr;
+  }
+  .week-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0F4146;
+    margin: 8px 0 12px;
+  }
+  .legend { font-size: 13px; color: #64748B; }
+  .legend span { font-weight: 700; }
+  .legend .total { color: #1D4ED8; }
+  .legend .done { color: #047857; }
+  .legend .pending { color: #B45309; }
+  .report-switch {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .report-switch a {
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid #CBD5E1;
+    color: #334155;
+    background: #fff;
+  }
+  .report-switch a.active {
+    background: #0F4146;
+    border-color: #0F4146;
+    color: #fff;
+  }
+  @media (max-width: 1100px) {
+    .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+    .summary-row, .summary-row.three-cols { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="pagetitle mb-4">
+  <h1>{{ page_title }}</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'DiscussionDashboard' %}">Discussion Report</a></li>
+      <li class="breadcrumb-item active">{{ page_subtitle }}</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="card p-4 border-0 shadow-sm">
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+      <div>
+        <h4 class="fw-bold m-0">{{ page_subtitle }}</h4>
+        <div class="text-muted small mt-1">{{ date_basis }}</div>
+        <div class="legend mt-2">
+          {% if calendar_type == 'discussion' %}
+          <span class="total">الديسكشن</span> = عدد الديسكشن &nbsp;|&nbsp;
+          <span class="done">DONE</span> = عدد DONE
+          {% else %}
+          <span class="done">DONE</span> = عدد العمليات بحالة DONE
+          {% endif %}
+        </div>
+        <div class="report-switch">
+          <a class="active" href="{% if calendar_type == 'discussion' %}{% url 'DiscussionCalendar' %}{% else %}{% url 'OperationCalendar' %}{% endif %}">{{ page_title }}</a>
+          <a href="{{ other_report_url }}">{{ other_report_label }}</a>
+        </div>
+      </div>
+      <div class="nav-wrapper">
+        <a class="nav-btn" href="?week={{ week_offset|add:'-1' }}">◀ Previous 2 weeks</a>
+        <span class="nav-date-range">{{ start_week }} — {{ end_week }}</span>
+        <a class="nav-btn" href="?week={{ week_offset|add:'1' }}">Next 2 weeks ▶</a>
+      </div>
+    </div>
+
+    <div class="summary-row{% if not show_done %} one-col{% endif %}">
+      <div class="summary-card total">
+        <div class="label">{% if calendar_type == 'discussion' %}عدد الديسكشن{% else %}عمليات DONE{% endif %}</div>
+        <div class="value">{{ period_stats.total }}</div>
+      </div>
+      {% if show_done %}
+      <div class="summary-card done">
+        <div class="label">DONE</div>
+        <div class="value">{{ period_stats.done }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="week-title">Week 1: {{ start_week }} — {{ week1_end }}</div>
+    <div class="calendar-grid">
+      {% for d in week1_days %}
+      <div class="day-card {% if d.is_today %}is-today{% endif %}">
+        <h5 class="fw-bold mb-0">{{ d.day_name }}</h5>
+        <p class="text-muted small mb-0">{{ d.date|date:"Y-m-d" }}</p>
+        <div class="stats-split{% if not show_done %} one-col{% endif %}">
+          <div>
+            <div class="stat-label">{% if calendar_type == 'discussion' %}الديسكشن{% else %}DONE{% endif %}</div>
+            <div class="stat-value">
+              <a class="{% if calendar_type == 'discussion' %}total{% else %}done{% endif %}" href="javascript:void(0)" onclick="openDayModal('{{ d.date_str }}', '{{ modal_status }}', '{% if calendar_type == 'discussion' %}الديسكشن{% else %}DONE{% endif %}')">{{ d.display_count }}</a>
+            </div>
+          </div>
+          {% if show_done %}
+          <div>
+            <div class="stat-label">DONE</div>
+            <div class="stat-value">
+              <a class="done" href="javascript:void(0)" onclick="openDayModal('{{ d.date_str }}', 'done', 'DONE')">{{ d.done }}</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="week-title" style="margin-top: 22px;">Week 2: {{ week2_start }} — {{ end_week }}</div>
+    <div class="calendar-grid">
+      {% for d in week2_days %}
+      <div class="day-card {% if d.is_today %}is-today{% endif %}">
+        <h5 class="fw-bold mb-0">{{ d.day_name }}</h5>
+        <p class="text-muted small mb-0">{{ d.date|date:"Y-m-d" }}</p>
+        <div class="stats-split{% if not show_done %} one-col{% endif %}">
+          <div>
+            <div class="stat-label">{% if calendar_type == 'discussion' %}الديسكشن{% else %}DONE{% endif %}</div>
+            <div class="stat-value">
+              <a class="{% if calendar_type == 'discussion' %}total{% else %}done{% endif %}" href="javascript:void(0)" onclick="openDayModal('{{ d.date_str }}', '{{ modal_status }}', '{% if calendar_type == 'discussion' %}الديسكشن{% else %}DONE{% endif %}')">{{ d.display_count }}</a>
+            </div>
+          </div>
+          {% if show_done %}
+          <div>
+            <div class="stat-label">DONE</div>
+            <div class="stat-value">
+              <a class="done" href="javascript:void(0)" onclick="openDayModal('{{ d.date_str }}', 'done', 'DONE')">{{ d.done }}</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="dayModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dayModalTitle">تفاصيل السجل</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="dayModalLoading" class="text-center py-4 d-none">
+          <div class="spinner-border text-primary"></div>
+        </div>
+        <div id="dayModalEmpty" class="text-center text-muted py-4 d-none">لا توجد سجلات</div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" id="dayModalTable">
+            <thead class="table-light">
+              <tr>
+                <th>رقم الديسكشن</th>
+                <th>رقم الملف</th>
+                <th>اسم المريض</th>
+                <th>اسم الطبيب</th>
+                <th>تاريخ الديسكشن</th>
+                <th>تاريخ العملية</th>
+                <th>نوع العملية</th>
+                <th>تحديد العين</th>
+                <th>النتيجة</th>
+                <th>الإجمالي</th>
+                <th>المقدم</th>
+                <th>المتبقي</th>
+                <th>ملاحظات</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const calendarType = "{{ calendar_type|default:'discussion' }}";
+
+  async function openDayModal(dateStr, status, title) {
+    const modalEl = document.getElementById('dayModal');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    document.getElementById('dayModalTitle').textContent = `${title} — ${dateStr}`;
+    document.getElementById('dayModalLoading').classList.remove('d-none');
+    document.getElementById('dayModalEmpty').classList.add('d-none');
+    document.querySelector('#dayModalTable tbody').innerHTML = '';
+    modal.show();
+
+    try {
+      const response = await fetch(`/discussion/day-list/?date=${encodeURIComponent(dateStr)}&status=${encodeURIComponent(status)}&mode=${encodeURIComponent(calendarType)}`);
+      const data = await response.json();
+      const tbody = document.querySelector('#dayModalTable tbody');
+      if (!data.items || !data.items.length) {
+        document.getElementById('dayModalEmpty').classList.remove('d-none');
+        return;
+      }
+      tbody.innerHTML = data.items.map((item) => `
+        <tr>
+          <td class="fw-bold">${item.serial || '-'}</td>
+          <td>${item.file_serial || '-'}</td>
+          <td>${item.patient_name || '-'}</td>
+          <td>${item.doctor || '-'}</td>
+          <td>${item.discussion_date || '-'}</td>
+          <td>${item.operation_date || '-'}</td>
+          <td>${item.operation_type || '-'}</td>
+          <td>${item.eye_selection || '-'}</td>
+          <td>${item.result || '-'}</td>
+          <td>${item.total_amount || '-'}</td>
+          <td>${item.deposit || '-'}</td>
+          <td>${item.remainder || '-'}</td>
+          <td>${item.note || '-'}</td>
+        </tr>
+      `).join('');
+    } catch (error) {
+      document.getElementById('dayModalEmpty').textContent = 'تعذر تحميل البيانات';
+      document.getElementById('dayModalEmpty').classList.remove('d-none');
+    } finally {
+      document.getElementById('dayModalLoading').classList.add('d-none');
+    }
+  }
+</script>
+{% endblock %}

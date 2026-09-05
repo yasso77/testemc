@@ -22,6 +22,11 @@ class UserExtra(models.Model):
         blank=True
     )
 
+    must_change_password = models.BooleanField(
+        default=True,
+        verbose_name='Must change password',
+    )
+
     def __str__(self):
         return f"{self.user.username} extra"
     

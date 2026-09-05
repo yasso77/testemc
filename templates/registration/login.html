@@ -102,13 +102,13 @@
             box-shadow: 0 8px 20px rgba(118, 188, 67, 0.3);
         }
 
-        .error-alert {
-            background-color: #fff5f5;
-            border-left: 4px solid #f87171;
-            color: #991b1b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
+        .form-check-input:checked {
+            background-color: var(--emc-green);
+            border-color: var(--emc-green);
+        }
+        .form-check-label {
+            color: #475569;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -149,11 +149,15 @@
                     <label for="id_username">Username</label>
                 </div>
 
-                <div class="form-floating mb-4">
+                <div class="form-floating mb-3">
                     {{ form.password }}
                     <label for="id_password">Password</label>
                 </div>
 
+                <div class="form-check mb-4">
+                    {{ form.remember_me }}
+                    <label class="form-check-label" for="id_remember_me">Remember password</label>
+                </div>
                 <button class="btn btn-primary btn-login w-100 mb-4" type="submit">
                     Login to Workstation
                 </button>

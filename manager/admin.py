@@ -1,7 +1,7 @@
 from django.contrib import admin
 from manager.model.doctor import Doctor, Specialties
 from manager.model.patient import AgentCompany, CheckUpPrice, MedicalConditionData, Offers, Patient,City, SufferedCases,Organizations
-from manager.model.visit import ClassficationsOptions
+from manager.model.visit import ClassficationsOptions, OperationType, DiscussionResult, PatientDiscussion
 
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
@@ -58,6 +58,36 @@ class ClassficationsOptionsAdmin(admin.ModelAdmin):
         obj.save()   
     
 admin.site.register(ClassficationsOptions,ClassficationsOptionsAdmin)
+
+class OperationTypeAdmin(admin.ModelAdmin):
+    list_display = ['operationTypeID', 'name', 'isActive', 'createdDate']
+    list_display_links = ['name']
+    search_fields = ['name']
+    list_editable = ['isActive']
+
+admin.site.register(OperationType, OperationTypeAdmin)
+
+
+class DiscussionResultAdmin(admin.ModelAdmin):
+    list_display = ['discussionResultID', 'name', 'isActive', 'createdDate']
+    list_display_links = ['name']
+    search_fields = ['name']
+    list_editable = ['isActive']
+
+admin.site.register(DiscussionResult, DiscussionResultAdmin)
+
+
+class PatientDiscussionAdmin(admin.ModelAdmin):
+    list_display = [
+        'discussionID', 'discussionSerial', 'patient', 'doctor',
+        'operationType', 'specifyDate', 'discussionResult', 'createdDate',
+    ]
+    list_display_links = ['discussionSerial']
+    search_fields = ['discussionSerial', 'patient__fullname', 'patient__fileserial']
+    list_filter = ['specifyDate', 'operationType', 'discussionResult']
+    readonly_fields = ['createdDate']
+
+admin.site.register(PatientDiscussion, PatientDiscussionAdmin)
 
 class CityAdmin(admin.ModelAdmin):
     list_display=['cityID','cityName','isVisible','createdDate']

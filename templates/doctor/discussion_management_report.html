@@ -1,0 +1,285 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<style>
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .kpi {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #eef2f7;
+  }
+  .kpi .lbl { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: .4px; }
+  .kpi .num { font-size: 30px; font-weight: 800; color: #0F4146; line-height: 1.1; margin: 6px 0; }
+  .kpi .sub { font-size: 12px; color: #94A3B8; }
+  .delta { font-size: 12px; font-weight: 700; }
+  .delta.up { color: #047857; }
+  .delta.down { color: #B91C1C; }
+  .hero {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #eef2f7;
+  }
+  .panel h5 { font-weight: 800; color: #0F4146; margin-bottom: 14px; }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+  .compare .big { font-size: 42px; font-weight: 800; }
+  .compare .visits { color: #1D4ED8; }
+  .compare .paid { color: #047857; }
+  .compare .rate {
+    background: #ECFDF5;
+    color: #047857;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 800;
+    font-size: 22px;
+  }
+  .funnel-row { margin-bottom: 10px; }
+  .funnel-meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .funnel-bar { height: 14px; background: #F1F5F9; border-radius: 999px; overflow: hidden; }
+  .funnel-bar span { display: block; height: 100%; background: #0F4146; border-radius: 999px; }
+  .money-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .money .num { font-size: 24px; font-weight: 800; }
+  .insight { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 14px; }
+  @media (max-width: 1100px) {
+    .kpi-grid, .hero, .money-grid, .compare { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="pagetitle">
+  <h1>Management Report</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'DiscussionDashboard' %}">Discussion</a></li>
+      <li class="breadcrumb-item active">Top Management</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="panel mb-3">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">From</label>
+        <input type="date" name="from_date" class="form-control" value="{{ from_date|date:'Y-m-d' }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">To</label>
+        <input type="date" name="to_date" class="form-control" value="{{ to_date|date:'Y-m-d' }}">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary" type="submit">Update figures</button>
+      </div>
+      <div class="col-md-3 text-muted small">Compared with previous period: {{ prev_from }} — {{ prev_to }}</div>
+    </form>
+  </div>
+
+  <div class="kpi-grid mb-3">
+    <div class="kpi">
+      <div class="lbl">Patients added</div>
+      <div class="num">{{ curr.added }}</div>
+      <div>
+        {% if deltas.added != None %}
+          <span class="delta {% if deltas.added >= 0 %}up{% else %}down{% endif %}">{{ deltas.added }}%</span>
+        {% endif %}
+        <span class="sub">new files in period</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Attended</div>
+      <div class="num">{{ curr.attended }}</div>
+      <div>
+        {% if deltas.attended != None %}
+          <span class="delta {% if deltas.attended >= 0 %}up{% else %}down{% endif %}">{{ deltas.attended }}%</span>
+        {% endif %}
+        <span class="sub">{{ conversions.attend_rate }}% of added</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Doctor visits</div>
+      <div class="num">{{ curr.doctor_patients }}</div>
+      <div>
+        {% if deltas.doctor_patients != None %}
+          <span class="delta {% if deltas.doctor_patients >= 0 %}up{% else %}down{% endif %}">{{ deltas.doctor_patients }}%</span>
+        {% endif %}
+        <span class="sub">{{ curr.doctor_visits }} visit records</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Discussed</div>
+      <div class="num">{{ curr.discussed_patients }}</div>
+      <div>
+        {% if deltas.discussed_patients != None %}
+          <span class="delta {% if deltas.discussed_patients >= 0 %}up{% else %}down{% endif %}">{{ deltas.discussed_patients }}%</span>
+        {% endif %}
+        <span class="sub">{{ curr.discussed }} discussions</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Paid / DONE</div>
+      <div class="num">{{ curr.done_patients }}</div>
+      <div>
+        {% if deltas.done_patients != None %}
+          <span class="delta {% if deltas.done_patients >= 0 %}up{% else %}down{% endif %}">{{ deltas.done_patients }}%</span>
+        {% endif %}
+        <span class="sub">{{ conversions.paid_vs_visit }}% of doctor visits</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="panel">
+      <h5>Paid operations vs doctor visits</h5>
+      <div class="compare">
+        <div>
+          <div class="sub">Visited a doctor</div>
+          <div class="big visits">{{ curr.doctor_patients }}</div>
+        </div>
+        <div>
+          <div class="rate">{{ conversions.paid_vs_visit }}%</div>
+          <div class="sub mt-2">conversion</div>
+        </div>
+        <div>
+          <div class="sub">Paid / DONE</div>
+          <div class="big paid">{{ curr.done_patients }}</div>
+        </div>
+      </div>
+      <div class="funnel-bar mt-3"><span style="width: {{ conversions.paid_vs_visit }}%; background:#047857;"></span></div>
+      <p class="text-muted small mt-3 mb-0">This is the main management KPI: how many patients who saw a doctor actually paid for an operation.</p>
+    </div>
+    <div class="panel">
+      <h5>Conversion funnel</h5>
+      {% for step in funnel %}
+      <div class="funnel-row">
+        <div class="funnel-meta">
+          <span>{{ step.label }}</span>
+          <span>{{ step.value }}</span>
+        </div>
+        <div class="funnel-bar"><span style="width: {{ step.width }}%;"></span></div>
+      </div>
+      {% endfor %}
+      <div class="small text-muted mt-2">
+        Attend {{ conversions.attend_rate }}% · Visit {{ conversions.visit_rate }}% · Discuss {{ conversions.discuss_rate }}% · Close {{ conversions.close_rate }}%
+      </div>
+    </div>
+  </div>
+
+  <div class="money-grid mb-3">
+    <div class="panel money">
+      <div class="lbl">Collected (deposit / المقدم)</div>
+      <div class="num text-success">{{ curr.collected|floatformat:0 }}</div>
+      {% if deltas.collected != None %}
+        <span class="delta {% if deltas.collected >= 0 %}up{% else %}down{% endif %}">{{ deltas.collected }}% vs previous</span>
+      {% endif %}
+    </div>
+    <div class="panel money">
+      <div class="lbl">Remainder outstanding</div>
+      <div class="num" style="color:#B45309;">{{ curr.remaining|floatformat:0 }}</div>
+      <div class="sub">still due on DONE cases</div>
+    </div>
+    <div class="panel money">
+      <div class="lbl">Operation pipeline (total amount)</div>
+      <div class="num">{{ curr.total_amount|floatformat:0 }}</div>
+      <div class="sub">value of DONE operations</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="panel">
+      <h5>Daily trend: visits vs discussed vs DONE</h5>
+      <canvas id="trendChart" height="120"></canvas>
+    </div>
+    <div class="panel">
+      <h5>Discussion results</h5>
+      <canvas id="resultChart" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="panel mt-3">
+    <h5>Doctor performance: visits vs paid</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Doctor</th>
+            <th>Doctor visits</th>
+            <th>Discussed</th>
+            <th>DONE / paid</th>
+            <th>Paid vs visits</th>
+            <th>Collected</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in doctor_rows %}
+          <tr>
+            <td class="fw-bold">{{ row.name }}</td>
+            <td>{{ row.visits }}</td>
+            <td>{{ row.discussed }}</td>
+            <td>{{ row.done }}</td>
+            <td>{{ row.paid_vs_visit }}%</td>
+            <td>{{ row.collected|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted">No data in this period</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel mt-3">
+    <h5>Management notes</h5>
+    {% for note in insights %}
+      <div class="insight">{{ note }}</div>
+    {% endfor %}
+    <div class="small text-muted mt-3">
+      Suggested next views for management: 1) paid vs visits by doctor, 2) remainder collection aging, 3) weekly conversion trend, 4) operation type mix of DONE cases.
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener('load', function () {
+    const trend = {{ trend_json|safe }};
+    const results = {{ result_json|safe }};
+    if (typeof Chart === 'undefined') return;
+
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: {
+        labels: trend.labels,
+        datasets: [
+          { label: 'Doctor visits', data: trend.visits, borderColor: '#1D4ED8', tension: 0.3, fill: false },
+          { label: 'Discussed', data: trend.discussed, borderColor: '#0F4146', tension: 0.3, fill: false },
+          { label: 'DONE / paid', data: trend.done, borderColor: '#047857', tension: 0.3, fill: false },
+        ]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+
+    new Chart(document.getElementById('resultChart'), {
+      type: 'doughnut',
+      data: {
+        labels: results.map(r => r.name),
+        datasets: [{ data: results.map(r => r.count), backgroundColor: ['#047857', '#1D4ED8', '#F59E0B', '#DC2626', '#64748B', '#7C3AED'] }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+  });
+</script>
+{% endblock %}

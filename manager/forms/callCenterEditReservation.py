@@ -41,7 +41,7 @@ class CallCenterEditReservationForm(forms.ModelForm):
             'leadSource': forms.Select(attrs={'class': 'form-select'}),            
             'gender': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'reservedBy': forms.TextInput(attrs={'class': 'form-control'}),
-            #'expectedDate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),  # Correct type attribute
+           
            
              
     
@@ -74,7 +74,14 @@ class CallCenterEditReservationForm(forms.ModelForm):
             raise forms.ValidationError('Age must be a number between 1 and 99.')
         return age
     
-          
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.instance and self.instance.pk:
+            # Preserve original value
+            cleaned_data['expectedDate'] = self.instance.expectedDate
+
+        return cleaned_data     
         
     def __init__(self, *args, existing_serial=False, **kwargs):
         self.request = kwargs.pop('request', None)   # ⭐ ADD THIS
@@ -103,3 +110,15 @@ class CallCenterEditReservationForm(forms.ModelForm):
                     (f"{char}-{i}", f"{char}-{i}")
                     for i in range(1, max_num + 1)
                 ]
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # Preserve expectedDate on edit
+        if self.instance and self.instance.pk:
+            instance.expectedDate = self.instance.expectedDate
+
+        if commit:
+            instance.save()
+
+        return instance

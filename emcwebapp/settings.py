@@ -16,7 +16,7 @@ from pathlib import Path
 
 # # Build paths inside the project like this: BASE_DIR / 'subdirFFFFFFFFFFFFF'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_URL = 'http://127.0.0.1:8000/'
 # # This is where the files will be COPIED to
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -84,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'manager.middleware.ForcePasswordChangeMiddleware',
     
     # 'debuggy.middleware.DebuggyMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -162,7 +163,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/custom-logout-page/'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 # settings.py
 
 # DEBUGGY = {

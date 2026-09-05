@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>سند قبض للعمليات - {{ receipt_no }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #efe8dc;
+      font-family: 'Tajawal', sans-serif;
+      color: #2b241c;
+    }
+    .toolbar {
+      max-width: 900px;
+      margin: 16px auto 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar button, .toolbar a {
+      background: #5a4634;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-family: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .toolbar a.btn-auth {
+      background: #1f6b4a;
+      order: -1;
+      min-width: 200px;
+      text-align: center;
+    }
+    .sheet {
+      width: 210mm;
+      min-height: 148mm;
+      margin: 16px auto 32px;
+      background: #f7f1e7;
+      padding: 18px 22px 0;
+      border: 1px solid #d4c5b0;
+      position: relative;
+      overflow: hidden;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 150px 1fr 120px;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .logo-wrap img {
+      max-width: 140px;
+      max-height: 78px;
+      object-fit: contain;
+    }
+    .center-name {
+      text-align: center;
+      color: #1f1a16;
+    }
+    .center-name h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .center-name h2 {
+      margin: 4px 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #4a3d31;
+    }
+    .decor {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+      opacity: 0.45;
+    }
+    .burst {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background:
+        repeating-conic-gradient(from 0deg, #7a6550 0deg 8deg, transparent 8deg 20deg);
+    }
+    .burst.sm { width: 18px; height: 18px; }
+    .burst.lg { width: 36px; height: 36px; }
+    .title-banner {
+      margin: 14px auto 14px;
+      width: fit-content;
+      background: #5a4634;
+      color: #fff;
+      border-radius: 40px;
+      padding: 8px 48px;
+      font-size: 26px;
+      font-weight: 800;
+    }
+    .meta-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.8fr 1.1fr;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .pay-types {
+      display: flex;
+      gap: 18px;
+      justify-content: flex-start;
+    }
+    .pay-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .circle {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #5a4634;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .circle.checked::after {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background: #5a4634;
+      border-radius: 50%;
+    }
+    .receipt-no {
+      text-align: center;
+      color: #5a4634;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .date-box { text-align: left; }
+    .boxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1.4fr;
+      gap: 14px;
+      margin: 8px 0 16px;
+    }
+    .box label {
+      display: block;
+      text-align: center;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .box .value {
+      border: 2px solid #8f7a64;
+      border-radius: 10px;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 4px 8px;
+      word-break: break-word;
+      text-align: center;
+      background: #fff;
+    }
+    .line {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .dots {
+      flex: 1;
+      border-bottom: 2px dotted #7b6a58;
+      min-height: 22px;
+      padding: 0 8px 2px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .summary .label { font-weight: 800; margin-bottom: 8px; }
+    .summary .mini {
+      border: 2px solid #8f7a64;
+      border-radius: 10px;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 6px;
+      background: #fff;
+    }
+    .stamp {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: 800;
+    }
+    .footer {
+      margin: 18px -22px 0;
+      background: #5a4634;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .footer a { color: #fff; text-decoration: none; }
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .sheet {
+        margin: 0;
+        border: none;
+        width: auto;
+        min-height: auto;
+        background: #fff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <a class="btn-auth" href="{% url 'discussion_authorization' discussion.discussionID %}" target="_blank">فتح التفويض الطبي</a>
+    <button type="button" onclick="window.print()">طباعة السند</button>
+    <a href="{% url 'Discussion' %}">رجوع للديسكشن</a>
+  </div>
+
+  <div class="sheet">
+    <div class="header">
+      <div class="logo-wrap">
+        <img src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div style="display:none;font-weight:800;font-size:42px;color:#5a4634;letter-spacing:-1px;">EMC</div>
+      </div>
+      <div class="center-name">
+        <h1>English Medical Center</h1>
+        <h2>المركز الطبي الإنكليزي للعيون والليزر</h2>
+      </div>
+      <div class="decor">
+        <span class="burst sm"></span>
+        <span class="burst"></span>
+        <span class="burst lg"></span>
+      </div>
+    </div>
+
+    <div class="title-banner">سند قبض للعمليات</div>
+
+    <div class="meta-row">
+      <div class="pay-types">
+        <div class="pay-item">
+          <span class="circle {% if payment_type == 'completion' %}checked{% endif %}"></span>
+          استكمال
+        </div>
+        <div class="pay-item">
+          <span class="circle {% if payment_type == 'advance' %}checked{% endif %}"></span>
+          مقدمة
+        </div>
+      </div>
+      <div class="receipt-no">NO.{{ receipt_no }}</div>
+      <div class="date-box">التاريخ : {{ receipt_date|date:"d / m / Y" }}</div>
+    </div>
+
+    <div class="boxes">
+      <div class="box">
+        <label>USD $</label>
+        <div class="value"></div>
+      </div>
+      <div class="box">
+        <label>IQD</label>
+        <div class="value">{{ deposit }}</div>
+      </div>
+      <div class="box">
+        <label>File No.</label>
+        <div class="value">{{ file_serial }}</div>
+      </div>
+      <div class="box">
+        <label>رقم الديسكشن</label>
+        <div class="value">{{ discussion.discussionSerial }}</div>
+      </div>
+    </div>
+
+    <div class="line">
+      <span>استلمت من السيد / السيدة :</span>
+      <span class="dots">{{ patient_name }}</span>
+    </div>
+    <div class="line">
+      <span>مبلغاً وقدره :</span>
+      <span class="dots">{{ amount_words }}</span>
+    </div>
+    <div class="line">
+      <span>وذلك عن :</span>
+      <span class="dots">{{ reason }}</span>
+    </div>
+    <div class="line">
+      <span></span>
+      <span class="dots">تاريخ العملية: {{ discussion.specifyDate|date:"Y-m-d" }}{% if discussion.eyeSelection %} — العين: {{ discussion.eyeSelection }}{% endif %}</span>
+    </div>
+
+    <div class="summary">
+      <div>
+        <div class="label">اسم المريض : {{ patient_name }}</div>
+        <div class="label">المبلغ المتبقي للعملية :</div>
+        <div class="mini">{{ remainder }}</div>
+      </div>
+      <div>
+        <div class="label">امين الصندوق : {{ cashier }}</div>
+        <div class="label">المبلغ الاجمالي :</div>
+        <div class="mini">{{ total }}</div>
+        <div class="stamp">ختم الحسابات</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>
+        info@emc-iraq.com<br>
+        www.emc-iraq.com<br>
+        English Medical Center For Lasik &amp; Eye Surgery
+      </div>
+      <div>بغداد - الكرادة - ساحة الواثق</div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function () {
+      window.print();
+    });
+  </script>
+</body>
+</html>

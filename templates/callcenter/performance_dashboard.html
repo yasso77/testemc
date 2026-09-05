@@ -1,0 +1,308 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<style>
+  :root {
+    --cc-teal: #0F4146;
+    --cc-taupe: #928469;
+    --cc-muted: #64748B;
+    --cc-line: #eef2f7;
+  }
+  .perf-hero {
+    background: linear-gradient(135deg, #0F4146 0%, #163f45 55%, #2a4f52 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .perf-hero h2 { font-weight: 800; margin: 0 0 4px; font-size: 1.55rem; }
+  .perf-hero p { margin: 0; opacity: .85; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi {
+    background: #fff;
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .kpi .lbl {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cc-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .kpi .num {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--cc-teal);
+    line-height: 1.1;
+    margin: 8px 0 4px;
+  }
+  .kpi .sub { font-size: 12px; color: #94A3B8; }
+  .delta { font-size: 12px; font-weight: 700; margin-left: 6px; }
+  .delta.up { color: #047857; }
+  .delta.down { color: #B91C1C; }
+  .panel {
+    background: #fff;
+    border: 1px solid var(--cc-line);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .panel h5 {
+    font-weight: 800;
+    color: var(--cc-teal);
+    margin-bottom: 14px;
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+  }
+  .compare .big { font-size: 36px; font-weight: 800; }
+  .compare .reserved { color: #1D4ED8; }
+  .compare .attended { color: #047857; }
+  .compare .ops { color: #B45309; }
+  .compare .arrow {
+    color: var(--cc-muted);
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .rate-pill {
+    display: inline-block;
+    background: #ECFDF5;
+    color: #047857;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 800;
+    font-size: 14px;
+  }
+  .table thead th {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--cc-muted);
+    font-weight: 700;
+  }
+  .badge-soft {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .badge-soft.yes { background: #ECFDF5; color: #047857; }
+  .badge-soft.no { background: #F1F5F9; color: #64748B; }
+  .badge-soft.op { background: #FFFBEB; color: #B45309; }
+  @media (max-width: 992px) {
+    .kpi-grid, .compare { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 576px) {
+    .kpi-grid, .compare { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="pagetitle">
+  <h1>My Performance</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+      <li class="breadcrumb-item">Call Center</li>
+      <li class="breadcrumb-item active">Performance</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="perf-hero">
+    <h2>{{ agent_name }}</h2>
+    <p>Your reservations, center attendance, and operation outcomes</p>
+  </div>
+
+  <div class="panel">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">From</label>
+        <input type="date" name="from_date" class="form-control" value="{{ from_date|date:'Y-m-d' }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">To</label>
+        <input type="date" name="to_date" class="form-control" value="{{ to_date|date:'Y-m-d' }}">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-arrow-repeat me-1"></i> Update figures
+        </button>
+      </div>
+      <div class="col-md-3 text-muted small">
+        Compared with previous period:<br>{{ prev_from|date:'Y-m-d' }} — {{ prev_to|date:'Y-m-d' }}
+      </div>
+    </form>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="lbl">Reservations made</div>
+      <div class="num">{{ curr.reserved }}</div>
+      <div>
+        {% if deltas.reserved != None %}
+          <span class="delta {% if deltas.reserved >= 0 %}up{% else %}down{% endif %}">{{ deltas.reserved }}%</span>
+        {% endif %}
+        <span class="sub">created by you</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Attended center</div>
+      <div class="num">{{ curr.attended }}</div>
+      <div>
+        {% if deltas.attended != None %}
+          <span class="delta {% if deltas.attended >= 0 %}up{% else %}down{% endif %}">{{ deltas.attended }}%</span>
+        {% endif %}
+        <span class="sub">of your reservations</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Got operation</div>
+      <div class="num">{{ curr.operations }}</div>
+      <div>
+        {% if deltas.operations != None %}
+          <span class="delta {% if deltas.operations >= 0 %}up{% else %}down{% endif %}">{{ deltas.operations }}%</span>
+        {% endif %}
+        <span class="sub">surgery / done discussion</span>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Conversion</div>
+      <div class="num">{{ curr.attend_rate }}%</div>
+      <div class="sub">attendance rate · ops from attended {{ curr.op_rate }}%</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h5>Reservations → Attendance → Operations</h5>
+    <div class="compare mb-3">
+      <div>
+        <div class="text-muted small fw-bold">Reserved</div>
+        <div class="big reserved">{{ curr.reserved }}</div>
+      </div>
+      <div class="arrow">→</div>
+      <div>
+        <div class="text-muted small fw-bold">Attended</div>
+        <div class="big attended">{{ curr.attended }}</div>
+        <div class="rate-pill mt-1">{{ curr.attend_rate }}%</div>
+      </div>
+      <div class="arrow">→</div>
+      <div>
+        <div class="text-muted small fw-bold">Operations</div>
+        <div class="big ops">{{ curr.operations }}</div>
+        <div class="rate-pill mt-1" style="background:#FFFBEB;color:#B45309;">{{ curr.op_rate }}%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h5>Daily trend</h5>
+    <canvas id="perfTrendChart" height="90"></canvas>
+  </div>
+
+  <div class="panel">
+    <h5>Recent reservations in this period</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Patient</th>
+            <th>Mobile</th>
+            <th>Created</th>
+            <th>Expected</th>
+            <th>Attended</th>
+            <th>Operation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent %}
+          <tr>
+            <td class="fw-semibold">{{ p.reservationCode }}</td>
+            <td>{{ p.fullname }}</td>
+            <td>{{ p.mobile }}</td>
+            <td>{{ p.createdDate|date:'Y-m-d' }}</td>
+            <td>{{ p.expectedDate|date:'Y-m-d'|default:'—' }}</td>
+            <td>
+              {% if p.attendanceDate %}
+                <span class="badge-soft yes">{{ p.attendanceDate|date:'Y-m-d' }}</span>
+              {% else %}
+                <span class="badge-soft no">Not yet</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.has_surgery or p.has_done_discussion %}
+                <span class="badge-soft op">Yes</span>
+              {% else %}
+                <span class="badge-soft no">No</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">No reservations in this period.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels = {{ trend_labels_json|safe }};
+  const reserved = {{ trend_reserved_json|safe }};
+  const attended = {{ trend_attended_json|safe }};
+  const operations = {{ trend_operations_json|safe }};
+
+  new Chart(document.getElementById('perfTrendChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Reservations',
+          data: reserved,
+          borderColor: '#1D4ED8',
+          backgroundColor: 'rgba(29,78,216,.12)',
+          tension: 0.3,
+          fill: false,
+        },
+        {
+          label: 'Attended',
+          data: attended,
+          borderColor: '#047857',
+          backgroundColor: 'rgba(4,120,87,.12)',
+          tension: 0.3,
+          fill: false,
+        },
+        {
+          label: 'Operations',
+          data: operations,
+          borderColor: '#B45309',
+          backgroundColor: 'rgba(180,83,9,.12)',
+          tension: 0.3,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+      },
+    },
+  });
+</script>
+{% endblock %}

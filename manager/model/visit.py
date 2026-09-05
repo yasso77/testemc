@@ -29,7 +29,100 @@ class PatientVisits(models.Model):
     classifiedID=models.ForeignKey(ClassficationsOptions,blank=True, null=True, verbose_name='Classified Option',on_delete=models.DO_NOTHING)
     createdate = models.DateField(db_column='CreateDate', blank=True, null=True)  # Field name made 
     updatedDate= models.DateField(db_column='updatedDate', blank=True, null=True)  # Field name made 
-    
+    operationType = models.ForeignKey(
+        'OperationType',
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+        db_constraint=False,
+        related_name='patient_visits',
+        verbose_name='نوع العملية',
+    )
+    discussionNotes = models.TextField(blank=True, null=True, verbose_name='ملاحظات للديسكشن')
 
+
+
+class OperationType(models.Model):
+    operationTypeID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200, verbose_name='Operation Type')
+    isActive = models.BooleanField(default=True, verbose_name='Is Active')
+    createdDate = models.DateField(auto_now_add=True, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Operation Type'
+        verbose_name_plural = 'Operation Types'
+
+
+class DiscussionResult(models.Model):
+    discussionResultID = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200, verbose_name='Discussion Result')
+    isActive = models.BooleanField(default=True, verbose_name='Is Active')
+    createdDate = models.DateField(auto_now_add=True, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Discussion Result'
+        verbose_name_plural = 'Discussion Results'
+
+
+class PatientDiscussion(models.Model):
+    discussionID = models.AutoField(primary_key=True)
+    discussionSerial = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name='Discussion Serial',
+    )
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name='discussions', blank=True, null=True
+    )
+    doctor = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='discussions', blank=True, null=True
+    )
+    doctorName = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='اسم الطبيب',
+    )
+    operationType = models.ForeignKey(
+        OperationType, on_delete=models.DO_NOTHING, blank=True, null=True, verbose_name='Operation Type'
+    )
+    EYE_CHOICES = [
+        ('OS', 'OS'),
+        ('OD', 'OD'),
+        ('OU', 'OU'),
+    ]
+    eyeSelection = models.CharField(
+        max_length=2,
+        choices=EYE_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name='تحديد العين',
+    )
+    specifyDate = models.DateField(blank=True, null=True, verbose_name='Specify Date')
+    discussionResult = models.ForeignKey(
+        DiscussionResult, on_delete=models.DO_NOTHING, blank=True, null=True, verbose_name='Discussion Result'
+    )
+    note = models.TextField(blank=True, null=True, verbose_name='Note')
+    totalAmount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    deposit = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    remainder = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    createdDate = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    createdBy = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='created_discussions', blank=True, null=True
+    )
+    receiptNo = models.PositiveIntegerField(blank=True, null=True, unique=True, verbose_name='Receipt No')
+
+    def __str__(self):
+        return self.discussionSerial or str(self.discussionID)
+
+    class Meta:
+        verbose_name = 'Patient Discussion'
+        verbose_name_plural = 'Patient Discussions'
 
    

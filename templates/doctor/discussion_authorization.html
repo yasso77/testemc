@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تفويض طبي - {{ file_serial }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #efe8dc;
+      font-family: 'Tajawal', sans-serif;
+      color: #1f1a16;
+    }
+    .toolbar {
+      max-width: 900px;
+      margin: 16px auto 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar button, .toolbar a {
+      background: #5a4634;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-family: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 16px auto 32px;
+      background: #f7f1e7;
+      padding: 22px 28px 0;
+      border: 1px solid #d4c5b0;
+      position: relative;
+      overflow: hidden;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 150px 1fr 120px;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-wrap img {
+      max-width: 140px;
+      max-height: 78px;
+      object-fit: contain;
+    }
+    .center-name { text-align: center; }
+    .center-name h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .center-name h2 {
+      margin: 6px 0 0;
+      font-size: 17px;
+      font-weight: 600;
+      color: #4a3d31;
+    }
+    .decor {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+      opacity: 0.45;
+    }
+    .burst {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(from 0deg, #7a6550 0deg 8deg, transparent 8deg 20deg);
+    }
+    .burst.sm { width: 18px; height: 18px; }
+    .burst.lg { width: 36px; height: 36px; }
+    .title-banner {
+      margin: 22px auto 28px;
+      width: fit-content;
+      background: #5a4634;
+      color: #fff;
+      border-radius: 40px;
+      padding: 10px 56px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .top-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .field {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+    .field .dots {
+      flex: 1;
+      border-bottom: 2px dotted #6f5c49;
+      min-height: 24px;
+      padding: 0 6px 2px;
+    }
+    .body-text {
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 2.1;
+      margin-top: 10px;
+    }
+    .body-text p { margin: 0 0 18px; }
+    .op-lines .dots {
+      display: block;
+      border-bottom: 2px dotted #6f5c49;
+      min-height: 28px;
+      margin: 8px 0 14px;
+      padding: 0 8px 4px;
+    }
+    .legal {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 2.15;
+      text-align: justify;
+    }
+    .signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      margin-top: 70px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .signatures .sig-box {
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 28px;
+    }
+    .signatures .line {
+      border-bottom: 1px solid #5a4634;
+      margin: 0 12px;
+    }
+    .footer {
+      margin: 70px -28px 0;
+      background: #5a4634;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .sheet {
+        margin: 0;
+        border: none;
+        width: auto;
+        min-height: auto;
+        background: #fff;
+      }
+      .footer { margin-top: 50px; }
+    }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">طباعة التفويض</button>
+    <a href="{% url 'discussion_receipt' discussion.discussionID %}">سند القبض</a>
+    <a href="{% url 'Discussion' %}">رجوع للديسكشن</a>
+  </div>
+
+  <div class="sheet">
+    <div class="header">
+      <div class="logo-wrap">
+        <img src="{% static 'assets/img/logo_emc.png' %}" alt="EMC Logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div style="display:none;font-weight:800;font-size:42px;color:#5a4634;letter-spacing:-1px;">EMC</div>
+      </div>
+      <div class="center-name">
+        <h1>English Medical Center</h1>
+        <h2>المركز الطبي الإنكليزي للعيون والليزر</h2>
+      </div>
+      <div class="decor">
+        <span class="burst sm"></span>
+        <span class="burst"></span>
+        <span class="burst lg"></span>
+      </div>
+    </div>
+
+    <div class="title-banner">تفويض طبي</div>
+
+    <div class="top-meta">
+      <div>
+        <div class="field">
+          <span>اسم المريض :</span>
+          <span class="dots">{{ patient_name }}</span>
+        </div>
+        <div class="field">
+          <span>رقم الفايل :</span>
+          <span class="dots">{{ file_serial }}</span>
+        </div>
+      </div>
+      <div>
+        <div class="field" style="justify-content:flex-start;">
+          <span>التاريخ :</span>
+          <span class="dots">{{ auth_date|date:"d / m / Y" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="body-text">
+      <div class="field">
+        <span>أنا الموقع أدناه :</span>
+        <span class="dots">{{ patient_name }}</span>
+      </div>
+
+      <p>أفوض الأطباء والكوادر الطبية المساعدة في المركز الطبي الإنكليزي للعيون بإجراء عملية :</p>
+      <div class="op-lines">
+        <div class="dots">{{ operation_text }}</div>
+        <div class="dots">{% if discussion.eyeSelection %}تحديد العين: {{ discussion.eyeSelection }}{% endif %}</div>
+      </div>
+
+      <div class="legal">
+        والقيام بالإجراءات التي يرونها مناسبة لي بعد أن تم شرح مضاعفات هذا الإجراء من قبل الفريق الطبي
+        وأن المركز والكادر الطبي غير مسؤولين عن أي مضاعفات لهذا الإجراء وأن يقوموا بالتخدير الذي يرونه
+        مناسباً لي سواء كان عاماً أو موضعياً.
+      </div>
+    </div>
+
+    <div class="signatures">
+      <div class="sig-box">
+        <div class="line"></div>
+        <div>اسم وتوقيع طبيب التخدير</div>
+      </div>
+      <div class="sig-box">
+        <div class="line"></div>
+        <div>اسم وتوقيع الطبيب</div>
+      </div>
+      <div class="sig-box">
+        <div class="line"></div>
+        <div>اسم وتوقيع المريض</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>
+        info@emc-iraq.com<br>
+        www.emc-iraq.com<br>
+        English Medical Center For Lasik &amp; Eye Surgery
+      </div>
+      <div>بغداد - الكرادة - ساحة الواثق</div>
+    </div>
+  </div>
+</body>
+</html>

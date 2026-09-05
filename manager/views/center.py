@@ -503,7 +503,7 @@ class CenterView(ListView):
     @login_required   
     def centerSearchOnPatient(request):
          
-        strText = request.GET.get('strText', '')  
+        strText = (request.GET.get('strText', '') or '').strip()
         
         today_date = datetime.date.today()        
         past_90_days_date = today_date - timedelta(days=90)
@@ -513,39 +513,52 @@ class CenterView(ListView):
             patientID=OuterRef('pk'),
             confirmationDate__gte=past_90_days_date
         ).order_by('-patientID').values('confirmationDate')[:1]
-    #print(strText) 
+
+        search_q = (
+            Q(reservationCode__icontains=strText) |
+            Q(mobile__icontains=strText) |
+            Q(fileserial__icontains=strText) |
+            Q(fullname__icontains=strText) |
+            Q(birthdate__icontains=strText) |
+            Q(attendanceDate__icontains=strText)
+        )
+
+        uuid_match = re.search(
+            r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+            strText,
+            re.I,
+        )
+        if uuid_match:
+            try:
+                from uuid import UUID
+                search_q |= Q(qr_token=UUID(uuid_match.group(0)))
+            except ValueError:
+                pass
+
         recent_patients = (
             Patient.objects.active()
-            .filter(
-                Q(reservationCode__icontains=strText) |
-                Q(mobile__icontains=strText) |  # Search in mobile
-                Q(fileserial__icontains=strText) |  # Search in file serial
-                Q(fullname__icontains=strText) |  # Search in name
-                Q(birthdate__icontains=strText) |  # Search in birthdate
-                Q(attendanceDate__icontains=strText),  # Search in attendance date
-                #reservedBy=request.user  # Keep the reservedBy filter
-            )
+            .filter(search_q)
             .select_related('sufferedcase')
             .annotate(
                 latestConfirmation=Subquery(latest_confirmation_date, output_field=models.DateField()),
-                call_count=Count('call_patients'),  # Count number of call tracks for each patient
-                last_call_date=Max('call_patients__createdDate'),  # Get the latest call date
+                call_count=Count('call_patients'),
+                last_call_date=Max('call_patients__createdDate'),
                 last_call_outcome=Subquery(
                     CallTrack.objects.filter(
-                        patientID=OuterRef('pk')  # Reference the current patient
+                        patientID=OuterRef('pk')
                     )
                     .order_by('-patientID')
-                    .values('outcome')[:1]  # Get the outcome of the latest call
+                    .values('outcome')[:1]
                 ),
                  has_medical_history=Exists(
                  PatientMedicalHistory.objects.filter(patient=OuterRef('pk'))
-            )  # ✅ Check if patient has a medical history
+            )
             )
             .values(
                 'patientid','fileserial', 'fullname', 'reservationCode', 'leadSource',
                 'createdDate','createdBy__username', 'city', 'mobile', 'age', 'sufferedcase__caseName',
                 'sufferedcaseByPatient__caseName', 'expectedDate', 'gender', 'attendanceDate', 'birthdate',
-                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'  # Add annotated fields
+                'call_count', 'last_call_date', 'last_call_outcome','has_medical_history','latestConfirmation'
             )
         )  
         

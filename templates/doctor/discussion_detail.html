@@ -1,0 +1,53 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>عرض الديسكشن</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'DiscussionDashboard' %}">التقرير</a></li>
+      <li class="breadcrumb-item active">{{ discussion.discussionSerial }}</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card">
+    <div class="card-body pt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">{{ discussion.discussionSerial }}</h5>
+        <div class="d-flex gap-2">
+          <a class="btn btn-primary" href="{% url 'discussion_edit' discussion.discussionID %}">تعديل</a>
+          {% if can_print %}
+            <a class="btn btn-success" href="{% url 'discussion_receipt' discussion.discussionID %}" target="_blank">طباعة السند</a>
+          {% endif %}
+          <a class="btn btn-outline-secondary" href="{% url 'DiscussionDashboard' %}">رجوع</a>
+        </div>
+      </div>
+
+      <table class="table table-bordered">
+        <tr><th width="30%">رقم الديسكشن</th><td>{{ discussion.discussionSerial }}</td></tr>
+        <tr><th>رقم الملف</th><td>{{ discussion.patient.fileserial }}</td></tr>
+        <tr><th>اسم المريض</th><td>{{ discussion.patient.fullname }}</td></tr>
+        <tr><th>ملاحظات الكول سنتر</th><td>{{ discussion.patient.remarks|default:"-" }}</td></tr>
+        <tr><th>اسم الطبيب</th><td>{% if discussion.doctor %}{{ discussion.doctor.get_full_name|default:discussion.doctor.username }}{% else %}-{% endif %}</td></tr>
+        <tr><th>نوع العملية</th><td>{{ discussion.operationType.name|default:"-" }}</td></tr>
+        <tr><th>تحديد العين</th><td>{{ discussion.eyeSelection|default:"-" }}</td></tr>
+        <tr><th>نتيجة الديسكشن</th><td>{{ discussion.discussionResult.name|default:"-" }}</td></tr>
+        <tr><th>تاريخ التحديد</th><td>{{ discussion.specifyDate|date:"Y-m-d" }}</td></tr>
+        <tr><th>المبلغ الإجمالي</th><td>{{ discussion.totalAmount|default:"-" }}</td></tr>
+        <tr><th>المقدم</th><td>{{ discussion.deposit|default:"-" }}</td></tr>
+        <tr><th>المتبقي</th><td>{{ discussion.remainder|default:"-" }}</td></tr>
+        <tr><th>ملاحظات</th><td>{{ discussion.note|default:"-" }}</td></tr>
+        <tr><th>تاريخ الإنشاء</th><td>{{ discussion.createdDate }}</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

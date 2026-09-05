@@ -1,0 +1,1077 @@
+{% extends 'master.html'%}
+
+{% block content %}
+<style>
+  body {
+    background: #F1F5F9;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+  }
+
+  .container {
+    width: 95%;
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    direction: rtl;
+  }
+
+  .search-bar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .search-bar input {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 18px;
+    border: 1px solid #CBD5E1;
+    border-radius: 12px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .search-bar input:focus {
+    border-color: #2563EB;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+
+  .search-bar button {
+    margin-right: 10px;
+    padding: 14px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .search-bar button:hover { background: #1E40AF; }
+
+  .loader {
+    display: none;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #195a7a;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+  }
+  @keyframes spin { 0%{transform:rotate(0)}100%{transform:rotate(360deg)} }
+
+  .panel {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .panel-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    color: #0F4146;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 8px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 18px;
+  }
+
+  .info-item { font-size: 16px; }
+
+  .info-item.full {
+    grid-column: 1 / -1;
+  }
+
+  .info-item strong {
+    display: block;
+    color: #64748B;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .serial-badge {
+    display: inline-block;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+  }
+
+  .visits-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .visits-table th,
+  .visits-table td {
+    border-bottom: 1px solid #E2E8F0;
+    padding: 10px 8px;
+    text-align: right;
+  }
+
+  .visits-table th {
+    background: #F8FAFC;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .visits-empty {
+    text-align: center;
+    color: #94A3B8;
+    padding: 16px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: #2563EB;
+  }
+
+  .remainder {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #166534;
+  }
+
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .week-nav button {
+    border: 1px solid #CBD5E1;
+    background: #F8FAFC;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .week-nav button:hover { background: #EFF6FF; border-color: #2563EB; }
+
+  .week-label {
+    font-weight: bold;
+    color: #0F4146;
+    font-size: 15px;
+  }
+
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+
+  .day-cell {
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    background: #F8FAFC;
+    min-height: 88px;
+    transition: 0.15s;
+  }
+
+  .day-cell:hover { border-color: #93C5FD; background: #EFF6FF; }
+
+  .day-cell.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: #F1F5F9;
+  }
+
+  .day-cell.disabled:hover {
+    border-color: #E2E8F0;
+    background: #F1F5F9;
+  }
+
+  .week-nav button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .day-cell.selected {
+    border-color: #2563EB;
+    background: #DBEAFE;
+  }
+
+  .day-cell.today {
+    box-shadow: inset 0 0 0 1px #0F4146;
+  }
+
+  .day-name {
+    font-size: 12px;
+    color: #64748B;
+    font-weight: 600;
+  }
+
+  .day-num {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0F172A;
+    margin: 4px 0;
+  }
+
+  .day-count {
+    display: inline-block;
+    min-width: 28px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #FEE2E2;
+    color: #B91C1C;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .day-count.zero {
+    background: #E2E8F0;
+    color: #64748B;
+  }
+
+  .selected-date {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #334155;
+  }
+
+  .calendar-section {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    background: #FFFBEB;
+    border-color: #FDE68A;
+  }
+
+  .calendar-section-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0F4146;
+    margin-bottom: 10px;
+  }
+
+  .calendar-hint {
+    font-size: 12px;
+    color: #64748B;
+    margin-bottom: 10px;
+  }
+
+  .history-link-wrap {
+    text-align: center;
+  }
+
+  .history-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #1D4ED8;
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 1px dashed #93C5FD;
+    padding-bottom: 2px;
+  }
+
+  .history-link:hover {
+    color: #1E40AF;
+    border-bottom-color: #1E40AF;
+  }
+
+  .history-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(15, 23, 42, 0.45);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .history-modal.show {
+    display: flex;
+  }
+
+  .history-modal-box {
+    width: min(980px, 96vw);
+    max-height: 90vh;
+    overflow: auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    direction: rtl;
+  }
+
+  .history-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #E2E8F0;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+  }
+
+  .history-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #0F4146;
+  }
+
+  .history-modal-close {
+    border: none;
+    background: #F1F5F9;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .history-modal-body {
+    padding: 16px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .history-section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0F4146;
+    margin-bottom: 10px;
+  }
+
+  .actions {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-save {
+    width: 100%;
+    max-width: 320px;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background: #0F4146;
+    cursor: pointer;
+  }
+
+  .btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-save:hover:not(:disabled) { opacity: 0.9; }
+
+  .readonly-field,
+  .serial-field {
+    min-height: 42px;
+    padding: 10px 12px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #0F4146;
+  }
+
+  .today-discussion-alert {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    color: #92400E;
+    font-weight: 600;
+  }
+
+  .hidden-until-patient { display: none; }
+  .hidden-until-patient.show { display: block; }
+
+  @media (max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 700px) {
+    .info-grid,
+    .form-row { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<section class="section">
+  <div class="container">
+
+    <div class="search-bar">
+      <input type="text" id="fileNumber" placeholder="اكتب رقم الملف أو امسحه الباركود">
+      <button type="button" onclick="searchPatient()">بحث</button>
+    </div>
+    <div class="history-link-wrap" style="display:block; margin-top:-8px;">
+      <a class="history-link" href="{% url 'DiscussionDashboard' %}">تقرير وسجلات الديسكشن</a>
+    </div>
+
+    <div id="loader" class="loader"></div>
+
+    <div class="panel" id="infoPanel">
+      <div class="panel-title">بيانات الديسكشن والمريض</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <strong>رقم الديسكشن</strong>
+          <span class="serial-badge" id="discussionSerial">-</span>
+        </div>
+        <div class="info-item">
+          <strong>اسم المريض</strong>
+          <span id="patientName">-</span>
+        </div>
+        <div class="info-item">
+          <strong>تاريخ الديسكشن</strong>
+          <span id="discussionDate">{{ today }}</span>
+          <small style="display:block;color:#64748B;font-size:12px;margin-top:2px;">يُسجّل تلقائياً عند الحفظ</small>
+        </div>
+        <div class="info-item">
+          <strong>رقم الملف</strong>
+          <span id="fileSerial">-</span>
+        </div>
+        <div class="info-item">
+          <strong>العمر</strong>
+          <span id="patientAge">-</span>
+        </div>
+        <div class="info-item full">
+          <strong>ملاحظات الديسكشن من الكول سنتر</strong>
+          <span id="discussionCallNotes">-</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-link-wrap hidden-until-patient" id="historyLinkWrap">
+      <a class="history-link" href="javascript:void(0)" onclick="openHistoryModal()">
+        سجل الزيارات والديسكشن السابقة
+      </a>
+      <span style="margin: 0 10px; color: #94A3B8;">|</span>
+      <a class="history-link" href="{% url 'DiscussionDashboard' %}">تقرير الديسكشن</a>
+    </div>
+
+    <div class="history-modal" id="historyModal" onclick="backdropCloseHistory(event)">
+      <div class="history-modal-box" onclick="event.stopPropagation()">
+        <div class="history-modal-header">
+          <h3>سجل الزيارات والديسكشن السابقة</h3>
+          <button type="button" class="history-modal-close" onclick="closeHistoryModal()" aria-label="إغلاق">&times;</button>
+        </div>
+        <div class="history-modal-body">
+          <div>
+            <div class="history-section-title">سجل الزيارات</div>
+            <div id="visitsContainer">
+              <div class="visits-empty">لا توجد زيارات</div>
+            </div>
+          </div>
+          <div>
+            <div class="history-section-title">سجل الديسكشن</div>
+            <div id="discussionsContainer">
+              <div class="visits-empty">لا توجد ديسكشن</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel hidden-until-patient" id="discussionPanel">
+      <div class="panel-title">الديسكشن</div>
+
+      <div id="todayDiscussionAlert" class="today-discussion-alert" style="display:none;"></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>رقم الديسكشن</label>
+          <div class="serial-badge serial-field" id="discussionSerialForm">-</div>
+        </div>
+        <div class="form-group">
+          <label>اسم المريض</label>
+          <div class="readonly-field" id="patientNameForm">-</div>
+        </div>
+        <div class="form-group">
+          <label>اسم الطبيب</label>
+          <select id="discussionDoctor">
+            {% for d in doctors %}
+              <option value="{{ d.id }}" {% if d.id == request.user.id %}selected{% endif %}>
+                {{ d.get_full_name|default:d.username }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>نوع العملية</label>
+          <select id="operationType">
+            <option value="">-- اختر نوع العملية --</option>
+            {% for op in operation_types %}
+              <option value="{{ op.operationTypeID }}">{{ op.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>تحديد العين</label>
+          <select id="eyeSelection">
+            <option value="">-- اختر العين --</option>
+            <option value="OS">OS</option>
+            <option value="OD">OD</option>
+            <option value="OU">OU</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>نتيجة الديسكشن</label>
+          <select id="discussionResult">
+            <option value="">-- اختر نتيجة الديسكشن --</option>
+            {% for r in discussion_results %}
+              <option value="{{ r.discussionResultID }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>المبلغ الإجمالي</label>
+          <input type="number" id="totalAmount" min="0" step="0.01" placeholder="0.00" oninput="calcRemainder()">
+        </div>
+        <div class="form-group">
+          <label>المقدم</label>
+          <input type="number" id="depositAmount" min="0" step="0.01" placeholder="0.00" oninput="calcRemainder()">
+        </div>
+        <div class="form-group">
+          <label>المتبقي (الإجمالي - المقدم)</label>
+          <div class="remainder" id="remainderAmount">0.00</div>
+        </div>
+      </div>
+
+      <div class="calendar-section">
+        <div class="calendar-section-title">تحديد موعد العملية</div>
+        <div class="calendar-hint">اختر تاريخ العملية — العداد يظهر عدد العمليات المحددة لكل يوم</div>
+        <div class="week-nav">
+          <button type="button" id="prevOperationWeekBtn" onclick="shiftOperationWeek(-1)">◀ الأسبوع السابق</button>
+          <div class="week-label" id="operationWeekLabel">-</div>
+          <button type="button" onclick="shiftOperationWeek(1)">الأسبوع التالي ▶</button>
+        </div>
+        <div class="week-grid" id="operationWeekGrid"></div>
+        <div class="selected-date">تاريخ العملية: <strong id="selectedOperationDateLabel">-</strong></div>
+      </div>
+
+      <div class="form-group full" style="margin-top: 14px;">
+        <label>ملاحظات</label>
+        <textarea id="discussionNote" placeholder="اكتب ملاحظات الديسكشن..."></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-save" id="btnSave" disabled onclick="saveDiscussion()">حفظ الديسكشن</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  let currentPatient = null;
+  let selectedOperationDate = null;
+  let operationWeekStart = null;
+  let savingDiscussion = false;
+  let hasTodayDiscussion = false;
+  const today = "{{ today }}";
+  const csrfToken = "{{ csrf_token }}";
+
+  function parseDate(str) {
+    const [y, m, d] = str.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function formatDate(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function getMonday(dateObj) {
+    const d = new Date(dateObj);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  async function searchPatient() {
+    const fileNumber = document.getElementById("fileNumber").value.trim();
+    const loader = document.getElementById("loader");
+
+    if (!fileNumber) {
+      alert("⚠️ الرجاء إدخال رقم الملف");
+      return;
+    }
+
+    resetPanels();
+    loader.style.display = "block";
+
+    try {
+      const response = await fetch(`/get_patient_info/${encodeURIComponent(fileNumber)}/?for_discussion=1`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || "لم يتم العثور على المريض");
+      }
+      const data = await response.json();
+
+      currentPatient = data;
+      fillPatient(data);
+      fillVisits(data.visits || []);
+      fillDiscussions(data.discussions || []);
+      if (data.doctor_operation_type_id) {
+        document.getElementById("operationType").value = data.doctor_operation_type_id;
+      }
+      if (data.doctor_discussion_notes) {
+        document.getElementById("discussionNote").value = data.doctor_discussion_notes;
+      }
+      selectedOperationDate = today;
+      setDiscussionSerial(data.fileserial);
+      hasTodayDiscussion = !!data.has_today_discussion;
+      updateTodayDiscussionState(data);
+      operationWeekStart = getMonday(parseDate(today));
+      await loadOperationWeek();
+      document.getElementById("selectedOperationDateLabel").textContent = today;
+
+      document.getElementById("historyLinkWrap").classList.add("show");
+      document.getElementById("discussionPanel").classList.add("show");
+      document.getElementById("btnSave").disabled = hasTodayDiscussion;
+    } catch (error) {
+      alert(error.message || "حدث خطأ أثناء جلب البيانات");
+      console.error(error);
+    } finally {
+      loader.style.display = "none";
+    }
+  }
+
+  function setDiscussionSerial(fileserial) {
+    const serial = fileserial ? `${fileserial}-${today}` : "-";
+    document.getElementById("discussionSerial").textContent = serial;
+    document.getElementById("discussionSerialForm").textContent = serial;
+    document.getElementById("discussionDate").textContent = today;
+    document.getElementById("fileSerial").textContent = fileserial || "-";
+  }
+
+  function updateTodayDiscussionState(data) {
+    const alertBox = document.getElementById("todayDiscussionAlert");
+    if (data.has_today_discussion) {
+      alertBox.style.display = "block";
+      alertBox.textContent = `⚠️ المريض لديه ديسكشن لهذا اليوم (${data.today_discussion_serial || "-"})`;
+    } else {
+      alertBox.style.display = "none";
+      alertBox.textContent = "";
+    }
+  }
+
+  function fillPatient(data) {
+    document.getElementById("patientName").textContent = data.name || "-";
+    document.getElementById("patientNameForm").textContent = data.name || "-";
+    document.getElementById("patientAge").textContent = data.age ?? "-";
+    document.getElementById("discussionCallNotes").textContent = data.discussion_call_notes || "-";
+  }
+
+  function fillVisits(visits) {
+    const container = document.getElementById("visitsContainer");
+    if (!visits.length) {
+      container.innerHTML = `<div class="visits-empty">لا توجد زيارات سابقة</div>`;
+      return;
+    }
+
+    const rows = visits.map((v) => `
+      <tr>
+        <td>${v.visit_date || "-"}</td>
+        <td>${v.doctor || "-"}</td>
+        <td>${v.visit_type || "-"}</td>
+        <td>${v.evaluation_degree || "-"}</td>
+        <td>${v.evaluation_classified || "-"}</td>
+      </tr>
+    `).join("");
+
+    container.innerHTML = `
+      <table class="visits-table">
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>الطبيب</th>
+            <th>النوع</th>
+            <th>التقييم</th>
+            <th>التصنيف</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function fillDiscussions(discussions) {
+    const container = document.getElementById("discussionsContainer");
+    if (!discussions.length) {
+      container.innerHTML = `<div class="visits-empty">لا توجد ديسكشن سابقة</div>`;
+      return;
+    }
+
+    const rows = discussions.map((d) => `
+      <tr>
+        <td>${d.discussion_serial || "-"}</td>
+        <td>${d.specify_date || "-"}</td>
+        <td>${d.doctor || "-"}</td>
+        <td>${d.operation_type || "-"}</td>
+        <td>${d.eye_selection || "-"}</td>
+        <td>${d.discussion_result || "-"}</td>
+        <td>${d.total_amount ?? "-"}</td>
+        <td>${d.deposit ?? "-"}</td>
+        <td>${d.remainder ?? "-"}</td>
+        <td>${d.note || "-"}</td>
+      </tr>
+    `).join("");
+
+    container.innerHTML = `
+      <table class="visits-table">
+        <thead>
+          <tr>
+            <th>رقم الديسكشن</th>
+            <th>تاريخ التحديد</th>
+            <th>الطبيب</th>
+            <th>نوع العملية</th>
+            <th>تحديد العين</th>
+            <th>النتيجة</th>
+            <th>الإجمالي</th>
+            <th>المقدم</th>
+            <th>المتبقي</th>
+            <th>ملاحظات</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function openHistoryModal() {
+    document.getElementById("historyModal").classList.add("show");
+  }
+
+  function closeHistoryModal() {
+    document.getElementById("historyModal").classList.remove("show");
+  }
+
+  function backdropCloseHistory(event) {
+    if (event.target.id === "historyModal") {
+      closeHistoryModal();
+    }
+  }
+
+  async function loadOperationWeek() {
+    if (!operationWeekStart) return;
+    const startStr = formatDate(operationWeekStart);
+    const response = await fetch(
+      `/discussion/week-counts/?week_start=${encodeURIComponent(startStr)}&calendar_type=operation`
+    );
+    if (!response.ok) throw new Error("تعذر تحميل التقويم");
+    const data = await response.json();
+    renderOperationWeek(data);
+  }
+
+  function renderOperationWeek(data) {
+    const grid = document.getElementById("operationWeekGrid");
+    document.getElementById("operationWeekLabel").textContent =
+      `${data.week_start} → ${data.week_end}`;
+
+    const prevBtn = document.getElementById("prevOperationWeekBtn");
+    if (prevBtn && operationWeekStart) {
+      const prevEnd = new Date(operationWeekStart);
+      prevEnd.setDate(prevEnd.getDate() - 1);
+      prevBtn.disabled = formatDate(prevEnd) < today;
+    }
+
+    grid.innerHTML = (data.days || []).map((day) => {
+      const isPast = day.date < today;
+      const isSelected = selectedOperationDate === day.date;
+      const isToday = day.date === today;
+      const countClass = day.count > 0 ? "" : "zero";
+      const clickAttr = isPast ? "" : `onclick="selectOperationDate('${day.date}')"`;
+      return `
+        <div class="day-cell ${isSelected ? "selected" : ""} ${isToday ? "today" : ""} ${isPast ? "disabled" : ""}"
+             ${clickAttr}>
+          <div class="day-name">${day.label}</div>
+          <div class="day-num">${day.day_num}</div>
+          <div class="day-count ${countClass}">${day.count}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function selectOperationDate(dateStr) {
+    if (dateStr < today) {
+      alert("⚠️ لا يمكن اختيار تاريخ سابق");
+      return;
+    }
+    selectedOperationDate = dateStr;
+    document.getElementById("selectedOperationDateLabel").textContent = dateStr;
+    document.querySelectorAll("#operationWeekGrid .day-cell").forEach((cell) => {
+      const onclick = cell.getAttribute("onclick") || "";
+      cell.classList.toggle("selected", onclick.includes(`'${dateStr}'`));
+    });
+  }
+
+  async function shiftOperationWeek(delta) {
+    if (!operationWeekStart) return;
+    const nextStart = new Date(operationWeekStart);
+    nextStart.setDate(nextStart.getDate() + (delta * 7));
+    if (delta < 0) {
+      const nextEnd = new Date(nextStart);
+      nextEnd.setDate(nextEnd.getDate() + 6);
+      if (formatDate(nextEnd) < today) {
+        return;
+      }
+    }
+    operationWeekStart = nextStart;
+    try {
+      await loadOperationWeek();
+    } catch (error) {
+      alert(error.message || "تعذر تحميل التقويم");
+    }
+  }
+
+  function calcRemainder() {
+    const total = parseFloat(document.getElementById("totalAmount").value) || 0;
+    const deposit = parseFloat(document.getElementById("depositAmount").value) || 0;
+    document.getElementById("remainderAmount").textContent = (total - deposit).toFixed(2);
+  }
+
+  function resetPanels() {
+    currentPatient = null;
+    selectedOperationDate = null;
+    operationWeekStart = null;
+    hasTodayDiscussion = false;
+    closeHistoryModal();
+    document.getElementById("historyLinkWrap").classList.remove("show");
+    document.getElementById("discussionPanel").classList.remove("show");
+    document.getElementById("btnSave").disabled = true;
+    document.getElementById("todayDiscussionAlert").style.display = "none";
+    document.getElementById("todayDiscussionAlert").textContent = "";
+    document.getElementById("discussionSerial").textContent = "-";
+    document.getElementById("discussionSerialForm").textContent = "-";
+    document.getElementById("fileSerial").textContent = "-";
+    document.getElementById("patientName").textContent = "-";
+    document.getElementById("patientNameForm").textContent = "-";
+    document.getElementById("patientAge").textContent = "-";
+    document.getElementById("discussionCallNotes").textContent = "-";
+    document.getElementById("selectedOperationDateLabel").textContent = "-";
+    document.getElementById("totalAmount").value = "";
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("remainderAmount").textContent = "0.00";
+    document.getElementById("operationType").value = "";
+    document.getElementById("eyeSelection").value = "";
+    document.getElementById("discussionResult").value = "";
+    document.getElementById("discussionNote").value = "";
+    document.getElementById("operationWeekGrid").innerHTML = "";
+    document.getElementById("visitsContainer").innerHTML = `<div class="visits-empty">لا توجد زيارات</div>`;
+    document.getElementById("discussionsContainer").innerHTML = `<div class="visits-empty">لا توجد ديسكشن</div>`;
+  }
+
+  async function saveDiscussion() {
+    if (savingDiscussion) {
+      return;
+    }
+    if (hasTodayDiscussion) {
+      alert("⚠️ المريض لديه ديسكشن لهذا اليوم");
+      return;
+    }
+    if (!currentPatient) {
+      alert("⚠️ الرجاء البحث عن المريض أولاً");
+      return;
+    }
+
+    const btnSave = document.getElementById("btnSave");
+    const operationTypeId = document.getElementById("operationType").value;
+    const eyeSelection = document.getElementById("eyeSelection").value;
+    const discussionResultId = document.getElementById("discussionResult").value;
+    const note = document.getElementById("discussionNote").value.trim();
+    const totalAmount = document.getElementById("totalAmount").value;
+    const deposit = document.getElementById("depositAmount").value;
+
+    if (!operationTypeId) {
+      alert("⚠️ الرجاء اختيار نوع العملية");
+      return;
+    }
+    if (!eyeSelection) {
+      alert("⚠️ الرجاء اختيار تحديد العين");
+      return;
+    }
+    if (!discussionResultId) {
+      alert("⚠️ الرجاء اختيار نتيجة الديسكشن");
+      return;
+    }
+    if (!selectedOperationDate) {
+      alert("⚠️ الرجاء اختيار تاريخ العملية من التقويم");
+      return;
+    }
+    if (selectedOperationDate < today) {
+      alert("⚠️ لا يمكن اختيار تاريخ عملية سابق");
+      return;
+    }
+    if (totalAmount === "" || deposit === "") {
+      alert("⚠️ الرجاء إدخال المبلغ الإجمالي والمقدم");
+      return;
+    }
+
+    const payload = {
+      patient_id: currentPatient.patientID,
+      doctor_id: document.getElementById("discussionDoctor").value,
+      operation_type_id: operationTypeId,
+      eye_selection: eyeSelection,
+      discussion_result_id: discussionResultId,
+      specify_date: selectedOperationDate,
+      note: note,
+      total_amount: totalAmount,
+      deposit: deposit,
+    };
+
+    savingDiscussion = true;
+    btnSave.disabled = true;
+    const originalLabel = btnSave.textContent;
+    btnSave.textContent = "جاري الحفظ...";
+
+    // Open blank tab now (same user gesture) so receipt is not blocked by popup blockers
+    const receiptWin = window.open("about:blank", "_blank");
+
+    try {
+      const response = await fetch("{% url 'save_discussion' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "تعذر حفظ الديسكشن");
+
+      if (data.discussion_serial) {
+        document.getElementById("discussionSerial").textContent = data.discussion_serial;
+        document.getElementById("discussionSerialForm").textContent = data.discussion_serial;
+      }
+
+      if (data.print_receipt && data.receipt_url) {
+        if (receiptWin && !receiptWin.closed) {
+          receiptWin.location.href = data.receipt_url;
+        } else {
+          window.open(data.receipt_url, "_blank");
+        }
+      } else {
+        if (receiptWin && !receiptWin.closed) receiptWin.close();
+        alert("✅ تم حفظ الديسكشن\nSerial: " + data.discussion_serial);
+      }
+      await loadOperationWeek();
+
+      // Refresh history lists after save
+      const refresh = await fetch(`/get_patient_info/${encodeURIComponent(currentPatient.fileserial)}/?for_discussion=1`);
+      if (refresh.ok) {
+        const refreshed = await refresh.json();
+        currentPatient = refreshed;
+        hasTodayDiscussion = !!refreshed.has_today_discussion;
+        updateTodayDiscussionState(refreshed);
+        document.getElementById("btnSave").disabled = hasTodayDiscussion;
+        fillVisits(refreshed.visits || []);
+        fillDiscussions(refreshed.discussions || []);
+      }
+    } catch (error) {
+      if (receiptWin && !receiptWin.closed) receiptWin.close();
+      alert(error.message || "حدث خطأ أثناء الحفظ");
+      console.error(error);
+    } finally {
+      savingDiscussion = false;
+      btnSave.disabled = false;
+      btnSave.textContent = originalLabel || "حفظ الديسكشن";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("fileNumber");
+    input.focus();
+    input.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchPatient();
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeHistoryModal();
+    });
+  });
+</script>
+{% endblock %}

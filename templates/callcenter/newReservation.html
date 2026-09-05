@@ -78,8 +78,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="form-container">
-                <form method="post" class="form-horizontal">
+                <form method="post" class="form-horizontal" id="newReservationForm">
                     {% csrf_token %}
+                    <input type="hidden" name="form_nonce" value="{{ form_nonce }}">
 
                     <div class="section-header">
                         <i class="bi bi-card-list"></i> Basic Information
@@ -122,7 +123,7 @@
                             {% comment %} {{ form.fullname }} {% endcomment %}
 
                                <div class="col-sm-8">
-                            <input type="text" id="id_fullname" name="fullname"  class="form-control"  required>
+                            <input type="text" id="id_fullname" name="fullname" class="form-control" value="{{ form.fullname.value|default_if_none:'' }}" required>
                             <div id="fullname-validation-message" class="alert alert-warning py-2 px-3" style="display: none;"></div>
                         </div>
                             {% if form.fullname.errors %}<div class="text-danger">{{ form.fullname.errors }}</div>{% endif %}
@@ -132,7 +133,7 @@
                     <div class="form-group row">
                         <label for="id_mobile" class="col-sm-3 col-form-label">Mobile <span class="text-danger">*</span></label>
                         <div class="col-sm-8">
-                            <input type="text" id="id_mobile" name="mobile" maxlength="15" class="form-control" placeholder="01XXXXXXXXX" required>
+                            <input type="text" id="id_mobile" name="mobile" maxlength="15" class="form-control" placeholder="01XXXXXXXXX" value="{{ form.mobile.value|default_if_none:'' }}" required>
                             <div id="mobile-validation-message" class="alert alert-warning py-2 px-3" style="display: none;"></div>
                         </div>
                     </div>
@@ -217,9 +218,14 @@
                         <div class="col-sm-8">{{ form.remarks }}</div>
                     </div>
 
+                    <div class="form-group row">
+                        <label for="{{ form.discussionCallNotes.id_for_label }}" class="col-sm-3 col-form-label">Call Notes for Discussion</label>
+                        <div class="col-sm-8">{{ form.discussionCallNotes }}</div>
+                    </div>
+
                     <div class="form-group row mt-5">
                         <div class="col-sm-12 text-center">
-                            <button type="submit" class="btn btn-primary btn-submit shadow-sm me-2">
+                            <button type="submit" id="btnCreateReservation" class="btn btn-primary btn-submit shadow-sm me-2">
                                 <i class="bi bi-check2-circle me-1"></i> Create Reservation
                             </button>
                             <button type="reset" class="btn btn-outline-secondary px-4 py-2">
@@ -284,26 +290,38 @@
 </script>
 
 <script>
-document.querySelector("form").addEventListener("submit", function(e){
+(function () {
+    const form = document.getElementById("newReservationForm");
+    if (!form) return;
+    const btn = document.getElementById("btnCreateReservation");
 
-    let slot = document.getElementById("id_slotNumber");
-
-    if(!slot.value){
-
-        e.preventDefault();
-
-        slot.classList.add("is-invalid");
-
-        if(!document.getElementById("slot-validation-message")){
-            let msg = document.createElement("div");
-            msg.id = "slot-validation-message";
-            msg.className = "text-danger mt-2";
-            msg.innerText = "Please select Slot Number.";
-            slot.parentNode.appendChild(msg);
+    form.addEventListener("submit", function (e) {
+        if (form.dataset.submitting === "1") {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
         }
 
-    }
+        const slot = document.getElementById("id_slotNumber");
+        if (slot && !slot.value) {
+            e.preventDefault();
+            slot.classList.add("is-invalid");
+            if (!document.getElementById("slot-validation-message")) {
+                const msg = document.createElement("div");
+                msg.id = "slot-validation-message";
+                msg.className = "text-danger mt-2";
+                msg.innerText = "Please select Slot Number.";
+                slot.parentNode.appendChild(msg);
+            }
+            return;
+        }
 
-});
+        form.dataset.submitting = "1";
+        if (btn) {
+            btn.style.pointerEvents = "none";
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+        }
+    }, true);
+})();
 </script>
 {% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>تعديل الديسكشن</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'DiscussionDashboard' %}">التقرير</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'discussion_detail' discussion.discussionID %}">عرض</a></li>
+      <li class="breadcrumb-item active">تعديل</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card">
+    <div class="card-body pt-4">
+      <div class="row mb-3">
+        <div class="col-md-4"><strong>رقم الديسكشن:</strong> {{ discussion.discussionSerial }}</div>
+        <div class="col-md-4"><strong>رقم الملف:</strong> {{ discussion.patient.fileserial }}</div>
+        <div class="col-md-4"><strong>اسم المريض:</strong> {{ discussion.patient.fullname }}</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">اسم الطبيب</label>
+            <select name="doctor_id" class="form-select" required>
+              {% for d in doctors %}
+                <option value="{{ d.id }}" {% if discussion.doctor_id == d.id %}selected{% endif %}>
+                  {{ d.get_full_name|default:d.username }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">نوع العملية</label>
+            <select name="operation_type" class="form-select" required>
+              {% for op in operation_types %}
+                <option value="{{ op.operationTypeID }}" {% if discussion.operationType_id == op.operationTypeID %}selected{% endif %}>{{ op.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">تحديد العين</label>
+            <select name="eye_selection" class="form-select" required>
+              <option value="">-- اختر العين --</option>
+              <option value="OS" {% if discussion.eyeSelection == 'OS' %}selected{% endif %}>OS</option>
+              <option value="OD" {% if discussion.eyeSelection == 'OD' %}selected{% endif %}>OD</option>
+              <option value="OU" {% if discussion.eyeSelection == 'OU' %}selected{% endif %}>OU</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">نتيجة الديسكشن</label>
+            <select name="discussion_result" class="form-select" required>
+              {% for r in discussion_results %}
+                <option value="{{ r.discussionResultID }}" {% if discussion.discussionResult_id == r.discussionResultID %}selected{% endif %}>{{ r.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">تحديد التاريخ</label>
+            <input type="date" name="specify_date" class="form-control" value="{{ specify_date }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">المبلغ الإجمالي</label>
+            <input type="number" step="0.01" min="0" name="total_amount" id="totalAmount" class="form-control" value="{{ discussion.totalAmount }}" oninput="calcRemainder()">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">المقدم</label>
+            <input type="number" step="0.01" min="0" name="deposit" id="depositAmount" class="form-control" value="{{ discussion.deposit }}" oninput="calcRemainder()">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">المتبقي</label>
+            <div class="form-control bg-light" id="remainderAmount">{{ discussion.remainder|default:"0.00" }}</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">ملاحظات</label>
+            <textarea name="note" class="form-control" rows="4">{{ discussion.note|default:"" }}</textarea>
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+          <a href="{% url 'discussion_detail' discussion.discussionID %}" class="btn btn-outline-secondary">إلغاء</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  function calcRemainder() {
+    const total = parseFloat(document.getElementById("totalAmount").value) || 0;
+    const deposit = parseFloat(document.getElementById("depositAmount").value) || 0;
+    document.getElementById("remainderAmount").textContent = (total - deposit).toFixed(2);
+  }
+</script>
+{% endblock %}
